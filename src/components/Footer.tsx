@@ -16,10 +16,10 @@ export default function Footer() {
             </div>
             <p className="text-sm leading-relaxed mb-4">
               <span className="text-white font-semibold italic">
-                "Apna Ghar Dhundein"
+                &ldquo;Apna Ghar Dhundein&rdquo;
               </span>
               <br />
-              Pakistan's most trusted real estate platform, connecting buyers,
+              Pakistan&apos;s most trusted real estate platform, connecting buyers,
               sellers, and renters since 2015.
             </p>
             <div className="flex gap-3 mt-4">

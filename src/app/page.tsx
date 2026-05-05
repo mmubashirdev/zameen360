@@ -92,7 +92,7 @@ export default function HomePage() {
         />
 
         <p className="relative text-sm uppercase tracking-widest font-semibold text-emerald-300 mb-3">
-          Pakistan's #1 Property Portal
+          Pakistan&apos;s #1 Property Portal
         </p>
         <h1 className="relative text-4xl sm:text-5xl md:text-6xl font-extrabold text-white mb-4 leading-tight">
           Find Your{" "}
@@ -314,7 +314,7 @@ export default function HomePage() {
           </h2>
           <p className="text-emerald-100 mb-8 text-lg">
             Reach millions of potential buyers and renters across Pakistan. List
-            your property on Zar Zameen today — it's free!
+            your property on Zar Zameen today — it&apos;s free!
           </p>
           <Link
             href="/contact"
