@@ -8,16 +8,16 @@ const client = new Client({
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  database: process.env.DB_DATABASE,
 });
 
 client
   .connect()
   .then(() => {
-    console.log("Postgres connected successfully");
+    console.log("db is connected");
   })
   .catch((err) => {
-    console.log("Error connecting DB ", err);
+    console.error("error connecting to db", err);
   });
 
 export default client;
