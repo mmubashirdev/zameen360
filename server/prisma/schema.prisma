@@ -8,9 +8,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+enum Role{
+  BUYER
+  SELLER
+  ADMIN
+}
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String  @id @default(uuid())
   name      String
   email     String   @unique
+  password  String 
+
+  role Role @default(BUYER)
   createdAt DateTime @default(now())
 }
