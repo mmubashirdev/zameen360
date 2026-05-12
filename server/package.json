@@ -12,7 +12,6 @@
   },
   "license": "MIT",
   "author": "",
-  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
@@ -21,9 +20,15 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "generate": "^0.14.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.7",
+    "nodemon": "^3.1.14",
     "pg": "^8.20.0",
     "prisma": "^6.19.3"
   }

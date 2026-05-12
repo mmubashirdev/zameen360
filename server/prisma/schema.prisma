@@ -1,6 +1,5 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,18 +7,199 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-enum Role{
+enum Role {
   BUYER
   SELLER
   ADMIN
 }
-model User {
-  id        String  @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String 
 
-  role Role @default(BUYER)
-  createdAt DateTime @default(now())
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum OtpType {
+  EMAIL
+  PHONE
+  PASSWORD_RESET
+}
+
+enum NotificationType {
+  ACCOUNT
+  SECURITY
+  SYSTEM
+  PROFILE
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ActivityStatus {
+  SUCCESS
+  FAILED
+  SUSPICIOUS
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  fullName        String    @map("full_name")
+  email           String    @unique
+  phone           String?
+  passwordHash    String    @map("password_hash")
+  role            Role      @default(BUYER)
+  city            String?
+  profilePicture  String?   @map("profile_picture")
+  trustScore      Decimal?  @default(0) @map("trust_score") @db.Decimal(5, 2)
+  isVerified      Boolean   @default(false) @map("is_verified")
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  profile         UserProfile?
+  sellerDetail    SellerDetail?
+  trustScoreData  TrustScore?
+  verifications   UserVerification[]
+  sessions        UserSession[]
+  notifications   UserNotification[]
+  passwordResets  PasswordReset[]
+  activityLogs    UserActivityLog[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique @map("user_id")
+  bio             String?
+  whatsappNumber  String?   @map("whatsapp_number")
+  dateOfBirth     DateTime? @map("date_of_birth")
+  gender          Gender?
+  address         String?
+  profileComplete Boolean   @default(false) @map("profile_complete")
+  lastLogin       DateTime? @map("last_login")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model SellerDetail {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique @map("user_id")
+  totalListings   Int       @default(0) @map("total_listings")
+  activeListings  Int       @default(0) @map("active_listings")
+  soldProperties  Int       @default(0) @map("sold_properties")
+  sellerRating    Decimal?  @default(0) @map("seller_rating") @db.Decimal(3, 2)
+  isPremium       Boolean   @default(false) @map("is_premium")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("seller_details")
+}
+
+model UserVerification {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  otpCode         String    @map("otp_code")
+  otpType         OtpType   @map("otp_type")
+  otpExpiry       DateTime  @map("otp_expiry")
+  isUsed          Boolean   @default(false) @map("is_used")
+  verifiedAt      DateTime? @map("verified_at")
+  attempts        Int       @default(0)
+  ipAddress       String?   @map("ip_address")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_verifications")
+}
+
+model UserSession {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  sessionToken    String    @map("session_token")
+  deviceType      String?   @map("device_type")
+  browser         String?
+  ipAddress       String?   @map("ip_address")
+  loginTime       DateTime  @default(now()) @map("login_time")
+  logoutTime      DateTime? @map("logout_time")
+  isActive        Boolean   @default(true) @map("is_active")
+  rememberMe      Boolean   @default(false) @map("remember_me")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+model UserNotification {
+  id              Int               @id @default(autoincrement())
+  userId          Int               @map("user_id")
+  title           String
+  message         String
+  type            NotificationType
+  isRead          Boolean           @default(false) @map("is_read")
+  link            String?
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_notifications")
+}
+
+model PasswordReset {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @map("user_id")
+  resetToken      String    @map("reset_token")
+  tokenExpiry     DateTime  @map("token_expiry")
+  isUsed          Boolean   @default(false) @map("is_used")
+  resetAt         DateTime? @map("reset_at")
+  ipAddress       String?   @map("ip_address")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_resets")
+}
+
+model TrustScore {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique @map("user_id")
+  trustScore      Decimal   @default(0) @map("trust_score") @db.Decimal(5, 2)
+  riskLevel       RiskLevel @default(LOW) @map("risk_level")
+  profileScore    Decimal   @default(0) @map("profile_score") @db.Decimal(5, 2)
+  activityScore   Decimal   @default(0) @map("activity_score") @db.Decimal(5, 2)
+  reviewScore     Decimal   @default(0) @map("review_score") @db.Decimal(5, 2)
+  flagCount       Int       @default(0) @map("flag_count")
+  isFlagged       Boolean   @default(false) @map("is_flagged")
+  lastCalculated  DateTime? @map("last_calculated")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("trust_scores")
+}
+
+model UserActivityLog {
+  id              Int            @id @default(autoincrement())
+  userId          Int            @map("user_id")
+  action          String
+  description     String?
+  ipAddress       String?        @map("ip_address")
+  device          String?
+  status          ActivityStatus @default(SUCCESS)
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_activity_logs")
 }
