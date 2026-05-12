@@ -1,23 +1,20 @@
 import pg from "pg";
-import "dotenv/config";
+import dotenv from "dotenv";
+
+dotenv.config({ override: true });
 
 const { Client } = pg;
 
 const client = new Client({
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
+  port: Number(process.env.DB_PORT),
   user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
+  password: String(process.env.DB_PASSWORD),
   database: process.env.DB_DATABASE,
 });
 
-client
-  .connect()
-  .then(() => {
-    console.log("db is connected");
-  })
-  .catch((err) => {
-    console.error("error connecting to db", err);
-  });
+client.connect()
+  .then(() => console.log("DB connected"))
+  .catch(err => console.error("DB error", err));
 
 export default client;
