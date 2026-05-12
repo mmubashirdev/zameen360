@@ -1,0 +1,23 @@
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model UserProfile {
+  id              Int       @id @default(autoincrement())
+  userId          Int       @unique @map("user_id")
+  bio             String?
+  whatsappNumber  String?   @map("whatsapp_number")
+  dateOfBirth     DateTime? @map("date_of_birth")
+  gender          Gender?
+  address         String?
+  profileComplete Boolean   @default(false) @map("profile_complete")
+  lastLogin       DateTime? @map("last_login")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
