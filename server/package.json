@@ -13,6 +13,7 @@
   "license": "MIT",
   "author": "",
   "main": "app.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node app.js",
     "dev": "nodemon app.js",
@@ -20,6 +21,7 @@
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@reduxjs/toolkit": "^2.11.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -30,6 +32,9 @@
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14",
     "pg": "^8.20.0",
-    "prisma": "^6.19.3"
+    "prisma": "^6.19.3",
+    "react-hot-toast": "^2.6.0",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.15.0"
   }
 }
