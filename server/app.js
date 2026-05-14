@@ -16,6 +16,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
+// ✅ Auth routes - index.js use karega
 app.use("/api/auth", require("./modules/auth/routes"));
 
 app.get("/", (req, res) => {

@@ -34,13 +34,10 @@
     "nodemon": "^3.1.14",
     "pg": "^8.20.0",
     "prisma": "^6.19.3",
-<<<<<<< HEAD
     "react-hook-form": "^7.75.0",
-    "zod": "^4.4.3"
-=======
+    "zod": "^4.4.3",
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.15.0"
->>>>>>> 73e3d77bffa835c174f5a328cebf8a0dded8809f
   }
 }
