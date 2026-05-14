@@ -9,6 +9,7 @@ export const AUTH_ENDPOINTS = {
   LOGIN:           "/auth/login",
   LOGOUT:          "/auth/logout",
   VERIFY_OTP:      "/auth/verify-otp",
+  VERIFY_RESET_OTP:"/auth/verify-reset-otp",
   RESEND_OTP:      "/auth/resend-otp",
   FORGOT_PASSWORD: "/auth/forgot-password",
   RESET_PASSWORD:  "/auth/reset-password",

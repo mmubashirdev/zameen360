@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
-import * as authApi from "./auth.api";
+import * as authApi from "./api/authApi";
 
 export interface AuthState {
   loading: boolean;
@@ -36,7 +36,7 @@ export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email: string, { rejectWithValue }) => {
     try {
-      const response = await authApi.forgotPasswordService(email);
+      const response = await authApi.forgotPassword({ email });
       return { response, email };
     } catch (error: unknown) {
       return rejectWithValue(getErrorMessage(error, "Failed to send OTP"));
@@ -48,7 +48,7 @@ export const verifyOTP = createAsyncThunk(
   "auth/verifyOTP",
   async (data: { email: string; otp: string }, { rejectWithValue }) => {
     try {
-      const response = await authApi.verifyResetOTPService(data);
+      const response = await authApi.verifyResetOtp(data);
       return response;
     } catch (error: unknown) {
       return rejectWithValue(getErrorMessage(error, "Invalid OTP"));
@@ -60,7 +60,7 @@ export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async (data: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await authApi.resetPasswordService(data);
+      const response = await authApi.resetPassword(data);
       return response;
     } catch (error: unknown) {
       return rejectWithValue(

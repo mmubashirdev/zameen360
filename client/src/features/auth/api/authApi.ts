@@ -56,10 +56,17 @@ export const forgotPassword = (payload: {
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, payload);
 
+export const verifyResetOtp = (payload: {
+  email: string;
+  otp: string;
+}): Promise<ApiResponse> =>
+  axiosInstance.post(AUTH_ENDPOINTS.VERIFY_RESET_OTP, payload);
+
 export const resetPassword = (payload: {
-  token: string;
+  email?: string;
+  token?: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.RESET_PASSWORD, payload);
 
