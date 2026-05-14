@@ -16,11 +16,13 @@ import type { AppDispatch, RootState } from "../../../app/stores/store";
 interface ForgotPasswordProps {
   onNext: () => void;
   setEmail: (email: string) => void;
+  onBack: () => void;
 }
 
 export default function ForgotPassword({
   onNext,
   setEmail,
+  onBack,
 }: ForgotPasswordProps) {
   const [emailLocal, setEmailLocal] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -75,6 +77,7 @@ export default function ForgotPassword({
     <AuthLayout>
       <button
         type="button"
+        onClick={onBack}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 mb-6 transition-colors"
       >
         <ArrowLeft size={16} />
@@ -147,6 +150,7 @@ export default function ForgotPassword({
         Remember your password?{" "}
         <button
           type="button"
+          onClick={onBack}
           className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors"
         >
           Login

@@ -110,7 +110,6 @@ code {
   background: var(--code-bg);
 }
 
-<<<<<<< HEAD
 /* ── Focus Ring ───────────────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid #2563eb;
@@ -125,7 +124,6 @@ code {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-=======
 
 html, body {
   margin: 0;
@@ -142,5 +140,6 @@ html, body {
   min-height: 100vh;
   height: 100vh;
   overflow: hidden;
->>>>>>> 73e3d77bffa835c174f5a328cebf8a0dded8809f
+}
+
 }

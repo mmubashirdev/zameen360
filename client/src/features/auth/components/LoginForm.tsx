@@ -89,16 +89,16 @@ export default function LoginForm({ toast }: LoginFormProps) {
       <div className={styles.brand}>
         <div className={styles.brandLogo}>
           <img
-            src="https://z-cdn-media.chatglm.cn/files/a6875cfd-97b4-4c6f-88f1-550d6a8fd092.png?auth_key=1878622656-5f4a780eeb0a4af0b8d855181ebfd693-0-f41294470d4d33f18e0c299f8ffe047e"
-            alt="Zameen 360 Logo"
+          className={styles.brandLogoImg}
+          src="https://z-cdn-media.chatglm.cn/files/8ecfdb5c-41b7-46cd-9808-b5cb303771d5.png?auth_key=1878622656-9379a6c556d7402a8d00fad834383a96-0-a4b6e6ca5ebfbff119124e83c08a6bb4"
+          alt="Zameen 360 Logo"
+        
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).style.display = "none";
             }}
           />
         </div>
-        <div className={styles.brandName}>
-          Zameen <span className={styles.brandNameAccent}>360</span>
-        </div>
+        
         <p className={styles.brandTagline}>
           Find. Buy. Sell. Your Property 360°
         </p>

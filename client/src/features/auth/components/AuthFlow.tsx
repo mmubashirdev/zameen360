@@ -1,0 +1,73 @@
+import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import ForgetPassword from "../pages/ForgetPassword";
+import OTPVerification from "../pages/OTPVerification";
+import CreateNewPassword from "../pages/CreateNewPassword";
+import SuccessPage from "../pages/SuccessPage";
+
+type Step = 1 | 2 | 3 | 4;
+
+function AuthFlow() {
+  const [step, setStep] = useState<Step>(1);
+  const [email, setEmail] = useState<string>("");
+
+  const goNext = () => setStep((s) => Math.min(4, s + 1) as Step);
+  const goBack = () => setStep((s) => Math.max(1, s - 1) as Step);
+  const goToLogin = () => {
+    setStep(1);
+    setEmail("");
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <ForgetPassword
+            key="step1"
+            onNext={goNext}
+            setEmail={setEmail}
+            onBack={goToLogin}
+          />
+        );
+      case 2:
+        return (
+          <OTPVerification
+            key="step2"
+            onNext={goNext}
+            onBack={goBack}
+            email={email}
+          />
+        );
+      case 3:
+        return (
+          <CreateNewPassword
+            key="step3"
+            onNext={goNext}
+            onBack={goBack}
+            email={email}
+          />
+        );
+      case 4:
+        return <SuccessPage key="step4" onLogin={goToLogin} />;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={step}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        className="w-full h-full flex-1 flex flex-col"
+      >
+        {renderStep()}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+export default AuthFlow;
