@@ -22,7 +22,7 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
         <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 z-0" />
         {/* Filled line */}
         <div
-          className="absolute top-4 left-0 h-0.5 bg-gradient-to-r from-blue-600 to-blue-500 transition-all duration-500 ease-out z-0"
+          className="absolute top-4 left-0 h-0.5 bg-gradient-to-right from-blue-600 to-blue-500 transition-all duration-500 ease-out z-0"
           style={{ width: `${progressPercent}%` }}
         />
 

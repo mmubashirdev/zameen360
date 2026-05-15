@@ -64,7 +64,7 @@ export default function GoogleCallbackPage() {
           ctx?.setUser?.(user, token);
 
           // Redirect to welcome
-          navigate("/welcome", { replace: true });
+          navigate("/dashboard", { replace: true });
         } else {
           navigate("/login?error=profile_failed", { replace: true });
         }

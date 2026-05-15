@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import SignupPage from "../pages/SignupPage";
 import LoginPage from "../pages/LoginPage";
-import WelcomePage from "../pages/WelcomePage";
+import DashboardHome from "@features/landing/pages/DashboardHome";
 import VerifyEmailPage from "../pages/VerifyEmailPage";
 import GoogleCallbackPage from "../pages/GoogleCallbackPage"; // ← Add
 import AuthFlow from "../components/AuthFlow";
@@ -11,7 +11,7 @@ export default function AuthRoutes() {
     <Routes>
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/welcome" element={<WelcomePage />} />
+      <Route path="/dashboard" element={<DashboardHome />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
       
       {/* ✅ Google OAuth callback */}

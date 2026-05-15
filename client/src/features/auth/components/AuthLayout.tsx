@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           alt="Luxury Real Estate"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/55 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-back from-black/40 via-black/55 to-black/80" />
 
         <div className="relative z-10 flex flex-col justify-between w-full p-10 xl:p-12 text-white">
           {/* Brand with Logo */}
@@ -60,7 +60,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       </div>
 
       {/* ─── Right Panel ─── */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-white h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-break from-gray-50 to-white h-screen overflow-y-auto">
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center mb-4">
           <img

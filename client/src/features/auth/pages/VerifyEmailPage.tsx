@@ -135,7 +135,7 @@ export default function VerifyEmailPage() {
       });
 
       toast.success("Email Verified!", "Account activated successfully.");
-      navigate("/welcome", { replace: true });
+      navigate("/dasboard", { replace: true });
     } catch (err) {
       const message =
         typeof err === "object" && err !== null && "message" in err
