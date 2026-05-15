@@ -1,4 +1,5 @@
 const express = require("express");
+const passport = require("./configs/passport");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
@@ -9,16 +10,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 ["uploads/profiles"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
-// ✅ Auth routes - index.js use karega
 app.use("/api/auth", require("./modules/auth/routes"));
-
+app.use("/api/auth", require("./modules/auth/routes/google.routes"))
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
 });

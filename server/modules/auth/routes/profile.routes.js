@@ -2,6 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const path = require("path");
 const c = require("../controllers/profile.controller");
+
 const auth = require("../middlewares/auth.middleware");
 
 const storage = multer.diskStorage({
@@ -14,4 +15,5 @@ router.get("/profile", auth, c.getProfile);
 router.put("/profile/update", auth, c.updateProfile);
 router.post("/profile/upload-picture", auth, upload.single("profilePicture"), c.uploadPicture);
 router.delete("/profile/remove-picture", auth, c.removePicture);
+router.get("/profile", auth, c.getProfile);
 module.exports = router;
