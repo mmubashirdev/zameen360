@@ -1,6 +1,6 @@
 // ─── User & Role Types ────────────────────────────────────────────────────────
 
-export type UserRole = "BUYER" | "SELLER";
+export type UserRole = "BUYER" | "SELLER" | "ADMIN";
 
 export interface User {
   userId: string;
@@ -28,7 +28,6 @@ export interface SignupFormValues {
   password: string;
   confirmPassword: string;
   role: "buyer" | "seller";
-  profileImage?: File | null;
   terms: true;
 }
 
@@ -40,7 +39,27 @@ export interface SignupPayload {
   password: string;
   confirmPassword: string;
   role: string;
-  profileImage?: File | null;
+}
+
+// ─── Login Types ──────────────────────────────────────────────────────────────
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface AuthSuccessPayload {
+  user: {
+    id?: string;
+    userId?: string;
+    fullName: string;
+    email: string;
+    role: UserRole;
+    isVerified: boolean;
+  };
+  accessToken: string;
+  refreshToken?: string;
 }
 
 // ─── API Response Types ───────────────────────────────────────────────────────
@@ -62,26 +81,6 @@ export interface RegisterResponseData {
 }
 
 export type RegisterResponse = ApiResponse<RegisterResponseData>;
-
-// ─── Login Types ──────────────────────────────────────────────────────────────
-
-export interface LoginFormValues {
-  email: string;
-  password: string;
-}
-
-export interface AuthSuccessPayload {
-  user: {
-    id?: string;
-    userId?: string;
-    fullName: string;
-    email: string;
-    role: UserRole;
-    isVerified: boolean;
-  };
-  accessToken: string;
-  refreshToken?: string;
-}
 
 // ─── Context Types ────────────────────────────────────────────────────────────
 

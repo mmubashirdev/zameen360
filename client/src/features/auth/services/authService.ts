@@ -5,7 +5,7 @@ import {
   verifyOtp,
   resendOtp,
 } from "../api/authApi";
-import { USER_ROLES, STORAGE_KEYS, FILE_UPLOAD } from "../constants/authConstants";
+import { USER_ROLES, STORAGE_KEYS } from "../constants/authConstants";
 import type {
   SignupFormValues,
   SignupServiceResult,
@@ -40,12 +40,10 @@ export const getStoredUser = (): User | null => {
 export const getStoredToken = (): string | null =>
   localStorage.getItem(STORAGE_KEYS.TOKEN);
 
-const normalizeUser = (
-  user: AuthSuccessPayload["user"] | User
-): User => ({
+const normalizeUser = (user: AuthSuccessPayload["user"] | User): User => ({
   userId:
     ("userId" in user && user.userId) || ("id" in user && user.id)
-      ? (("userId" in user && user.userId) || ("id" in user && user.id) || "")
+      ? ("userId" in user && user.userId) || ("id" in user && user.id) || ""
       : "",
   fullName: user.fullName,
   email: user.email,
@@ -53,51 +51,34 @@ const normalizeUser = (
   isVerified: user.isVerified,
 });
 
-// ─── FormData Builder ─────────────────────────────────────────────────────────
+// ─── Payload Builder ──────────────────────────────────────────────────────────
 
-const validateProfileImage = (file: File): void => {
-  if (!FILE_UPLOAD.ALLOWED_TYPES.includes(file.type)) {
-    throw new Error("Only JPG and PNG files are allowed.");
-  }
-  if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
-    throw new Error("Profile image must be less than 5MB.");
-  }
-};
-
-const buildSignupFormData = (data: SignupFormValues): FormData => {
-  const formData = new FormData();
-
-  formData.append("fullName", data.fullName.trim());
-  formData.append("email", data.email.trim().toLowerCase());
-  formData.append("phone", data.phone.trim());
-  formData.append("city", data.city);
-  formData.append("password", data.password);
-  formData.append("confirmPassword", data.confirmPassword);
-  formData.append("role", data.role.toUpperCase());
-
-  if (data.profileImage instanceof File) {
-    validateProfileImage(data.profileImage);
-    formData.append("profileImage", data.profileImage);
-  }
-
-  return formData;
+const buildSignupPayload = (data: SignupFormValues): object => {
+  return {
+    fullName: data.fullName.trim(),
+    email: data.email.trim().toLowerCase(),
+    phone: data.phone.trim(),
+    city: data.city,
+    password: data.password,
+    confirmPassword: data.confirmPassword,
+    role: data.role.toUpperCase(),
+  };
 };
 
 // ─── Signup Service ───────────────────────────────────────────────────────────
 
 /**
- * Builds FormData, calls role-specific endpoint,
+ * Builds JSON payload, calls role-specific endpoint,
  * persists token if returned, and returns normalized result.
  */
 export const signupService = async (
-  formValues: SignupFormValues
+  formValues: SignupFormValues,
 ): Promise<SignupServiceResult> => {
   const role = formValues.role.toUpperCase();
-  const formData = buildSignupFormData(formValues);
+  const payload = buildSignupPayload(formValues);
 
   // Route to correct endpoint based on role
-  const apiFn =
-    role === USER_ROLES.SELLER ? registerSeller : registerBuyer;
+  const apiFn = role === USER_ROLES.SELLER ? registerSeller : registerBuyer;
 
   /*
     Backend response shape:
@@ -107,7 +88,7 @@ export const signupService = async (
       data: { userId, fullName, email, role, isVerified }
     }
   */
-  const response = await apiFn(formData);
+  const response = await apiFn(payload);
 
   if (!response.success || !response.data) {
     throw new Error(response.message ?? "Registration failed.");
@@ -127,7 +108,7 @@ export const signupService = async (
 // ─── Login Service ────────────────────────────────────────────────────────────
 
 export const loginService = async (
-  credentials: LoginFormValues
+  credentials: LoginFormValues,
 ): Promise<LoginServiceResult> => {
   const response = await loginUser(credentials);
 
@@ -144,7 +125,7 @@ export const loginService = async (
 };
 
 export const verifyEmailService = async (
-  payload: VerifyOtpPayload
+  payload: VerifyOtpPayload,
 ): Promise<LoginServiceResult> => {
   const response = await verifyOtp(payload);
 
@@ -161,7 +142,7 @@ export const verifyEmailService = async (
 };
 
 export const resendVerificationOtpService = async (
-  email: string
+  email: string,
 ): Promise<string> => {
   const response = await resendOtp({ email });
 

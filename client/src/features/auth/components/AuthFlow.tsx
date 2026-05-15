@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import ForgetPassword from "../pages/ForgetPassword";
 import OTPVerification from "../pages/OTPVerification";
 import CreateNewPassword from "../pages/CreateNewPassword";
@@ -8,14 +9,18 @@ import SuccessPage from "../pages/SuccessPage";
 type Step = 1 | 2 | 3 | 4;
 
 function AuthFlow() {
+  const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
   const [email, setEmail] = useState<string>("");
 
   const goNext = () => setStep((s) => Math.min(4, s + 1) as Step);
   const goBack = () => setStep((s) => Math.max(1, s - 1) as Step);
+
+  // ✅ Direct redirect to login page
   const goToLogin = () => {
     setStep(1);
     setEmail("");
+    navigate("/login");
   };
 
   const renderStep = () => {
@@ -25,6 +30,7 @@ function AuthFlow() {
           <ForgetPassword
             key="step1"
             onNext={goNext}
+            onBack={goBack}
             setEmail={setEmail}
           />
         );
@@ -34,6 +40,7 @@ function AuthFlow() {
             key="step2"
             onNext={goNext}
             onBack={goBack}
+            onBackToLogin={goToLogin}
             email={email}
           />
         );
@@ -43,6 +50,7 @@ function AuthFlow() {
             key="step3"
             onNext={goNext}
             onBack={goBack}
+            onBackToLogin={goToLogin}
             email={email}
           />
         );

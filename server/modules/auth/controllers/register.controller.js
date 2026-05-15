@@ -4,8 +4,8 @@ exports.register = async (req, res) => {
   try {
     const data = await service.registerUser(
       req.body,
-      req.ip,
-      req.headers["user-agent"]
+      req.ip || "unknown",
+      req.headers["user-agent"] || "unknown"
     );
 
     res.status(201).json({
@@ -14,9 +14,17 @@ exports.register = async (req, res) => {
       data,
     });
   } catch (e) {
+    // Handle Prisma unique constraint error
+    if (e.code === "P2002") {
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered. Use  Different Email.",
+      });
+    }
+
     res.status(e.status || 500).json({
       success: false,
-      message: e.message,
+      message: e.message || "Internal server error",
     });
   }
 };

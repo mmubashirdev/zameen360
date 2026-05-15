@@ -5,6 +5,13 @@ const transporter = nodemailer.createTransport({
   port: process.env.EMAIL_PORT,
   secure: false,
   auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+  // ⚡ Performance settings
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  connectionTimeout: 10000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
 });
 
 const sendEmail = async (to, subject, html) => {
@@ -23,7 +30,7 @@ const sendEmail = async (to, subject, html) => {
 };
 
 // ============================================
-// 🔐 OTP EMAIL TEMPLATE - WEBSITE WIDE VIEW
+// 🔐 OTP EMAIL TEMPLATE - UNIQUE DESIGN
 // ============================================
 const sendOTPEmail = async (to, otp, purpose) => {
   const otpDigits = otp.toString().split("");
@@ -32,20 +39,19 @@ const sendOTPEmail = async (to, otp, purpose) => {
       (digit) => `
     <td align="center" style="padding:0 6px;">
       <div style="
-        background:linear-gradient(145deg,#ffffff 0%,#F0F7FF 100%);
-        color:#1A73E8;
-        font-size:36px;
-        font-weight:800;
+        background:#FFFFFF;
+        color:#0F172A;
+        font-size:38px;
+        font-weight:900;
         font-family:'Courier New',monospace;
-        width:58px;
-        height:70px;
-        line-height:70px;
-        border-radius:14px;
-        border:1.5px solid rgba(26,115,232,0.15);
+        width:60px;
+        height:74px;
+        line-height:74px;
+        border-radius:16px;
+        border:2px solid #E0E7FF;
         box-shadow:
-          0 8px 25px rgba(26,115,232,0.1),
-          0 2px 6px rgba(0,0,0,0.04),
-          inset 0 -3px 0 rgba(26,115,232,0.06);
+          0 10px 30px rgba(79,70,229,0.12),
+          inset 0 -4px 0 rgba(79,70,229,0.08);
       ">${digit}</div>
     </td>
   `
@@ -59,111 +65,128 @@ const sendOTPEmail = async (to, otp, purpose) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#F0F4F8;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F4F8;padding:30px 20px;">
+  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#EEF2FF;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#EEF2FF;padding:40px 20px;">
       <tr>
         <td align="center">
 
-          <!-- WIDE WEBSITE CONTAINER -->
-          <table width="800" cellpadding="0" cellspacing="0" style="max-width:800px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,0.07),0 4px 16px rgba(0,0,0,0.03);">
+          <table width="800" cellpadding="0" cellspacing="0" style="max-width:800px;width:100%;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 25px 80px rgba(79,70,229,0.1);">
             
-            <!-- TOP NAV BAR -->
+            <!-- HEADER WITH GRADIENT -->
             <tr>
-              <td style="background:#ffffff;padding:16px 40px;border-bottom:1px solid #F1F5F9;">
+              <td style="background:linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);padding:40px 50px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <h1 style="color:#1F2937;margin:0;font-size:22px;font-weight:800;">
-                        🏠 Zameen <span style="color:#1A73E8;">360</span>
+                      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px;">
+                        Zameen <span style="color:#FCD34D;">360°</span>
                       </h1>
+                      <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;font-weight:500;">
+                        Your Property Universe
+                      </p>
                     </td>
                     <td align="right" style="vertical-align:middle;">
-                      <span style="color:#6B7280;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">
-                        Secure Verification
-                      </span>
+                      <div style="
+                        background:rgba(255,255,255,0.15);
+                        backdrop-filter:blur(10px);
+                        padding:8px 18px;
+                        border-radius:50px;
+                        display:inline-block;
+                        border:1px solid rgba(255,255,255,0.2);
+                      ">
+                        <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
+                          Verification
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
 
-            <!-- WIDE REAL ESTATE BANNER IMAGE -->
+            <!-- DECORATIVE STRIP -->
             <tr>
-              <td style="padding:0;margin:0;">
-                <img 
-                  src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80" 
-                  alt="Luxury Property" 
-                  width="800"
-                  style="display:block;width:100%;max-width:800px;height:250px;object-fit:cover;"
-                />
-              </td>
+              <td style="background:linear-gradient(90deg,#FCD34D 0%,#F59E0B 25%,#EF4444 50%,#EC4899 75%,#8B5CF6 100%);height:5px;"></td>
             </tr>
 
-            <!-- TWO COLUMN LAYOUT -->
+            <!-- MAIN CONTENT -->
             <tr>
-              <td style="padding:40px 50px 20px;">
+              <td style="padding:50px 60px 30px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <!-- LEFT SIDE - HEADING & INFO -->
-                    <td width="45%" style="vertical-align:top;padding-right:30px;">
+                    <!-- LEFT COLUMN -->
+                    <td width="45%" style="vertical-align:top;padding-right:40px;">
                       <div style="
                         display:inline-block;
-                        background:linear-gradient(135deg,#EEF4FF 0%,#DBEAFE 100%);
-                        color:#1A73E8;
-                        font-size:10px;
-                        font-weight:700;
-                        letter-spacing:2.5px;
+                        background:linear-gradient(135deg,#EEF2FF 0%,#E0E7FF 100%);
+                        color:#4F46E5;
+                        font-size:11px;
+                        font-weight:800;
+                        letter-spacing:3px;
                         text-transform:uppercase;
-                        padding:6px 18px;
+                        padding:8px 20px;
                         border-radius:50px;
-                        margin-bottom:16px;
+                        margin-bottom:20px;
                       ">
-                        ✉️ Email Verification
+                        Action Required
                       </div>
-                      <h2 style="color:#1F2937;margin:16px 0 10px;font-size:28px;font-weight:800;line-height:1.2;">
-                        Verify Your<br>Identity
+                      <h2 style="color:#0F172A;margin:0 0 16px;font-size:32px;font-weight:900;line-height:1.15;letter-spacing:-1px;">
+                        Almost<br>
+                        <span style="background:linear-gradient(135deg,#4F46E5,#7C3AED);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">There!</span>
                       </h2>
-                      <p style="color:#6B7280;margin:0 0 16px;font-size:14px;line-height:1.8;">
-                        We received a verification request for your 
-                        <strong style="color:#1A73E8;">${purpose}</strong>. 
-                        Please use the code shown to complete the process.
+                      <p style="color:#64748B;margin:0 0 24px;font-size:15px;line-height:1.7;">
+                        Use the verification code on the right to complete your 
+                        <strong style="color:#4F46E5;">${purpose}</strong> process.
                       </p>
                       
-                      <!-- TIMER WARNING -->
-                      <div style="
-                        background:linear-gradient(145deg,#FFFCF0 0%,#FFF9E6 100%);
-                        border-left:4px solid #F59E0B;
-                        padding:12px 16px;
-                        border-radius:0 12px 12px 0;
-                        margin-top:10px;
-                      ">
-                        <p style="color:#92400E;margin:0;font-size:13px;font-weight:600;">
-                          ⏱️ Code expires in <strong>1 minute</strong>
-                        </p>
-                      </div>
+                      <!-- TIMER BADGE -->
+                      <table cellpadding="0" cellspacing="0" style="margin-top:8px;">
+                        <tr>
+                          <td style="
+                            background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);
+                            padding:14px 20px;
+                            border-radius:14px;
+                            border-left:5px solid #F59E0B;
+                          ">
+                            <p style="color:#92400E;margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+                              Time Sensitive
+                            </p>
+                            <p style="color:#78350F;margin:0;font-size:14px;font-weight:700;">
+                              Expires in 10 minutes
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
                     </td>
 
-                    <!-- RIGHT SIDE - OTP BOX -->
+                    <!-- RIGHT COLUMN - OTP -->
                     <td width="55%" style="vertical-align:top;">
                       <div style="
-                        background:linear-gradient(145deg,#FAFBFF 0%,#F0F4FF 100%);
-                        padding:30px 20px;
-                        border-radius:20px;
-                        border:1px solid rgba(26,115,232,0.08);
-                        box-shadow:0 10px 35px rgba(26,115,232,0.06),inset 0 1px 0 rgba(255,255,255,0.9);
+                        background:linear-gradient(145deg,#F8FAFF 0%,#EEF2FF 100%);
+                        padding:35px 25px;
+                        border-radius:24px;
+                        border:1px solid #E0E7FF;
+                        box-shadow:0 15px 40px rgba(79,70,229,0.08);
                         text-align:center;
+                        position:relative;
                       ">
-                        <p style="color:#1A73E8;margin:0 0 18px;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;">
-                          Your Verification Code
+                        <p style="color:#4F46E5;margin:0 0 22px;font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:800;">
+                          Verification Code
                         </p>
                         <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                           <tr>
                             ${otpBoxes}
                           </tr>
                         </table>
-                        <p style="color:#9CA3AF;margin:18px 0 0;font-size:11px;">
-                          Do not share this code with anyone
-                        </p>
+                        <div style="
+                          margin-top:24px;
+                          padding-top:20px;
+                          border-top:1px dashed #C7D2FE;
+                        ">
+                          <p style="color:#64748B;margin:0;font-size:12px;font-weight:600;">
+                            Keep this code private &amp; confidential
+                          </p>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -171,104 +194,61 @@ const sendOTPEmail = async (to, otp, purpose) => {
               </td>
             </tr>
 
-            <!-- SECURITY NOTICE - FULL WIDTH -->
+            <!-- SECURITY BANNER -->
             <tr>
-              <td style="padding:10px 50px 15px;">
+              <td style="padding:0 60px 25px;">
+                <div style="
+                  background:linear-gradient(145deg,#F1F5F9 0%,#E2E8F0 100%);
+                  border:1px solid #CBD5E1;
+                  padding:20px 24px;
+                  border-radius:16px;
+                ">
+                  <p style="color:#0F172A;margin:0 0 6px;font-size:14px;font-weight:800;">
+                    Security First
+                  </p>
+                  <p style="color:#475569;margin:0;font-size:13px;line-height:1.6;">
+                    Zameen 360 will never request your code via call, SMS, or third-party apps. If you didn't request this, please ignore this email.
+                  </p>
+                </div>
+              </td>
+            </tr>
+
+            <!-- FEATURES GRID -->
+            <tr>
+              <td style="padding:0 60px 35px;">
+                <p style="color:#94A3B8;margin:0 0 16px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;">
+                  What Makes Us Different
+                </p>
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td style="
-                      background:linear-gradient(145deg,#F8FAFC 0%,#F1F5F9 100%);
-                      border:1px solid #E2E8F0;
-                      padding:16px 20px;
-                      border-radius:14px;
-                    ">
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td style="vertical-align:middle;padding-right:14px;" width="40">
-                            <div style="
-                              background:linear-gradient(145deg,#E8F0FE 0%,#D2E3FC 100%);
-                              width:36px;height:36px;
-                              border-radius:10px;
-                              text-align:center;line-height:36px;
-                            ">
-                              <span style="font-size:16px;">🛡️</span>
-                            </div>
-                          </td>
-                          <td style="vertical-align:middle;">
-                            <p style="color:#374151;margin:0;font-size:13px;line-height:1.6;">
-                              <strong>Security Notice:</strong> Zameen 360 will never ask you for this code via phone call, SMS, or any third-party app. Keep your code confidential.
-                            </p>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-
-            <!-- DIVIDER -->
-            <tr>
-              <td style="padding:10px 50px;">
-                <hr style="border:none;border-top:1px solid #F1F5F9;margin:0;">
-              </td>
-            </tr>
-
-            <!-- FEATURES ROW - 4 COLUMNS -->
-            <tr>
-              <td style="padding:15px 50px 25px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td align="center" width="25%" style="padding:0 6px;">
+                    <td align="center" width="33.33%" style="padding:0 6px;">
                       <div style="
-                        background:linear-gradient(145deg,#F0F7FF 0%,#E3EFFD 100%);
-                        padding:16px 8px;
-                        border-radius:14px;
-                        box-shadow:0 4px 12px rgba(26,115,232,0.05);
-                        border:1px solid rgba(26,115,232,0.05);
+                        background:linear-gradient(145deg,#FEF3C7 0%,#FDE68A 100%);
+                        padding:20px 12px;
+                        border-radius:16px;
                       ">
-                        <span style="font-size:22px;display:block;margin-bottom:6px;">🏘️</span>
-                        <p style="color:#1F2937;margin:0;font-size:12px;font-weight:700;">3D Tours</p>
-                        <p style="color:#9CA3AF;margin:2px 0 0;font-size:10px;">Virtual Walkthrough</p>
+                        <p style="color:#78350F;margin:0;font-size:24px;font-weight:900;">10K+</p>
+                        <p style="color:#92400E;margin:4px 0 0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Properties</p>
                       </div>
                     </td>
-                    <td align="center" width="25%" style="padding:0 6px;">
+                    <td align="center" width="33.33%" style="padding:0 6px;">
                       <div style="
-                        background:linear-gradient(145deg,#F0FFF4 0%,#DCFCE7 100%);
-                        padding:16px 8px;
-                        border-radius:14px;
-                        box-shadow:0 4px 12px rgba(34,197,94,0.05);
-                        border:1px solid rgba(34,197,94,0.05);
+                        background:linear-gradient(145deg,#DBEAFE 0%,#BFDBFE 100%);
+                        padding:20px 12px;
+                        border-radius:16px;
                       ">
-                        <span style="font-size:22px;display:block;margin-bottom:6px;">✅</span>
-                        <p style="color:#1F2937;margin:0;font-size:12px;font-weight:700;">Verified</p>
-                        <p style="color:#9CA3AF;margin:2px 0 0;font-size:10px;">Trusted Listings</p>
+                        <p style="color:#1E40AF;margin:0;font-size:24px;font-weight:900;">50+</p>
+                        <p style="color:#1E3A8A;margin:4px 0 0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Cities</p>
                       </div>
                     </td>
-                    <td align="center" width="25%" style="padding:0 6px;">
+                    <td align="center" width="33.33%" style="padding:0 6px;">
                       <div style="
-                        background:linear-gradient(145deg,#FFF7ED 0%,#FFEDD5 100%);
-                        padding:16px 8px;
-                        border-radius:14px;
-                        box-shadow:0 4px 12px rgba(249,115,22,0.05);
-                        border:1px solid rgba(249,115,22,0.05);
+                        background:linear-gradient(145deg,#FCE7F3 0%,#FBCFE8 100%);
+                        padding:20px 12px;
+                        border-radius:16px;
                       ">
-                        <span style="font-size:22px;display:block;margin-bottom:6px;">🤝</span>
-                        <p style="color:#1F2937;margin:0;font-size:12px;font-weight:700;">Agents</p>
-                        <p style="color:#9CA3AF;margin:2px 0 0;font-size:10px;">500+ Trusted</p>
-                      </div>
-                    </td>
-                    <td align="center" width="25%" style="padding:0 6px;">
-                      <div style="
-                        background:linear-gradient(145deg,#F5F0FF 0%,#EDE9FE 100%);
-                        padding:16px 8px;
-                        border-radius:14px;
-                        box-shadow:0 4px 12px rgba(139,92,246,0.05);
-                        border:1px solid rgba(139,92,246,0.05);
-                      ">
-                        <span style="font-size:22px;display:block;margin-bottom:6px;">🗺️</span>
-                        <p style="color:#1F2937;margin:0;font-size:12px;font-weight:700;">50+ Cities</p>
-                        <p style="color:#9CA3AF;margin:2px 0 0;font-size:10px;">Nationwide</p>
+                        <p style="color:#9D174D;margin:0;font-size:24px;font-weight:900;">25K+</p>
+                        <p style="color:#831843;margin:4px 0 0;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Users</p>
                       </div>
                     </td>
                   </tr>
@@ -276,34 +256,24 @@ const sendOTPEmail = async (to, otp, purpose) => {
               </td>
             </tr>
 
-            <!-- WEBSITE FOOTER -->
+            <!-- FOOTER -->
             <tr>
-              <td style="background:linear-gradient(145deg,#1A1A2E 0%,#0F1629 100%);padding:30px 50px;">
+              <td style="background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);padding:35px 60px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <h3 style="color:#ffffff;margin:0 0 4px;font-size:18px;font-weight:700;">
-                        🏠 Zameen <span style="color:#1A73E8;">360</span>
+                      <h3 style="color:#ffffff;margin:0 0 6px;font-size:20px;font-weight:900;">
+                        Zameen <span style="color:#FCD34D;">360°</span>
                       </h3>
-                      <p style="color:rgba(255,255,255,0.4);margin:0;font-size:11px;letter-spacing:1px;">
-                        3D Property Experience Platform
+                      <p style="color:rgba(255,255,255,0.5);margin:0;font-size:12px;letter-spacing:1px;">
+                        Find. Buy. Sell. Your Property Universe.
                       </p>
-                    </td>
-                    <td align="center" style="vertical-align:middle;">
-                      <table cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">📘</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">📸</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">🐦</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">💼</a></td>
-                        </tr>
-                      </table>
                     </td>
                     <td align="right" style="vertical-align:middle;">
-                      <p style="color:rgba(255,255,255,0.4);margin:0 0 3px;font-size:11px;">
-                        <a href="mailto:support@zameen360.com" style="color:#1A73E8;text-decoration:none;font-weight:600;">support@zameen360.com</a>
+                      <p style="color:rgba(255,255,255,0.5);margin:0 0 4px;font-size:12px;">
+                        <a href="mailto:support@zameen360.com" style="color:#FCD34D;text-decoration:none;font-weight:700;">support@zameen360.com</a>
                       </p>
-                      <p style="color:rgba(255,255,255,0.25);margin:0;font-size:10px;">
+                      <p style="color:rgba(255,255,255,0.3);margin:0;font-size:11px;">
                         © 2025 Zameen 360. All rights reserved.
                       </p>
                     </td>
@@ -319,11 +289,11 @@ const sendOTPEmail = async (to, otp, purpose) => {
   </body>
   </html>
   `;
-  return await sendEmail(to, "🔐 Your Zameen 360 Verification Code", html);
+  return await sendEmail(to, "Your Zameen 360 Verification Code", html);
 };
 
 // ============================================
-// 🎉 WELCOME EMAIL TEMPLATE - WEBSITE WIDE VIEW
+// 🎉 WELCOME EMAIL - UNIQUE DESIGN
 // ============================================
 const sendWelcomeEmail = async (to, name) => {
   const html = `
@@ -333,254 +303,208 @@ const sendWelcomeEmail = async (to, name) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#F0F4F8;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F4F8;padding:30px 20px;">
+  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#F0FDF4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0FDF4;padding:40px 20px;">
       <tr>
         <td align="center">
 
-          <table width="800" cellpadding="0" cellspacing="0" style="max-width:800px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,0.07),0 4px 16px rgba(0,0,0,0.03);">
+          <table width="800" cellpadding="0" cellspacing="0" style="max-width:800px;width:100%;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 25px 80px rgba(34,197,94,0.1);">
             
-            <!-- TOP NAV BAR -->
+            <!-- HEADER -->
             <tr>
-              <td style="background:#ffffff;padding:16px 40px;border-bottom:1px solid #F1F5F9;">
+              <td style="background:linear-gradient(135deg,#10B981 0%,#059669 100%);padding:40px 50px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <h1 style="color:#1F2937;margin:0;font-size:22px;font-weight:800;">
-                        🏠 Zameen <span style="color:#1A73E8;">360</span>
+                      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px;">
+                        Zameen <span style="color:#FCD34D;">360°</span>
                       </h1>
+                      <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;font-weight:500;">
+                        Welcome to your property universe
+                      </p>
                     </td>
                     <td align="right" style="vertical-align:middle;">
-                      <span style="color:#22C55E;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">
-                        ✅ Account Verified
-                      </span>
+                      <div style="
+                        background:rgba(255,255,255,0.15);
+                        padding:8px 18px;
+                        border-radius:50px;
+                        display:inline-block;
+                        border:1px solid rgba(255,255,255,0.2);
+                      ">
+                        <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
+                          Verified
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
 
-            <!-- WIDE BANNER IMAGE -->
+            <!-- COLOR STRIP -->
             <tr>
-              <td style="padding:0;margin:0;">
-                <img 
-                  src="https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80" 
-                  alt="Luxury Home" 
-                  width="800"
-                  style="display:block;width:100%;max-width:800px;height:260px;object-fit:cover;"
-                />
-              </td>
+              <td style="background:linear-gradient(90deg,#10B981 0%,#FCD34D 50%,#10B981 100%);height:5px;"></td>
             </tr>
 
-            <!-- TWO COLUMN WELCOME -->
+            <!-- WELCOME HERO -->
             <tr>
-              <td style="padding:40px 50px 20px;">
-                <table width="100%" cellpadding="0" cellspacing="0">
+              <td style="padding:60px 60px 30px;text-align:center;">
+                <p style="color:#10B981;margin:0 0 16px;font-size:12px;font-weight:800;letter-spacing:4px;text-transform:uppercase;">
+                  Welcome Aboard
+                </p>
+                <h2 style="color:#0F172A;margin:0 0 20px;font-size:42px;font-weight:900;line-height:1.1;letter-spacing:-1.5px;">
+                  Hello, <span style="background:linear-gradient(135deg,#10B981,#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${name}!</span>
+                </h2>
+                <p style="color:#64748B;margin:0 auto;font-size:16px;line-height:1.7;max-width:520px;">
+                  You're now part of <strong style="color:#10B981;">Zameen 360</strong> — Pakistan's most innovative real estate platform. Let's help you find your dream property.
+                </p>
+
+                <!-- CTA BUTTON -->
+                <table cellpadding="0" cellspacing="0" style="margin:32px auto 0;">
                   <tr>
-                    <!-- LEFT - WELCOME TEXT -->
-                    <td width="50%" style="vertical-align:top;padding-right:30px;">
-                      <div style="
-                        display:inline-block;
-                        background:linear-gradient(145deg,#FEF3C7 0%,#FDE68A 100%);
-                        width:70px;height:70px;
-                        border-radius:50%;
-                        line-height:70px;
-                        text-align:center;
-                        margin-bottom:16px;
-                        box-shadow:0 8px 25px rgba(245,158,11,0.15);
-                      ">
-                        <span style="font-size:32px;">🎉</span>
-                      </div>
-                      <h2 style="color:#1F2937;margin:0 0 4px;font-size:28px;font-weight:800;">
-                        Welcome Aboard!
-                      </h2>
-                      <h3 style="color:#1A73E8;margin:0 0 14px;font-size:22px;font-weight:600;">
-                        ${name}
-                      </h3>
-                      <p style="color:#6B7280;margin:0 0 20px;font-size:14px;line-height:1.8;">
-                        Thank you for joining <strong style="color:#1A73E8;">Zameen 360</strong> — Pakistan's first 3D real estate platform. Explore immersive property tours, verified listings, and connect with trusted agents.
-                      </p>
+                    <td style="
+                      background:linear-gradient(135deg,#10B981 0%,#059669 100%);
+                      border-radius:14px;
+                      box-shadow:0 12px 30px rgba(16,185,129,0.3);
+                    ">
                       <a href="https://zameen360.com" style="
-                        background:linear-gradient(145deg,#1A73E8 0%,#1565C0 100%);
+                        display:inline-block;
                         color:#ffffff;
                         text-decoration:none;
-                        padding:14px 35px;
-                        border-radius:12px;
-                        font-size:14px;
-                        font-weight:700;
-                        display:inline-block;
-                        box-shadow:0 8px 25px rgba(26,115,232,0.25);
+                        padding:18px 50px;
+                        font-size:15px;
+                        font-weight:800;
+                        letter-spacing:0.5px;
                       ">
-                        🚀 Start Exploring
+                        Start Exploring →
                       </a>
                     </td>
-
-                    <!-- RIGHT - FEATURE CARDS -->
-                    <td width="50%" style="vertical-align:top;">
-                      <!-- Card 1 -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-                        <tr>
-                          <td style="
-                            background:linear-gradient(145deg,#F0F7FF 0%,#E8F0FE 100%);
-                            border-radius:14px;padding:14px 16px;
-                            border-left:4px solid #1A73E8;
-                          ">
-                            <table width="100%" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td width="42" style="vertical-align:middle;">
-                                  <div style="background:linear-gradient(145deg,#1A73E8 0%,#1565C0 100%);width:36px;height:36px;border-radius:10px;text-align:center;line-height:36px;">
-                                    <span style="font-size:16px;">🔍</span>
-                                  </div>
-                                </td>
-                                <td style="vertical-align:middle;padding-left:12px;">
-                                  <p style="color:#1F2937;margin:0;font-size:13px;font-weight:700;">Search & Discover</p>
-                                  <p style="color:#6B7280;margin:2px 0 0;font-size:11px;">Thousands of verified listings</p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- Card 2 -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-                        <tr>
-                          <td style="
-                            background:linear-gradient(145deg,#F0FFF4 0%,#DCFCE7 100%);
-                            border-radius:14px;padding:14px 16px;
-                            border-left:4px solid #22C55E;
-                          ">
-                            <table width="100%" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td width="42" style="vertical-align:middle;">
-                                  <div style="background:linear-gradient(145deg,#22C55E 0%,#16A34A 100%);width:36px;height:36px;border-radius:10px;text-align:center;line-height:36px;">
-                                    <span style="font-size:16px;">🏘️</span>
-                                  </div>
-                                </td>
-                                <td style="vertical-align:middle;padding-left:12px;">
-                                  <p style="color:#1F2937;margin:0;font-size:13px;font-weight:700;">3D Virtual Tours</p>
-                                  <p style="color:#6B7280;margin:2px 0 0;font-size:11px;">Immersive property walkthroughs</p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- Card 3 -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
-                        <tr>
-                          <td style="
-                            background:linear-gradient(145deg,#FFF7ED 0%,#FFEDD5 100%);
-                            border-radius:14px;padding:14px 16px;
-                            border-left:4px solid #F97316;
-                          ">
-                            <table width="100%" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td width="42" style="vertical-align:middle;">
-                                  <div style="background:linear-gradient(145deg,#F97316 0%,#EA580C 100%);width:36px;height:36px;border-radius:10px;text-align:center;line-height:36px;">
-                                    <span style="font-size:16px;">🗺️</span>
-                                  </div>
-                                </td>
-                                <td style="vertical-align:middle;padding-left:12px;">
-                                  <p style="color:#1F2937;margin:0;font-size:13px;font-weight:700;">Interactive Maps</p>
-                                  <p style="color:#6B7280;margin:2px 0 0;font-size:11px;">Find properties on 3D maps</p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-
-                      <!-- Card 4 -->
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td style="
-                            background:linear-gradient(145deg,#F5F0FF 0%,#EDE9FE 100%);
-                            border-radius:14px;padding:14px 16px;
-                            border-left:4px solid #8B5CF6;
-                          ">
-                            <table width="100%" cellpadding="0" cellspacing="0">
-                              <tr>
-                                <td width="42" style="vertical-align:middle;">
-                                  <div style="background:linear-gradient(145deg,#8B5CF6 0%,#7C3AED 100%);width:36px;height:36px;border-radius:10px;text-align:center;line-height:36px;">
-                                    <span style="font-size:16px;">💳</span>
-                                  </div>
-                                </td>
-                                <td style="vertical-align:middle;padding-left:12px;">
-                                  <p style="color:#1F2937;margin:0;font-size:13px;font-weight:700;">Smart Payments</p>
-                                  <p style="color:#6B7280;margin:2px 0 0;font-size:11px;">Flexible installment plans</p>
-                                </td>
-                              </tr>
-                            </table>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
                   </tr>
                 </table>
               </td>
             </tr>
 
-            <!-- STATS ROW -->
+            <!-- FEATURES -->
             <tr>
-              <td style="padding:10px 50px 30px;">
-                <table width="100%" cellpadding="0" cellspacing="0" style="
-                  background:linear-gradient(145deg,#FAFBFF 0%,#F0F4FF 100%);
-                  border-radius:16px;
-                  border:1px solid rgba(26,115,232,0.06);
-                  padding:20px 10px;
-                ">
+              <td style="padding:30px 60px;">
+                <p style="color:#94A3B8;margin:0 0 24px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;">
+                  Discover What's Possible
+                </p>
+                <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td align="center" width="25%">
-                      <p style="color:#1A73E8;margin:0;font-size:24px;font-weight:800;">10K+</p>
-                      <p style="color:#9CA3AF;margin:3px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Properties</p>
+                    <td width="50%" style="vertical-align:top;padding:6px;">
+                      <div style="
+                        background:linear-gradient(145deg,#ECFDF5 0%,#D1FAE5 100%);
+                        padding:24px;
+                        border-radius:16px;
+                        border:1px solid #A7F3D0;
+                      ">
+                        <p style="color:#065F46;margin:0 0 8px;font-size:14px;font-weight:800;">
+                          Smart Search
+                        </p>
+                        <p style="color:#047857;margin:0;font-size:12px;line-height:1.6;">
+                          AI-powered property search across 50+ cities
+                        </p>
+                      </div>
                     </td>
-                    <td align="center" width="25%" style="border-left:1px solid rgba(26,115,232,0.1);">
-                      <p style="color:#1A73E8;margin:0;font-size:24px;font-weight:800;">500+</p>
-                      <p style="color:#9CA3AF;margin:3px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Agents</p>
+                    <td width="50%" style="vertical-align:top;padding:6px;">
+                      <div style="
+                        background:linear-gradient(145deg,#EFF6FF 0%,#DBEAFE 100%);
+                        padding:24px;
+                        border-radius:16px;
+                        border:1px solid #93C5FD;
+                      ">
+                        <p style="color:#1E40AF;margin:0 0 8px;font-size:14px;font-weight:800;">
+                          3D Tours
+                        </p>
+                        <p style="color:#1D4ED8;margin:0;font-size:12px;line-height:1.6;">
+                          Immersive virtual walkthroughs of properties
+                        </p>
+                      </div>
                     </td>
-                    <td align="center" width="25%" style="border-left:1px solid rgba(26,115,232,0.1);">
-                      <p style="color:#1A73E8;margin:0;font-size:24px;font-weight:800;">50+</p>
-                      <p style="color:#9CA3AF;margin:3px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Cities</p>
+                  </tr>
+                  <tr>
+                    <td width="50%" style="vertical-align:top;padding:6px;">
+                      <div style="
+                        background:linear-gradient(145deg,#FEF3C7 0%,#FDE68A 100%);
+                        padding:24px;
+                        border-radius:16px;
+                        border:1px solid #FCD34D;
+                      ">
+                        <p style="color:#78350F;margin:0 0 8px;font-size:14px;font-weight:800;">
+                          Verified Listings
+                        </p>
+                        <p style="color:#92400E;margin:0;font-size:12px;line-height:1.6;">
+                          Every property is authenticated &amp; trusted
+                        </p>
+                      </div>
                     </td>
-                    <td align="center" width="25%" style="border-left:1px solid rgba(26,115,232,0.1);">
-                      <p style="color:#1A73E8;margin:0;font-size:24px;font-weight:800;">25K+</p>
-                      <p style="color:#9CA3AF;margin:3px 0 0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Happy Users</p>
+                    <td width="50%" style="vertical-align:top;padding:6px;">
+                      <div style="
+                        background:linear-gradient(145deg,#FCE7F3 0%,#FBCFE8 100%);
+                        padding:24px;
+                        border-radius:16px;
+                        border:1px solid #F9A8D4;
+                      ">
+                        <p style="color:#9D174D;margin:0 0 8px;font-size:14px;font-weight:800;">
+                          Direct Connect
+                        </p>
+                        <p style="color:#BE185D;margin:0;font-size:12px;line-height:1.6;">
+                          Talk to verified buyers &amp; sellers directly
+                        </p>
+                      </div>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
 
-            <!-- WEBSITE FOOTER -->
+            <!-- STATS BAR -->
             <tr>
-              <td style="background:linear-gradient(145deg,#1A1A2E 0%,#0F1629 100%);padding:30px 50px;">
+              <td style="padding:0 60px 35px;">
+                <div style="
+                  background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);
+                  padding:28px 20px;
+                  border-radius:20px;
+                ">
+                  <table width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td align="center" width="33.33%">
+                        <p style="color:#FCD34D;margin:0;font-size:28px;font-weight:900;">10K+</p>
+                        <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;">Properties</p>
+                      </td>
+                      <td align="center" width="33.33%" style="border-left:1px solid rgba(255,255,255,0.1);border-right:1px solid rgba(255,255,255,0.1);">
+                        <p style="color:#10B981;margin:0;font-size:28px;font-weight:900;">50+</p>
+                        <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;">Cities</p>
+                      </td>
+                      <td align="center" width="33.33%">
+                        <p style="color:#EC4899;margin:0;font-size:28px;font-weight:900;">25K+</p>
+                        <p style="color:rgba(255,255,255,0.6);margin:6px 0 0;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;">Happy Users</p>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td style="background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);padding:35px 60px;border-top:1px solid rgba(255,255,255,0.05);">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <h3 style="color:#ffffff;margin:0 0 4px;font-size:18px;font-weight:700;">
-                        🏠 Zameen <span style="color:#1A73E8;">360</span>
+                      <h3 style="color:#ffffff;margin:0 0 6px;font-size:20px;font-weight:900;">
+                        Zameen <span style="color:#FCD34D;">360°</span>
                       </h3>
-                      <p style="color:rgba(255,255,255,0.4);margin:0;font-size:11px;">
-                        3D Property Experience Platform
+                      <p style="color:rgba(255,255,255,0.5);margin:0;font-size:12px;letter-spacing:1px;">
+                        Find. Buy. Sell. Your Property Universe.
                       </p>
-                    </td>
-                    <td align="center" style="vertical-align:middle;">
-                      <table cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">📘</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">📸</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">🐦</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">💼</a></td>
-                        </tr>
-                      </table>
                     </td>
                     <td align="right" style="vertical-align:middle;">
-                      <p style="color:rgba(255,255,255,0.4);margin:0 0 3px;font-size:11px;">
-                        <a href="mailto:support@zameen360.com" style="color:#1A73E8;text-decoration:none;font-weight:600;">support@zameen360.com</a>
+                      <p style="color:rgba(255,255,255,0.5);margin:0 0 4px;font-size:12px;">
+                        <a href="mailto:support@zameen360.com" style="color:#FCD34D;text-decoration:none;font-weight:700;">support@zameen360.com</a>
                       </p>
-                      <p style="color:rgba(255,255,255,0.25);margin:0;font-size:10px;">
+                      <p style="color:rgba(255,255,255,0.3);margin:0;font-size:11px;">
                         © 2025 Zameen 360. All rights reserved.
                       </p>
                     </td>
@@ -596,11 +520,11 @@ const sendWelcomeEmail = async (to, name) => {
   </body>
   </html>
   `;
-  return await sendEmail(to, "🎉 Welcome to Zameen 360 — Your 3D Property Journey!", html);
+  return await sendEmail(to, "Welcome to Zameen 360 — Let's Begin!", html);
 };
 
 // ============================================
-// 🔒 PASSWORD RESET EMAIL - WEBSITE WIDE VIEW
+// 🔒 PASSWORD RESET EMAIL - UNIQUE DESIGN
 // ============================================
 const sendPasswordResetEmail = async (to, otp) => {
   const otpDigits = otp.toString().split("");
@@ -609,20 +533,19 @@ const sendPasswordResetEmail = async (to, otp) => {
       (digit) => `
     <td align="center" style="padding:0 6px;">
       <div style="
-        background:linear-gradient(145deg,#ffffff 0%,#FFF5F5 100%);
-        color:#DC2626;
-        font-size:36px;
-        font-weight:800;
+        background:#FFFFFF;
+        color:#0F172A;
+        font-size:38px;
+        font-weight:900;
         font-family:'Courier New',monospace;
-        width:58px;
-        height:70px;
-        line-height:70px;
-        border-radius:14px;
-        border:1.5px solid rgba(220,38,38,0.15);
+        width:60px;
+        height:74px;
+        line-height:74px;
+        border-radius:16px;
+        border:2px solid #FECACA;
         box-shadow:
-          0 8px 25px rgba(220,38,38,0.08),
-          0 2px 6px rgba(0,0,0,0.04),
-          inset 0 -3px 0 rgba(220,38,38,0.05);
+          0 10px 30px rgba(220,38,38,0.12),
+          inset 0 -4px 0 rgba(220,38,38,0.08);
       ">${digit}</div>
     </td>
   `
@@ -636,168 +559,158 @@ const sendPasswordResetEmail = async (to, otp) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#F0F4F8;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F0F4F8;padding:30px 20px;">
+  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#FEF2F2;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FEF2F2;padding:40px 20px;">
       <tr>
         <td align="center">
 
-          <table width="800" cellpadding="0" cellspacing="0" style="max-width:800px;width:100%;background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 20px 70px rgba(0,0,0,0.07),0 4px 16px rgba(0,0,0,0.03);">
+          <table width="800" cellpadding="0" cellspacing="0" style="max-width:800px;width:100%;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 25px 80px rgba(220,38,38,0.1);">
             
-            <!-- TOP NAV BAR -->
+            <!-- HEADER -->
             <tr>
-              <td style="background:#ffffff;padding:16px 40px;border-bottom:1px solid #F1F5F9;">
+              <td style="background:linear-gradient(135deg,#DC2626 0%,#991B1B 100%);padding:40px 50px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <h1 style="color:#1F2937;margin:0;font-size:22px;font-weight:800;">
-                        🏠 Zameen <span style="color:#1A73E8;">360</span>
+                      <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:900;letter-spacing:-0.5px;">
+                        Zameen <span style="color:#FCD34D;">360°</span>
                       </h1>
+                      <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:13px;font-weight:500;">
+                        Password Reset Request
+                      </p>
                     </td>
                     <td align="right" style="vertical-align:middle;">
-                      <span style="color:#DC2626;font-size:12px;letter-spacing:1px;text-transform:uppercase;font-weight:600;">
-                        🔒 Password Reset
-                      </span>
+                      <div style="
+                        background:rgba(255,255,255,0.15);
+                        padding:8px 18px;
+                        border-radius:50px;
+                        display:inline-block;
+                        border:1px solid rgba(255,255,255,0.2);
+                      ">
+                        <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;">
+                          Secure
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
 
-            <!-- BANNER IMAGE -->
+            <!-- COLOR STRIP -->
             <tr>
-              <td style="padding:0;margin:0;">
-                <img 
-                  src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80" 
-                  alt="Property Security" 
-                  width="800"
-                  style="display:block;width:100%;max-width:800px;height:230px;object-fit:cover;"
-                />
-              </td>
+              <td style="background:linear-gradient(90deg,#DC2626 0%,#FCD34D 50%,#DC2626 100%);height:5px;"></td>
             </tr>
 
-            <!-- TWO COLUMN LAYOUT -->
+            <!-- MAIN CONTENT -->
             <tr>
-              <td style="padding:40px 50px 20px;">
+              <td style="padding:50px 60px 30px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <!-- LEFT - INFO -->
-                    <td width="45%" style="vertical-align:top;padding-right:30px;">
+                    <td width="45%" style="vertical-align:top;padding-right:40px;">
                       <div style="
                         display:inline-block;
-                        background:linear-gradient(145deg,#FEF2F2 0%,#FEE2E2 100%);
-                        width:65px;height:65px;
-                        border-radius:50%;
-                        line-height:65px;
-                        text-align:center;
-                        margin-bottom:16px;
-                        border:2px solid rgba(220,38,38,0.1);
+                        background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);
+                        color:#DC2626;
+                        font-size:11px;
+                        font-weight:800;
+                        letter-spacing:3px;
+                        text-transform:uppercase;
+                        padding:8px 20px;
+                        border-radius:50px;
+                        margin-bottom:20px;
                       ">
-                        <span style="font-size:30px;">🔒</span>
+                        Reset Request
                       </div>
-                      <h2 style="color:#1F2937;margin:0 0 8px;font-size:26px;font-weight:800;line-height:1.2;">
-                        Password<br>Reset Request
+                      <h2 style="color:#0F172A;margin:0 0 16px;font-size:30px;font-weight:900;line-height:1.15;letter-spacing:-1px;">
+                        Reset Your<br>
+                        <span style="background:linear-gradient(135deg,#DC2626,#991B1B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Password</span>
                       </h2>
-                      <p style="color:#6B7280;margin:0 0 16px;font-size:14px;line-height:1.8;">
-                        We received a request to reset your account password. Use the code to proceed securely.
+                      <p style="color:#64748B;margin:0 0 20px;font-size:15px;line-height:1.7;">
+                        Use the code on the right to securely reset your account password.
                       </p>
                       
-                      <!-- 1 MINUTE TIMER -->
+                      <!-- TIMER -->
                       <div style="
-                        background:linear-gradient(145deg,#FFFCF0 0%,#FFF9E6 100%);
-                        border-left:4px solid #F59E0B;
-                        padding:12px 16px;
-                        border-radius:0 12px 12px 0;
+                        background:linear-gradient(135deg,#FEF3C7 0%,#FDE68A 100%);
+                        padding:14px 20px;
+                        border-radius:14px;
+                        border-left:5px solid #F59E0B;
                         margin-bottom:14px;
                       ">
-                        <p style="color:#92400E;margin:0;font-size:13px;font-weight:600;">
-                          ⏱️ Code expires in <strong>1 minute</strong>
+                        <p style="color:#92400E;margin:0 0 2px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+                          Time Sensitive
+                        </p>
+                        <p style="color:#78350F;margin:0;font-size:14px;font-weight:700;">
+                          Expires in 10 minutes
                         </p>
                       </div>
 
-                      <!-- SECURITY ALERT -->
+                      <!-- WARNING -->
                       <div style="
-                        background:linear-gradient(145deg,#FEF2F2 0%,#FEE2E2 100%);
-                        border:1px solid #FECACA;
-                        padding:14px;
-                        border-radius:12px;
+                        background:linear-gradient(135deg,#FEE2E2 0%,#FECACA 100%);
+                        padding:14px 20px;
+                        border-radius:14px;
+                        border-left:5px solid #DC2626;
                       ">
-                        <p style="color:#991B1B;margin:0 0 3px;font-size:12px;font-weight:700;">⚠️ Security Alert</p>
-                        <p style="color:#6B7280;margin:0;font-size:11px;line-height:1.6;">
-                          If you didn't request this, ignore this email. Your password remains safe.
+                        <p style="color:#991B1B;margin:0 0 4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">
+                          Didn't Request?
+                        </p>
+                        <p style="color:#7F1D1D;margin:0;font-size:13px;line-height:1.5;">
+                          Ignore this email. Your password is safe.
                         </p>
                       </div>
                     </td>
 
-                    <!-- RIGHT - OTP BOX -->
+                    <!-- RIGHT - OTP -->
                     <td width="55%" style="vertical-align:top;">
                       <div style="
-                        background:linear-gradient(145deg,#FFFAFA 0%,#FEF2F2 100%);
-                        padding:30px 20px;
-                        border-radius:20px;
-                        border:1px solid rgba(220,38,38,0.08);
-                        box-shadow:0 10px 35px rgba(220,38,38,0.05);
+                        background:linear-gradient(145deg,#FFF1F2 0%,#FFE4E6 100%);
+                        padding:35px 25px;
+                        border-radius:24px;
+                        border:1px solid #FECACA;
+                        box-shadow:0 15px 40px rgba(220,38,38,0.08);
                         text-align:center;
                       ">
-                        <p style="color:#DC2626;margin:0 0 18px;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:700;">
-                          Password Reset Code
+                        <p style="color:#DC2626;margin:0 0 22px;font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:800;">
+                          Reset Code
                         </p>
                         <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
                           <tr>
                             ${otpBoxes}
                           </tr>
                         </table>
-                        <p style="color:#9CA3AF;margin:18px 0 0;font-size:11px;">
-                          Do not share this code with anyone
-                        </p>
+                        <div style="
+                          margin-top:24px;
+                          padding-top:20px;
+                          border-top:1px dashed #FCA5A5;
+                        ">
+                          <p style="color:#991B1B;margin:0;font-size:12px;font-weight:600;">
+                            Never share this code with anyone
+                          </p>
+                        </div>
                       </div>
 
                       <!-- PASSWORD TIPS -->
                       <div style="
                         background:linear-gradient(145deg,#F8FAFC 0%,#F1F5F9 100%);
-                        padding:18px;
-                        border-radius:14px;
+                        padding:20px;
+                        border-radius:16px;
                         margin-top:14px;
                         border:1px solid #E2E8F0;
                       ">
-                        <p style="color:#1F2937;margin:0 0 10px;font-size:13px;font-weight:700;">🛡️ Password Tips</p>
-                        <table cellpadding="0" cellspacing="0" width="100%">
-                          <tr>
-                            <td style="padding:3px 0;">
-                              <table cellpadding="0" cellspacing="0"><tr>
-                                <td style="vertical-align:middle;padding-right:8px;">
-                                  <div style="background:#E8F0FE;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;">
-                                    <span style="font-size:9px;color:#1A73E8;font-weight:800;">✓</span>
-                                  </div>
-                                </td>
-                                <td><p style="color:#4B5563;margin:0;font-size:11px;">8+ characters</p></td>
-                              </tr></table>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td style="padding:3px 0;">
-                              <table cellpadding="0" cellspacing="0"><tr>
-                                <td style="vertical-align:middle;padding-right:8px;">
-                                  <div style="background:#E8F0FE;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;">
-                                    <span style="font-size:9px;color:#1A73E8;font-weight:800;">✓</span>
-                                  </div>
-                                </td>
-                                <td><p style="color:#4B5563;margin:0;font-size:11px;">Upper & lowercase mix</p></td>
-                              </tr></table>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td style="padding:3px 0;">
-                              <table cellpadding="0" cellspacing="0"><tr>
-                                <td style="vertical-align:middle;padding-right:8px;">
-                                  <div style="background:#E8F0FE;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;">
-                                    <span style="font-size:9px;color:#1A73E8;font-weight:800;">✓</span>
-                                  </div>
-                                </td>
-                                <td><p style="color:#4B5563;margin:0;font-size:11px;">Numbers & special chars</p></td>
-                              </tr></table>
-                            </td>
-                          </tr>
-                        </table>
+                        <p style="color:#0F172A;margin:0 0 12px;font-size:13px;font-weight:800;">
+                          Strong Password Tips
+                        </p>
+                        <p style="color:#64748B;margin:0 0 6px;font-size:12px;line-height:1.6;">
+                          • Minimum 8 characters
+                        </p>
+                        <p style="color:#64748B;margin:0 0 6px;font-size:12px;line-height:1.6;">
+                          • Mix of upper &amp; lowercase
+                        </p>
+                        <p style="color:#64748B;margin:0;font-size:12px;line-height:1.6;">
+                          • Include numbers &amp; symbols
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -805,34 +718,24 @@ const sendPasswordResetEmail = async (to, otp) => {
               </td>
             </tr>
 
-            <!-- WEBSITE FOOTER -->
+            <!-- FOOTER -->
             <tr>
-              <td style="background:linear-gradient(145deg,#1A1A2E 0%,#0F1629 100%);padding:30px 50px;">
+              <td style="background:linear-gradient(135deg,#0F172A 0%,#1E293B 100%);padding:35px 60px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td style="vertical-align:middle;">
-                      <h3 style="color:#ffffff;margin:0 0 4px;font-size:18px;font-weight:700;">
-                        🏠 Zameen <span style="color:#1A73E8;">360</span>
+                      <h3 style="color:#ffffff;margin:0 0 6px;font-size:20px;font-weight:900;">
+                        Zameen <span style="color:#FCD34D;">360°</span>
                       </h3>
-                      <p style="color:rgba(255,255,255,0.4);margin:0;font-size:11px;">
-                        3D Property Experience Platform
+                      <p style="color:rgba(255,255,255,0.5);margin:0;font-size:12px;letter-spacing:1px;">
+                        Find. Buy. Sell. Your Property Universe.
                       </p>
-                    </td>
-                    <td align="center" style="vertical-align:middle;">
-                      <table cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">📘</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">📸</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">🐦</a></td>
-                          <td style="padding:0 5px;"><a href="#" style="display:inline-block;background:rgba(255,255,255,0.08);width:32px;height:32px;border-radius:8px;text-align:center;line-height:32px;text-decoration:none;font-size:14px;">💼</a></td>
-                        </tr>
-                      </table>
                     </td>
                     <td align="right" style="vertical-align:middle;">
-                      <p style="color:rgba(255,255,255,0.4);margin:0 0 3px;font-size:11px;">
-                        <a href="mailto:support@zameen360.com" style="color:#1A73E8;text-decoration:none;font-weight:600;">support@zameen360.com</a>
+                      <p style="color:rgba(255,255,255,0.5);margin:0 0 4px;font-size:12px;">
+                        <a href="mailto:support@zameen360.com" style="color:#FCD34D;text-decoration:none;font-weight:700;">support@zameen360.com</a>
                       </p>
-                      <p style="color:rgba(255,255,255,0.25);margin:0;font-size:10px;">
+                      <p style="color:rgba(255,255,255,0.3);margin:0;font-size:11px;">
                         © 2025 Zameen 360. All rights reserved.
                       </p>
                     </td>
@@ -848,7 +751,7 @@ const sendPasswordResetEmail = async (to, otp) => {
   </body>
   </html>
   `;
-  return await sendEmail(to, "🔒 Reset Your Zameen 360 Password", html);
+  return await sendEmail(to, "Reset Your Zameen 360 Password", html);
 };
 
 module.exports = {

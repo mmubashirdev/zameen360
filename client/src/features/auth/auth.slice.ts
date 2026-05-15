@@ -19,7 +19,6 @@ const initialState: AuthState = {
   otpVerified: false,
 };
 
-// Helper to extract API error message
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (axios.isAxiosError(error)) {
     return (
@@ -32,6 +31,8 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error ? error.message : fallback;
 };
 
+// ─── Forgot Password ─────────────────────────────────────────────────────────
+
 export const forgotPassword = createAsyncThunk(
   "auth/forgotPassword",
   async (email: string, { rejectWithValue }) => {
@@ -41,8 +42,25 @@ export const forgotPassword = createAsyncThunk(
     } catch (error: unknown) {
       return rejectWithValue(getErrorMessage(error, "Failed to send OTP"));
     }
-  },
+  }
 );
+
+// ─── Resend OTP (NEW) ────────────────────────────────────────────────────────
+
+export const resendOtp = createAsyncThunk(
+  "auth/resendOtp",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      // Reuse forgotPassword API or use resend endpoint
+      const response = await authApi.forgotPassword({ email });
+      return response;
+    } catch (error: unknown) {
+      return rejectWithValue(getErrorMessage(error, "Failed to resend OTP"));
+    }
+  }
+);
+
+// ─── Verify OTP ──────────────────────────────────────────────────────────────
 
 export const verifyOTP = createAsyncThunk(
   "auth/verifyOTP",
@@ -53,8 +71,10 @@ export const verifyOTP = createAsyncThunk(
     } catch (error: unknown) {
       return rejectWithValue(getErrorMessage(error, "Invalid OTP"));
     }
-  },
+  }
 );
+
+// ─── Reset Password ──────────────────────────────────────────────────────────
 
 export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
@@ -64,11 +84,13 @@ export const resetPassword = createAsyncThunk(
       return response;
     } catch (error: unknown) {
       return rejectWithValue(
-        getErrorMessage(error, "Failed to reset password"),
+        getErrorMessage(error, "Failed to reset password")
       );
     }
-  },
+  }
 );
+
+// ─── Slice ───────────────────────────────────────────────────────────────────
 
 const authSlice = createSlice({
   name: "auth",
@@ -79,6 +101,9 @@ const authSlice = createSlice({
     },
     clearAuthSuccess: (state) => {
       state.successMessage = null;
+    },
+    clearOtpVerified: (state) => {
+      state.otpVerified = false;
     },
     setEmailForReset: (state, action: PayloadAction<string>) => {
       state.emailForReset = action.payload;
@@ -108,6 +133,22 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
+
+      // ✅ Resend OTP (NEW)
+      .addCase(resendOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(resendOtp.fulfilled, (state) => {
+        state.loading = false;
+        state.successMessage = "New OTP sent to your email";
+      })
+      .addCase(resendOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
       // Verify OTP
       .addCase(verifyOTP.pending, (state) => {
         state.loading = true;
@@ -122,7 +163,9 @@ const authSlice = createSlice({
       .addCase(verifyOTP.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+        state.otpVerified = false;
       })
+
       // Reset Password
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
@@ -143,7 +186,9 @@ const authSlice = createSlice({
 export const {
   clearAuthError,
   clearAuthSuccess,
+  clearOtpVerified,
   setEmailForReset,
   resetAuthState,
 } = authSlice.actions;
+
 export default authSlice.reducer;

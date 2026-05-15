@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { Home, Users, MapPin } from "lucide-react";
-import logo from "../../../assets/zameen360-logo.png";
+import logo from "../../../assets/chatgpt_image_may_12__2026__11_24_22_pm_720-removebg-preview.png";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
             <img
               src={logo}
               alt="Zameen 360"
-              className="h-14 w-auto object-contain"
+              className="h-50 pb-2.5 w-auto object-contain"
             />
           </div>
 
