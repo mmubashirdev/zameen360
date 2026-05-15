@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -31,7 +31,6 @@ export default function SignupForm({ toast }: SignupFormProps) {
   const {
     register,
     handleSubmit,
-    control,
     watch,
     setValue,
     setError,
@@ -55,20 +54,17 @@ export default function SignupForm({ toast }: SignupFormProps) {
   const watchedPassword = watch("password");
   const watchedRole = watch("role");
 
-  // ── Submit ──────────────────────────────────────────────────────────────────
+  // ── Submit ────────────────────────────────────────────────────────────────
 
   const onSubmit = useCallback(
     async (data: SignupSchemaType) => {
       try {
         const result = await signup(data);
         setSubmitSuccess(true);
-
-        // ✅ Only success toast - small confirmation
         toast.success(
           "Account Created!",
           "Please verify your email to continue."
         );
-
         navigate("/verify-email", {
           state: {
             userId: result.user?.userId,
@@ -81,49 +77,27 @@ export default function SignupForm({ toast }: SignupFormProps) {
             ? err.message
             : "Something went wrong. Please try again.";
 
-        // ✅ Detect which field has error
         const field = detectErrorField(message);
 
         if (field === "email") {
-          setError("email", {
-            type: "manual",
-            message: message,
-          });
-          // Focus email input
+          setError("email", { type: "manual", message });
           document.getElementById("email")?.focus();
         } else if (field === "password") {
-          setError("password", {
-            type: "manual",
-            message: message,
-          });
+          setError("password", { type: "manual", message });
         } else if (field === "phone") {
-          setError("phone", {
-            type: "manual",
-            message: message,
-          });
+          setError("phone", { type: "manual", message });
         } else {
-          // General error - set on email as fallback (or show small inline)
-          setError("email", {
-            type: "manual",
-            message: message,
-          });
+          setError("email", { type: "manual", message });
         }
       }
     },
     [signup, navigate, toast, setError]
   );
 
-  // ── Validation Error - silent (no toast) ───────────────────────────────────
-
-  const onValidationError = useCallback(() => {
-    // No toast - errors already shown inline by react-hook-form
-  }, []);
-
-  // ── Clear server errors when user types ────────────────────────────────────
+  const onValidationError = useCallback(() => {}, []);
 
   const handleInputChange = useCallback(
     (fieldName: keyof SignupSchemaType) => {
-      // Clear manual error when user types in field
       if (errors[fieldName]?.type === "manual") {
         clearErrors(fieldName);
       }
@@ -131,18 +105,14 @@ export default function SignupForm({ toast }: SignupFormProps) {
     [errors, clearErrors]
   );
 
-  // ── Google OAuth ────────────────────────────────────────────────────────────
+  const handleGoogleClick = useCallback(() => {
+    setIsGoogleLoading(true);
+    const baseUrl =
+      import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
+    window.location.href = `${baseUrl}/auth/google`;
+  }, []);
 
- const handleGoogleClick = useCallback(() => {
-  setIsGoogleLoading(true);
-  const baseUrl =
-    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
-  
-  // ✅ Direct redirect to backend Google OAuth
-  window.location.href = `${baseUrl}/auth/google`;
-}, []);
-
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className={styles.formContainer}>
@@ -159,35 +129,69 @@ export default function SignupForm({ toast }: SignupFormProps) {
         noValidate
         autoComplete="off"
       >
-        {/* ── Full Name ───────────────────────────────────────────────────── */}
-        <div className={styles.formGroup}>
-          <div className={styles.inputWrapper}>
-            <i
-              className={`fa-solid fa-user ${styles.inputIcon}`}
-              aria-hidden="true"
-            />
-            <input
-              {...register("fullName", {
-                onChange: () => handleInputChange("fullName"),
-              })}
-              id="fullName"
-              type="text"
-              placeholder="Full Name"
-              className={`${styles.formInput} ${
-                errors.fullName ? styles.inputError : ""
-              }`}
-              aria-required="true"
-            />
+        {/* ── Row 1: Full Name + City ─────────────────────────────────── */}
+        <div className={styles.formGroupRow}>
+          {/* Full Name */}
+          <div className={styles.formGroup}>
+            <div className={styles.inputWrapper}>
+              <i
+                className={`fa-solid fa-user ${styles.inputIcon}`}
+                aria-hidden="true"
+              />
+              <input
+                {...register("fullName", {
+                  onChange: () => handleInputChange("fullName"),
+                })}
+                id="fullName"
+                type="text"
+                placeholder="Full Name"
+                className={`${styles.formInput} ${
+                  errors.fullName ? styles.inputError : ""
+                }`}
+                aria-required="true"
+              />
+            </div>
+            {errors.fullName && (
+              <p className={styles.fieldError} role="alert">
+                <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
+                {errors.fullName.message}
+              </p>
+            )}
           </div>
-          {errors.fullName && (
-            <p className={styles.fieldError} role="alert">
-              <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-              {errors.fullName.message}
-            </p>
-          )}
+
+          {/* City */}
+          <div className={styles.formGroup}>
+            <div className={styles.inputWrapper}>
+              <i
+                className={`fa-solid fa-location-dot ${styles.inputIcon}`}
+                aria-hidden="true"
+              />
+              <select
+                {...register("city")}
+                id="city"
+                className={`${styles.formSelect} ${
+                  errors.city ? styles.selectError : ""
+                }`}
+                aria-required="true"
+              >
+                <option value="">Select your city</option>
+                {PAKISTAN_CITIES.map(({ value, label }) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {errors.city && (
+              <p className={styles.fieldError} role="alert">
+                <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
+                {errors.city.message}
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* ── Email & Phone ───────────────────────────────────────────────── */}
+        {/* ── Row 2: Email + Phone ────────────────────────────────────── */}
         <div className={styles.formGroupRow}>
           <div className={styles.formGroup}>
             <div className={styles.inputWrapper}>
@@ -244,38 +248,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
           </div>
         </div>
 
-        {/* ── City ───────────────────────────────────────────────────────── */}
-        <div className={styles.formGroup}>
-          <div className={styles.inputWrapper}>
-            <i
-              className={`fa-solid fa-location-dot ${styles.inputIcon}`}
-              aria-hidden="true"
-            />
-            <select
-              {...register("city")}
-              id="city"
-              className={`${styles.formSelect} ${
-                errors.city ? styles.selectError : ""
-              }`}
-              aria-required="true"
-            >
-              <option value="">Select your city</option>
-              {PAKISTAN_CITIES.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          {errors.city && (
-            <p className={styles.fieldError} role="alert">
-              <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-              {errors.city.message}
-            </p>
-          )}
-        </div>
-
-        {/* ── Password & Confirm ──────────────────────────────────────────── */}
+        {/* ── Row 3: Password + Confirm ───────────────────────────────── */}
         <div className={styles.formGroupRow}>
           <div className={styles.formGroup}>
             <div className={styles.inputWrapper}>
@@ -357,7 +330,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
           </div>
         </div>
 
-        {/* ── Role Cards ──────────────────────────────────────────────────── */}
+        {/* ── Role Cards ──────────────────────────────────────────────── */}
         <div className={styles.roleSection}>
           <label className={styles.roleSectionLabel}>
             I am a <span className={styles.required}>*</span>
@@ -414,58 +387,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
           )}
         </div>
 
-        {/* ── Terms Checkbox ──────────────────────────────────────────────── */}
-        <Controller
-          name="terms"
-          control={control}
-          render={({ field: { value, onChange }, fieldState: { error } }) => (
-            <div
-              className={[
-                styles.checkboxGroup,
-                error ? styles.checkboxGroupError : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-            >
-              <div className={styles.checkboxBox}>
-                <input
-                  type="checkbox"
-                  id="terms"
-                  checked={value === true}
-                  onChange={(e) =>
-                    onChange(e.target.checked ? true : undefined)
-                  }
-                />
-                <div
-                  className={[
-                    styles.checkboxVisual,
-                    value === true ? styles.checkboxChecked : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                >
-                  <i className="fa-solid fa-check" aria-hidden="true" />
-                </div>
-              </div>
-              <label className={styles.checkboxLabel} htmlFor="terms">
-                I agree to the <Link to="/terms">Terms of Service</Link> and{" "}
-                <Link to="/privacy">Privacy Policy</Link>
-              </label>
-            </div>
-          )}
-        />
-        {errors.terms && (
-          <p
-            className={styles.fieldError}
-            role="alert"
-            style={{ marginTop: -8, marginBottom: 8 }}
-          >
-            <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-            {errors.terms.message}
-          </p>
-        )}
-
-        {/* ── Submit Button ───────────────────────────────────────────────── */}
+        {/* ── Submit ──────────────────────────────────────────────────── */}
         <button
           type="submit"
           className={[
@@ -492,7 +414,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
           )}
         </button>
 
-        {/* ── Social Login ────────────────────────────────────────────────── */}
+        {/* ── Social Login ─────────────────────────────────────────────── */}
         <SocialLogin
           onGoogleClick={handleGoogleClick}
           isLoading={isGoogleLoading}

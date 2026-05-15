@@ -67,6 +67,16 @@ export const HERO_FEATURES = [
     title: "Connect with Buyers & Sellers",
     desc:  "Direct communication, zero hassle",
   },
+  {
+    icon:  "fa-magnifying-glass-location",
+    title: "Smart Search",
+    desc:  "Find properties instantly",
+  },
+  {
+    icon:  "fa-headset",
+    title: "24/7 Support",
+    desc:  "Always here to help you",
+  },
 ] as const;
 
 // ─── Footer Advantages ────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 import styles from "../styles/auth.module.css";
 import AuthNavbar         from "../components/AuthNavbar";
-import AuthFooter         from "../components/AuthFooter";
+
 import SignupForm         from "../components/SignupForm";
-import { ToastContainer } from "@shared/components/Toast";
+
 import { useToast }       from "@shared/hooks/useToast";
 import { HERO_FEATURES }  from "../constants/authConstants";
 
@@ -57,12 +57,9 @@ export default function SignupPage() {
         </section>
       </main>
 
-      <AuthFooter />
+  
 
-      <ToastContainer
-        toasts={toast.toasts}
-        removeToast={toast.removeToast}
-      />
+      
     </div>
   );
 }
