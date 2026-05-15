@@ -31,7 +31,6 @@ function AuthFlow() {
             key="step1"
             onNext={goNext}
             setEmail={setEmail}
-            onBack={goToLogin}
           />
         );
       case 2:
