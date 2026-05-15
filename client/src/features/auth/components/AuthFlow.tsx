@@ -30,6 +30,7 @@ function AuthFlow() {
           <ForgetPassword
             key="step1"
             onNext={goNext}
+            onBack={goBack}
             setEmail={setEmail}
           />
         );

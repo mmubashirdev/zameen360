@@ -2,5 +2,8 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-console.log("Prisma keys:", Object.keys(prisma));
+prisma.$connect()
+  .then(() => console.log("DB connected via Prisma"))
+  .catch(err => console.error("DB connection error:", err));
+
 module.exports = prisma;
