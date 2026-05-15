@@ -1,9 +1,9 @@
 import AuthNavbar from "../components/AuthNavbar";
 import AuthFooter from "../components/AuthFooter";
-import { useAuth } from "../hooks/useAuth";
+import { useAuthContext } from "../hooks/useAuth";
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthContext();
 
   return (
     <>

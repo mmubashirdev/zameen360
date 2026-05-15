@@ -1,103 +1,278 @@
-import { useCallback } from "react";
-import { useAuthContext } from "../context/useAuthContext";
+import { useContext, useState } from "react";
+import { AuthContext } from "../context/authContextStore";
 import {
-  signupService,
-  loginService,
-  logoutService,
-  verifyEmailService,
-  resendVerificationOtpService,
-} from "../services/authService";
+  registerBuyer,
+  registerSeller,
+  loginUser,
+  verifyOtp,
+  resendOtp,
+} from "../api/authApi";
+import { STORAGE_KEYS } from "../constants/authConstants";
 import type {
-  SignupFormValues,
-  LoginFormValues,
+  AuthContextType,
   SignupServiceResult,
   LoginServiceResult,
+  LoginFormValues,
+  User,
   VerifyOtpPayload,
 } from "../types/auth.types";
+import type { SignupSchemaType } from "../validations/signupSchema";
+
+// ─── useAuthContext ───────────────────────────────────────────────────────────
+
+export function useAuthContext(): AuthContextType {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuthContext must be used within <AuthProvider>");
+  }
+  return ctx;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (typeof error === "string") return error;
+
+  const err = error as {
+    message?: string;
+    status?: number;
+    response?: { data?: { message?: string } };
+    data?: { message?: string };
+  };
+
+  const msg =
+    err?.message ??
+    err?.response?.data?.message ??
+    err?.data?.message ??
+    fallback;
+
+  return String(msg);
+}
+
+function getRequiresVerification(error: unknown): boolean {
+  const err = error as {
+    requiresVerification?: boolean;
+    response?: { data?: { requiresVerification?: boolean } };
+  };
+
+  return Boolean(
+    err?.requiresVerification ?? err?.response?.data?.requiresVerification
+  );
+}
+
+// ─── Detect which field caused the error ──────────────────────────────────────
+
+export function detectErrorField(
+  message: string
+): "email" | "password" | "phone" | "general" {
+  const lower = message.toLowerCase();
+
+  if (
+    lower.includes("email") &&
+    (lower.includes("already") ||
+      lower.includes("exist") ||
+      lower.includes("registered") ||
+      lower.includes("invalid email"))
+  ) {
+    return "email";
+  }
+
+  if (lower.includes("password")) return "password";
+  if (lower.includes("phone")) return "phone";
+
+  return "general";
+}
+
+// ─── useAuth ──────────────────────────────────────────────────────────────────
 
 export function useAuth() {
-  const ctx = useAuthContext();
+  const ctx = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // ── Signup ────────────────────────────────────────────────────────────────
 
-  const signup = useCallback(
-    async (formValues: SignupFormValues): Promise<SignupServiceResult> => {
-      ctx.setLoading(true);
-      ctx.setError(null);
-      try {
-        const result = await signupService(formValues);
-        ctx.setLoading(false);
-        return result;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Registration failed.";
-        ctx.setError(message);
-        throw err;
+  const signup = async (
+    data: SignupSchemaType
+  ): Promise<SignupServiceResult> => {
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone,
+        city: data.city,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        role: data.role.toUpperCase(),
+      };
+
+      const response =
+        data.role === "buyer"
+          ? await registerBuyer(payload)
+          : await registerSeller(payload);
+
+      if (!response.success || !response.data) {
+        throw new Error(response.message || "Registration failed.");
       }
-    },
-    [ctx]
-  );
 
+      ctx?.setError?.(null);
 
-  const login = useCallback(
-    async (credentials: LoginFormValues): Promise<LoginServiceResult> => {
-      ctx.setLoading(true);
-      ctx.setError(null);
-      try {
-        const result = await loginService(credentials);
-        ctx.setUser(result.user, result.token);
-        return result;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Login failed.";
-        ctx.setError(message);
-        throw err;
+      return {
+        user: response.data,
+        message: response.message,
+      };
+    } catch (error: unknown) {
+      const message = getErrorMessage(
+        error,
+        "Registration failed. Please try again."
+      );
+      ctx?.setError?.(message);
+      throw new Error(message, { cause: error });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ── Login ─────────────────────────────────────────────────────────────────
+
+  const login = async (
+    data: LoginFormValues
+  ): Promise<LoginServiceResult> => {
+    setIsLoading(true);
+
+    try {
+      const response = await loginUser({
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+      });
+
+      if (!response.success || !response.data) {
+        throw {
+          message: response.message || "Login failed.",
+          requiresVerification: response.requiresVerification ?? false,
+        };
       }
-    },
-    [ctx]
-  );
 
+      const apiUser = response.data.user;
 
-  const logout = useCallback((): void => {
-    logoutService();
-    ctx.logout();
-  }, [ctx]);
+      const normalizedUser: User = {
+        userId: apiUser.userId ?? apiUser.id ?? "",
+        fullName: apiUser.fullName,
+        email: apiUser.email,
+        role: apiUser.role,
+        isVerified: apiUser.isVerified,
+      };
 
-  const verifyEmail = useCallback(
-    async (payload: VerifyOtpPayload): Promise<LoginServiceResult> => {
-      ctx.setLoading(true);
-      ctx.setError(null);
-      try {
-        const result = await verifyEmailService(payload);
-        ctx.setUser(result.user, result.token);
-        return result;
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Email verification failed.";
-        ctx.setError(message);
-        throw err;
+      const token = response.data.accessToken;
+
+      localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(normalizedUser));
+
+      ctx?.setUser?.(normalizedUser, token);
+      ctx?.setError?.(null);
+
+      return {
+        user: normalizedUser,
+        token,
+        message: response.message || "Login successful.",
+      };
+    } catch (error: unknown) {
+      const message = getErrorMessage(
+        error,
+        "Login failed. Please try again."
+      );
+      const requiresVerification = getRequiresVerification(error);
+
+      ctx?.setError?.(message);
+
+      throw { message, requiresVerification };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ── Verify Email ──────────────────────────────────────────────────────────
+
+  const verifyEmail = async (
+    payload: VerifyOtpPayload
+  ): Promise<LoginServiceResult> => {
+    setIsLoading(true);
+
+    try {
+      const response = await verifyOtp(payload);
+
+      if (!response.success) {
+        throw new Error(response.message || "Verification failed.");
       }
-    },
-    [ctx]
-  );
 
-  const resendVerificationOtp = useCallback(
-    async (email: string): Promise<string> => {
-      ctx.setError(null);
-      return resendVerificationOtpService(email);
-    },
-    [ctx]
-  );
+      const apiUser = response.data?.user;
+      const token = response.data?.accessToken ?? "";
+
+      const normalizedUser: User = {
+        userId: apiUser?.userId ?? apiUser?.id ?? "",
+        fullName: apiUser?.fullName ?? "",
+        email: apiUser?.email ?? payload.email,
+        role: apiUser?.role ?? "BUYER",
+        isVerified: true,
+      };
+
+      if (token) {
+        localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(normalizedUser));
+        ctx?.setUser?.(normalizedUser, token);
+      }
+
+      ctx?.setError?.(null);
+
+      return {
+        user: normalizedUser,
+        token,
+        message: response.message || "Email verified successfully.",
+      };
+    } catch (error: unknown) {
+      const message = getErrorMessage(
+        error,
+        "Verification failed. Please try again."
+      );
+      ctx?.setError?.(message);
+      throw new Error(message, { cause: error });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ── Resend Verification OTP ───────────────────────────────────────────────
+
+  const resendVerificationOtp = async (email: string): Promise<string> => {
+    setIsLoading(true);
+
+    try {
+      const response = await resendOtp({
+        email: email.trim().toLowerCase(),
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to resend code.");
+      }
+
+      return response.message || "Verification code sent successfully.";
+    } catch (error: unknown) {
+      const message = getErrorMessage(
+        error,
+        "Failed to resend code. Please try again."
+      );
+      throw new Error(message, { cause: error });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
-    user: ctx.user,
-    token: ctx.token,
-    isAuthenticated: ctx.isAuthenticated,
-    isLoading: ctx.isLoading,
-    error: ctx.error,
     signup,
     login,
     verifyEmail,
     resendVerificationOtp,
-    logout,
+    isLoading,
   };
 }

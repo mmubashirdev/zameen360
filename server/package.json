@@ -32,12 +32,14 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "pg": "^8.20.0",
     "prisma": "^6.19.3",
     "react-hook-form": "^7.75.0",
-    "zod": "^4.4.3",
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.15.0"
+    "react-router-dom": "^7.15.0",
+    "zod": "^4.4.3"
   }
 }

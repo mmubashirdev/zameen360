@@ -1,14 +1,9 @@
-// Email Verification page (after registration)
-
-
-// VerifyEmailPage.tsx
-import { useMemo, useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AuthNavbar from "../components/AuthNavbar";
-import AuthFooter from "../components/AuthFooter";
 import { ToastContainer } from "@shared/components/Toast";
 import { useToast } from "@shared/hooks/useToast";
 import { useAuth } from "../hooks/useAuth";
+import styles from "../pages/verifyemail.module.css";
 
 interface VerifyEmailLocationState {
   email?: string;
@@ -26,14 +21,15 @@ export default function VerifyEmailPage() {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isResending, setIsResending] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [expiryTimer, setExpiryTimer] = useState(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Auto-focus first input on mount
+  // ── Auto focus first input ──────────────────────────────
   useEffect(() => {
     inputRefs.current[0]?.focus();
   }, []);
 
-  // Resend cooldown timer
+  // ── Resend cooldown timer ───────────────────────────────
   useEffect(() => {
     if (resendTimer <= 0) return;
     const interval = setInterval(() => {
@@ -42,60 +38,93 @@ export default function VerifyEmailPage() {
     return () => clearInterval(interval);
   }, [resendTimer]);
 
+  // ── Code expiry timer ───────────────────────────────────
+  useEffect(() => {
+    if (expiryTimer <= 0) return;
+    const interval = setInterval(() => {
+      setExpiryTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [expiryTimer]);
+
   const cleanedOtp = useMemo(() => otp.join(""), [otp]);
 
-  // ── OTP Input Handlers ─────────────────────────────────────────────
+  // ── Format timer ────────────────────────────────────────
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
-  const handleOtpChange = (index: number, value: string) => {
+  // ── OTP Handlers ────────────────────────────────────────
+  const handleOtpChange = useCallback((index: number, value: string) => {
     const digit = value.replace(/\D/g, "").slice(-1);
-    const newOtp = [...otp];
-    newOtp[index] = digit;
-    setOtp(newOtp);
 
-    // Auto-focus next input
+    setOtp((prev) => {
+      const newOtp = [...prev];
+      newOtp[index] = digit;
+      return newOtp;
+    });
+
     if (digit && index < 5) {
-      inputRefs.current[index + 1]?.focus();
+      requestAnimationFrame(() => {
+        inputRefs.current[index + 1]?.focus();
+      });
     }
-  };
+  }, []);
 
-  const handleOtpKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
-  ) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-      const newOtp = [...otp];
-      newOtp[index - 1] = "";
-      setOtp(newOtp);
-    }
-    if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-    if (e.key === "ArrowRight" && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
+  const handleOtpKeyDown = useCallback(
+    (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Backspace") {
+        setOtp((prev) => {
+          const newOtp = [...prev];
+          if (!newOtp[index] && index > 0) {
+            newOtp[index - 1] = "";
+            requestAnimationFrame(() => {
+              inputRefs.current[index - 1]?.focus();
+            });
+          } else {
+            newOtp[index] = "";
+          }
+          return newOtp;
+        });
+      } else if (e.key === "ArrowLeft" && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      } else if (e.key === "ArrowRight" && index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      }
+    },
+    []
+  );
 
-  const handleOtpPaste = (e: React.ClipboardEvent) => {
+  const handleOtpPaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     if (!pasted) return;
-    const newOtp = [...otp];
+
+    const newOtp = ["", "", "", "", "", ""];
     for (let i = 0; i < 6; i++) {
       newOtp[i] = pasted[i] || "";
     }
     setOtp(newOtp);
+
     const focusIndex = Math.min(pasted.length, 5);
-    inputRefs.current[focusIndex]?.focus();
-  };
+    requestAnimationFrame(() => {
+      inputRefs.current[focusIndex]?.focus();
+    });
+  }, []);
 
-  // ── Verify Handler ─────────────────────────────────────────────────
-
+  // ── Verify Handler ──────────────────────────────────────
   const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (cleanedOtp.length !== 6) {
-      toast.error("Incomplete Code", "Please enter the full 6-digit verification code.");
+      toast.error("Incomplete Code", "Please enter the full 6-digit code.");
       return;
     }
 
@@ -104,24 +133,22 @@ export default function VerifyEmailPage() {
         email: email.trim().toLowerCase(),
         otpCode: cleanedOtp,
       });
-      toast.success("Email Verified!", "Your account has been activated successfully.");
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 1200);
+
+      toast.success("Email Verified!", "Account activated successfully.");
+      navigate("/welcome", { replace: true });
     } catch (err) {
       const message =
         typeof err === "object" && err !== null && "message" in err
           ? String((err as { message: string }).message)
-          : "Invalid or expired code. Please try again.";
+          : "Invalid or expired code.";
+
       toast.error("Verification Failed", message);
-      // Clear OTP and refocus
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     }
   };
 
-  // ── Resend Handler ─────────────────────────────────────────────────
-
+  // ── Resend Handler ──────────────────────────────────────
   const handleResend = async () => {
     if (!email.trim()) {
       toast.error("Email Required", "No email found. Please sign up again.");
@@ -132,63 +159,139 @@ export default function VerifyEmailPage() {
     setIsResending(true);
     try {
       const message = await resendVerificationOtp(email.trim().toLowerCase());
-      toast.success("Code Sent!", message || "A new verification code has been sent.");
+      toast.success("Code Sent!", message || "New code sent.");
       setResendTimer(60);
+      setExpiryTimer(60);
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (err) {
       const message =
         typeof err === "object" && err !== null && "message" in err
           ? String((err as { message: string }).message)
-          : "Could not resend the code. Please try again.";
+          : "Could not resend code.";
       toast.error("Resend Failed", message);
     } finally {
       setIsResending(false);
     }
   };
 
-  // ── Mask Email ─────────────────────────────────────────────────────
-
-  const maskedEmail = useMemo(() => {
+  // ── Mask Email - Split into local & domain ──────────────
+  const emailLocal = useMemo(() => {
     if (!email) return "";
-    const [local, domain] = email.split("@");
-    if (!domain) return email;
-    if (local.length <= 2) return `${local}***@${domain}`;
-    return `${local.slice(0, 2)}${"•".repeat(Math.min(local.length - 2, 6))}@${domain}`;
+    const local = email.split("@")[0] || "";
+    if (local.length <= 3) return `${local}***`;
+    return `${local.slice(0, 3)}${"*".repeat(Math.min(local.length - 3, 10))}`;
   }, [email]);
 
-  // ── Render ─────────────────────────────────────────────────────────
+  const emailDomain = useMemo(() => {
+    if (!email) return "";
+    return email.split("@")[1] || "";
+  }, [email]);
 
   return (
-    <>
-      <AuthNavbar />
+    <div className={styles.page}>
+      {/* ─── LEFT SIDE - Hero ──────────────────────────────────── */}
+      <div className={styles.leftSide}>
+        <div className={styles.bgImage}>
+          <img
+            src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80"
+            alt="Luxury Property"
+          />
+          <div className={styles.overlay} />
+        </div>
 
-      <main style={mainStyle}>
-        {/* Decorative top gradient bar */}
-        <div style={topBarStyle} />
+        {/* Logo Top Left */}
+        <div className={styles.logoBox}>
+          <div className={styles.logoPlaceholder}>
+            <span className={styles.logoText}>
+              Z<span>360</span>
+            </span>
+          </div>
+        </div>
 
-        <section style={cardStyle}>
-          {/* Icon */}
-          <div style={iconContainerStyle}>
-            <div style={iconCircleStyle}>
-              <i
-                className="fa-solid fa-envelope-open-text"
-                style={{ fontSize: 28, color: "#2563eb" }}
-              />
+        {/* Hero Content Center */}
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            Find. Buy. Sell.
+            <br />
+            Your Property{" "}
+            <span className={styles.heroAccent}>360°</span>
+          </h1>
+          <p className={styles.heroSubtitle}>
+            Discover the best properties, connect with trusted agents, and
+            make smart real estate decisions.
+          </p>
+        </div>
+
+        {/* Stats Bottom */}
+        <div className={styles.statsBox}>
+          <div className={styles.statItem}>
+            <div className={styles.statIconWrap}>
+              <i className="fa-solid fa-house" aria-hidden="true" />
+            </div>
+            <div className={styles.statNumber}>10K+</div>
+            <div className={styles.statLabel}>Properties</div>
+          </div>
+          <div className={styles.statItem}>
+            <div className={styles.statIconWrap}>
+              <i className="fa-solid fa-users" aria-hidden="true" />
+            </div>
+            <div className={styles.statNumber}>500+</div>
+            <div className={styles.statLabel}>Agents</div>
+          </div>
+          <div className={styles.statItem}>
+            <div className={styles.statIconWrap}>
+              <i className="fa-solid fa-location-dot" aria-hidden="true" />
+            </div>
+            <div className={styles.statNumber}>50+</div>
+            <div className={styles.statLabel}>Cities</div>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── RIGHT SIDE - Verify Form ─────────────────────────── */}
+      <div className={styles.rightSide}>
+        <div className={styles.card}>
+          {/* Back to Login */}
+          <Link to="/login" className={styles.backLink}>
+            <i className="fa-solid fa-arrow-left" />
+            Back to Login
+          </Link>
+
+          {/* Shield Icon */}
+          <div className={styles.shieldIconWrap}>
+            <div className={styles.shieldCircle}>
+              <i className="fa-solid fa-shield-halved" aria-hidden="true" />
             </div>
           </div>
 
-          {/* Heading */}
-          <h1 style={headingStyle}>Verify Your Email</h1>
-          <p style={subtitleStyle}>
-            We've sent a 6-digit verification code to
+          {/* Title */}
+          <h2 className={styles.cardTitle}>Verify Your Email</h2>
+          <p className={styles.cardSubtitle}>
+            Enter the 6-digit code sent to
           </p>
-          <p style={emailDisplayStyle}>{maskedEmail || "your email"}</p>
+
+          {/* ✅ Email split into spans (using DIV not P) */}
+          <div className={styles.emailMasked}>
+            {email ? (
+              <>
+                <span>{emailLocal}</span>
+                <span aria-hidden="true" style={{ margin: "0 4px" }}>
+                  @
+                </span>
+                <span>{emailDomain}</span>
+              </>
+            ) : (
+              "your email"
+            )}
+          </div>
 
           {/* OTP Form */}
-          <form onSubmit={handleVerify} noValidate style={{ width: "100%" }}>
-            {/* OTP Inputs */}
-            <div style={otpContainerStyle} onPaste={handleOtpPaste}>
+          <form onSubmit={handleVerify} noValidate className={styles.form}>
+            <div
+              className={styles.otpContainer}
+              onPaste={handleOtpPaste}
+            >
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -202,298 +305,62 @@ export default function VerifyEmailPage() {
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
                   onFocus={(e) => e.target.select()}
-                  style={{
-                    ...otpInputStyle,
-                    borderColor: digit ? "#2563eb" : "#e2e8f0",
-                    background: digit ? "#eff6ff" : "#f8fafc",
-                    transform: digit ? "scale(1.05)" : "scale(1)",
-                  }}
+                  className={`${styles.otpInput} ${
+                    digit ? styles.otpInputFilled : ""
+                  }`}
                   aria-label={`Digit ${index + 1}`}
                 />
               ))}
             </div>
 
+            {/* Expiry Timer */}
+            <p className={styles.expiryText}>
+              <i className="fa-regular fa-clock" aria-hidden="true" />
+              Code expires in{" "}
+              <span className={styles.timerValue}>
+                {formatTime(expiryTimer)}
+              </span>
+            </p>
+
             {/* Verify Button */}
             <button
               type="submit"
               disabled={isLoading || cleanedOtp.length !== 6}
-              style={{
-                ...verifyBtnStyle,
-                opacity: isLoading || cleanedOtp.length !== 6 ? 0.6 : 1,
-                cursor:
-                  isLoading || cleanedOtp.length !== 6
-                    ? "not-allowed"
-                    : "pointer",
-              }}
+              className={`${styles.verifyBtn} ${
+                cleanedOtp.length === 6 ? styles.verifyBtnActive : ""
+              }`}
             >
               {isLoading ? (
-                <span style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center" }}>
-                  <span style={spinnerStyle} />
+                <span className={styles.btnLoading}>
+                  <span className={styles.spinner} />
                   Verifying...
                 </span>
               ) : (
-                <span style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
-                  <i className="fa-solid fa-shield-check" style={{ fontSize: 16 }} />
-                  Verify Email
-                </span>
+                "Verify Code"
               )}
             </button>
           </form>
 
-          {/* Divider */}
-          <div style={dividerStyle}>
-            <span style={dividerLineStyle} />
-            <span style={dividerTextStyle}>Didn't receive the code?</span>
-            <span style={dividerLineStyle} />
-          </div>
-
-          {/* Resend Button */}
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={isResending || resendTimer > 0}
-            style={{
-              ...resendBtnStyle,
-              opacity: isResending || resendTimer > 0 ? 0.5 : 1,
-              cursor: isResending || resendTimer > 0 ? "not-allowed" : "pointer",
-            }}
-          >
-            {isResending ? (
-              <span style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
-                <span style={spinnerSmallStyle} />
-                Sending...
-              </span>
-            ) : resendTimer > 0 ? (
-              `Resend in ${resendTimer}s`
-            ) : (
-              <span style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
-                <i className="fa-solid fa-rotate-right" style={{ fontSize: 14 }} />
-                Resend Code
-              </span>
-            )}
-          </button>
-
-          {/* Help Text */}
-          <p style={helpTextStyle}>
-            <i
-              className="fa-solid fa-circle-info"
-              style={{ color: "#94a3b8", marginRight: 6 }}
-            />
-            Check your spam folder if you don't see the email
+          {/* Resend */}
+          <p className={styles.resendText}>
+            Didn't receive the code?{" "}
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isResending || resendTimer > 0}
+              className={styles.resendBtn}
+            >
+              {isResending
+                ? "Sending..."
+                : resendTimer > 0
+                ? `Resend in ${resendTimer}s`
+                : "Resend Code"}
+            </button>
           </p>
+        </div>
+      </div>
 
-          {/* Back to Login */}
-          <Link to="/login" style={backLinkStyle}>
-            <i className="fa-solid fa-arrow-left" style={{ fontSize: 12 }} />
-            Back to Login
-          </Link>
-        </section>
-      </main>
-
-      <AuthFooter />
       <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
-
-      {/* Keyframe for spinner */}
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
-
-
-
-const mainStyle: React.CSSProperties = {
-  minHeight: "calc(100vh - 68px)",
-  marginTop: 68,
-  display: "grid",
-  placeItems: "center",
-  padding: "40px 20px",
-  background: "linear-gradient(180deg, #f0f5ff 0%, #f8fafc 50%, #ffffff 100%)",
-  fontFamily: "'Poppins', 'Inter', sans-serif",
-};
-
-const topBarStyle: React.CSSProperties = {
-  position: "fixed",
-  top: 68,
-  left: 0,
-  right: 0,
-  height: 4,
-  background:
-    "linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa, #3b82f6, #2563eb)",
-  backgroundSize: "200% 100%",
-  zIndex: 10,
-};
-
-const cardStyle: React.CSSProperties = {
-  width: "100%",
-  maxWidth: 460,
-  background: "#ffffff",
-  borderRadius: 20,
-  padding: "40px 36px 36px",
-  boxShadow: "0 4px 6px rgba(0,0,0,0.02), 0 20px 60px rgba(37,99,235,0.08)",
-  border: "1px solid #e8eef6",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  animation: "fadeInUp 0.5s ease-out",
-};
-
-const iconContainerStyle: React.CSSProperties = {
-  marginBottom: 20,
-};
-
-const iconCircleStyle: React.CSSProperties = {
-  width: 64,
-  height: 64,
-  borderRadius: "50%",
-  background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
-  display: "grid",
-  placeItems: "center",
-  border: "2px solid #bfdbfe",
-};
-
-const headingStyle: React.CSSProperties = {
-  margin: "0 0 8px",
-  fontSize: 26,
-  fontWeight: 700,
-  color: "#0f172a",
-  textAlign: "center",
-  letterSpacing: "-0.02em",
-};
-
-const subtitleStyle: React.CSSProperties = {
-  margin: 0,
-  fontSize: 14,
-  color: "#64748b",
-  textAlign: "center",
-  lineHeight: 1.5,
-};
-
-const emailDisplayStyle: React.CSSProperties = {
-  margin: "4px 0 28px",
-  fontSize: 14,
-  fontWeight: 600,
-  color: "#2563eb",
-  textAlign: "center",
-  background: "#eff6ff",
-  padding: "6px 16px",
-  borderRadius: 8,
-  border: "1px solid #dbeafe",
-};
-
-const otpContainerStyle: React.CSSProperties = {
-  display: "flex",
-  gap: 10,
-  justifyContent: "center",
-  marginBottom: 24,
-  width: "100%",
-};
-
-const otpInputStyle: React.CSSProperties = {
-  width: 50,
-  height: 56,
-  borderRadius: 12,
-  border: "2px solid #e2e8f0",
-  fontSize: 22,
-  fontWeight: 700,
-  color: "#0f172a",
-  textAlign: "center",
-  outline: "none",
-  transition: "all 0.2s ease",
-  fontFamily: "'Poppins', monospace",
-};
-
-const verifyBtnStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "14px 20px",
-  borderRadius: 12,
-  border: "none",
-  fontSize: 15,
-  fontWeight: 700,
-  color: "#ffffff",
-  background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
-  boxShadow: "0 4px 14px rgba(37,99,235,0.3)",
-  transition: "all 0.2s ease",
-  fontFamily: "'Poppins', sans-serif",
-  letterSpacing: "0.02em",
-};
-
-const dividerStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 12,
-  width: "100%",
-  margin: "24px 0 16px",
-};
-
-const dividerLineStyle: React.CSSProperties = {
-  flex: 1,
-  height: 1,
-  background: "#e2e8f0",
-};
-
-const dividerTextStyle: React.CSSProperties = {
-  fontSize: 13,
-  color: "#94a3b8",
-  whiteSpace: "nowrap",
-  fontWeight: 500,
-};
-
-const resendBtnStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "12px 20px",
-  borderRadius: 12,
-  border: "1.5px solid #dbeafe",
-  fontSize: 14,
-  fontWeight: 600,
-  color: "#2563eb",
-  background: "#f8fafc",
-  transition: "all 0.2s ease",
-  fontFamily: "'Poppins', sans-serif",
-};
-
-const helpTextStyle: React.CSSProperties = {
-  margin: "20px 0 16px",
-  fontSize: 12,
-  color: "#94a3b8",
-  textAlign: "center",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const backLinkStyle: React.CSSProperties = {
-  fontSize: 14,
-  fontWeight: 600,
-  color: "#64748b",
-  textDecoration: "none",
-  display: "flex",
-  alignItems: "center",
-  gap: 6,
-  transition: "color 0.2s ease",
-};
-
-const spinnerStyle: React.CSSProperties = {
-  width: 18,
-  height: 18,
-  border: "2.5px solid rgba(255,255,255,0.3)",
-  borderTopColor: "#ffffff",
-  borderRadius: "50%",
-  animation: "spin 0.6s linear infinite",
-};
-
-const spinnerSmallStyle: React.CSSProperties = {
-  width: 14,
-  height: 14,
-  border: "2px solid rgba(37,99,235,0.2)",
-  borderTopColor: "#2563eb",
-  borderRadius: "50%",
-  animation: "spin 0.6s linear infinite",
-};

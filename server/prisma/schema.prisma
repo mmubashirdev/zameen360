@@ -47,6 +47,7 @@ enum ActivityStatus {
 model User {
   id              Int       @id @default(autoincrement())
   fullName        String    @map("full_name")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   email           String    @unique
   phone           String?
   passwordHash    String    @map("password_hash")
@@ -58,7 +59,7 @@ model User {
   isActive        Boolean   @default(true) @map("is_active")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
-
+  googleId        String?  @unique
   profile         UserProfile?
   sellerDetail    SellerDetail?
   trustScoreData  TrustScore?

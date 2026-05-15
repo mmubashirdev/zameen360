@@ -14,6 +14,7 @@ import type { AppDispatch, RootState } from "../../../app/stores/store";
 interface CreateNewPasswordProps {
   onNext: () => void;
   onBack: () => void;
+  onBackToLogin: () => void;
   email?: string;
 }
 
@@ -26,7 +27,7 @@ const CRITERIA: Array<(p: string) => boolean> = [
 
 export default function CreateNewPassword({
   onNext,
-  onBack,
+  onBackToLogin,
   email,
 }: CreateNewPasswordProps) {
   const [password, setPassword] = useState<string>("");
@@ -79,46 +80,49 @@ export default function CreateNewPassword({
 
   return (
     <AuthLayout>
+      {/* Back to Login - Compact */}
       <button
         type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800 mb-6 transition-colors"
+        onClick={onBackToLogin}
+        className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-900 hover:text-blue-950 mb-3 transition-colors"
       >
         <ArrowLeft size={16} />
-        Back
+        Back to Login
       </button>
 
       <StepIndicator currentStep={3} />
 
-      <div className="text-center mb-7">
+      {/* Compact Header */}
+      <div className="text-center mb-4">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
-          className="w-16 h-16 mx-auto mb-5 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center"
+          className="w-12 h-12 mx-auto mb-2 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center"
         >
-          <KeyRound size={26} className="text-blue-600" />
+          <KeyRound size={22} className="text-blue-900" />
         </motion.div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">
           Create New Password
         </h2>
-        <p className="text-sm text-gray-500">
-          Your new password must be different from your previous password.
+        <p className="text-xs text-gray-500">
+          Your new password must be different from previous.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Compact Form */}
+      <form onSubmit={handleSubmit} className="space-y-3">
         {/* New Password */}
         <div>
           <label
             htmlFor="new-password"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-xs font-semibold text-gray-800 mb-1.5"
           >
             New Password
           </label>
           <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-              <Lock size={18} />
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+              <Lock size={17} />
             </span>
             <input
               id="new-password"
@@ -129,15 +133,15 @@ export default function CreateNewPassword({
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
-              className="w-full pl-11 pr-11 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all duration-200"
+              className="w-full pl-11 pr-11 py-2.5 text-sm font-semibold text-black rounded-xl border border-gray-200 bg-gray-50 outline-none focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100 transition-all duration-200 placeholder:text-gray-400 placeholder:font-normal"
             />
             <button
               type="button"
               onClick={() => setShowPwd((s) => !s)}
               aria-label={showPwd ? "Hide password" : "Show password"}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPwd ? <EyeOff size={17} /> : <Eye size={17} />}
             </button>
           </div>
           <PasswordStrengthMeter password={password} />
@@ -147,13 +151,13 @@ export default function CreateNewPassword({
         <div>
           <label
             htmlFor="confirm-password"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-xs font-semibold text-gray-800 mb-1.5"
           >
             Confirm New Password
           </label>
           <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-              <Lock size={18} />
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+              <Lock size={17} />
             </span>
             <input
               id="confirm-password"
@@ -165,38 +169,39 @@ export default function CreateNewPassword({
               onChange={(e) => setConfirm(e.target.value)}
               disabled={loading}
               className={[
-                "w-full pl-11 pr-11 py-3 text-sm rounded-xl border outline-none transition-all duration-200 bg-gray-50",
+                "w-full pl-11 pr-11 py-2.5 text-sm font-semibold text-black rounded-xl border outline-none transition-all duration-200 bg-gray-50",
+                "placeholder:text-gray-400 placeholder:font-normal",
                 confirm.length === 0
-                  ? "border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  ? "border-gray-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   : passwordsMatch
-                    ? "border-green-400 bg-green-50/50 focus:ring-4 focus:ring-green-100"
-                    : "border-red-400 bg-red-50/50 focus:ring-4 focus:ring-red-100",
+                    ? "border-green-500 bg-green-50/50 focus:ring-4 focus:ring-green-100"
+                    : "border-red-500 bg-red-50/50 focus:ring-4 focus:ring-red-100",
               ].join(" ")}
             />
             <button
               type="button"
               onClick={() => setShowConfirm((s) => !s)}
               aria-label={showConfirm ? "Hide password" : "Show password"}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
             >
-              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}
             </button>
           </div>
 
           {confirm.length > 0 && (
             <div
               className={[
-                "mt-2 flex items-center gap-1.5 text-xs font-medium",
-                passwordsMatch ? "text-green-600" : "text-red-600",
+                "mt-1.5 flex items-center gap-1.5 text-xs font-bold",
+                passwordsMatch ? "text-green-700" : "text-red-600",
               ].join(" ")}
             >
               {passwordsMatch ? (
                 <>
-                  <Check size={14} strokeWidth={3} /> Passwords match
+                  <Check size={13} strokeWidth={3} /> Passwords match
                 </>
               ) : (
                 <>
-                  <X size={14} strokeWidth={2.5} /> Passwords do not match
+                  <X size={13} strokeWidth={2.5} /> Passwords do not match
                 </>
               )}
             </div>
@@ -207,7 +212,7 @@ export default function CreateNewPassword({
           type="submit"
           loading={loading}
           disabled={!canSubmit || loading}
-          className="mt-2"
+          className="mt-1"
         >
           Reset Password
         </AuthButton>

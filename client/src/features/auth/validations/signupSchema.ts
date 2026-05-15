@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { FILE_UPLOAD } from "../constants/authConstants";
 
 export const signupSchema = z
   .object({
@@ -49,19 +48,6 @@ export const signupSchema = z
     role: z.enum(["buyer", "seller"], {
       message: "Please select your role",
     }),
-
-    profileImage: z
-      .instanceof(File)
-      .optional()
-      .nullable()
-      .refine(
-        (file) => !file || FILE_UPLOAD.ALLOWED_TYPES.includes(file.type),
-        "Only JPG and PNG files are allowed"
-      )
-      .refine(
-        (file) => !file || file.size <= FILE_UPLOAD.MAX_SIZE_BYTES,
-        "File size must be less than 5MB"
-      ),
 
     terms: z.literal(true, {
       message: "You must agree to the Terms and Privacy Policy",
