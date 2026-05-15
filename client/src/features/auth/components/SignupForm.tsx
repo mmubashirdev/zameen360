@@ -8,12 +8,11 @@ import {
   signupSchema,
   type SignupSchemaType,
 } from "../validations/signupSchema";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, detectErrorField } from "../hooks/useAuth";
 import { PAKISTAN_CITIES } from "../constants/authConstants";
 import type { ToastHook } from "../types/auth.types";
 
 import PasswordStrength from "./PasswordStrength";
-import ImageUploadPreview from "./ImageUploadPreview";
 import SocialLogin from "./SocialLogin";
 
 interface SignupFormProps {
@@ -35,6 +34,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
     control,
     watch,
     setValue,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SignupSchemaType>({
     resolver: zodResolver(signupSchema),
@@ -46,7 +47,6 @@ export default function SignupForm({ toast }: SignupFormProps) {
       password: "",
       confirmPassword: "",
       role: undefined,
-      profileImage: null,
       terms: undefined,
     },
     mode: "onBlur",
@@ -62,52 +62,85 @@ export default function SignupForm({ toast }: SignupFormProps) {
       try {
         const result = await signup(data);
         setSubmitSuccess(true);
+
+        // ✅ Only success toast - small confirmation
         toast.success(
-          "Welcome to Zameen 360!",
-          result.message ?? "Account created! Please verify your email."
+          "Account Created!",
+          "Please verify your email to continue."
         );
-        setTimeout(() => {
-          navigate("/verify-email", {
-            state: {
-              userId: result.user?.userId,
-              email: result.user?.email,
-            },
-          });
-        }, 1800);
+
+        navigate("/verify-email", {
+          state: {
+            userId: result.user?.userId,
+            email: result.user?.email,
+          },
+        });
       } catch (err) {
         const message =
           err instanceof Error
             ? err.message
             : "Something went wrong. Please try again.";
-        toast.error("Registration Failed", message);
+
+        // ✅ Detect which field has error
+        const field = detectErrorField(message);
+
+        if (field === "email") {
+          setError("email", {
+            type: "manual",
+            message: message,
+          });
+          // Focus email input
+          document.getElementById("email")?.focus();
+        } else if (field === "password") {
+          setError("password", {
+            type: "manual",
+            message: message,
+          });
+        } else if (field === "phone") {
+          setError("phone", {
+            type: "manual",
+            message: message,
+          });
+        } else {
+          // General error - set on email as fallback (or show small inline)
+          setError("email", {
+            type: "manual",
+            message: message,
+          });
+        }
       }
     },
-    [signup, navigate, toast]
+    [signup, navigate, toast, setError]
   );
 
+  // ── Validation Error - silent (no toast) ───────────────────────────────────
+
   const onValidationError = useCallback(() => {
-    toast.error(
-      "Validation Error",
-      "Please fix the errors highlighted below."
-    );
-  }, [toast]);
+    // No toast - errors already shown inline by react-hook-form
+  }, []);
+
+  // ── Clear server errors when user types ────────────────────────────────────
+
+  const handleInputChange = useCallback(
+    (fieldName: keyof SignupSchemaType) => {
+      // Clear manual error when user types in field
+      if (errors[fieldName]?.type === "manual") {
+        clearErrors(fieldName);
+      }
+    },
+    [errors, clearErrors]
+  );
 
   // ── Google OAuth ────────────────────────────────────────────────────────────
 
-  const handleGoogleClick = useCallback(async () => {
-    setIsGoogleLoading(true);
-    try {
-      toast.info(
-        "Google OAuth",
-        "Redirecting to Google for authentication..."
-      );
-      await new Promise<void>((r) => setTimeout(r, 1500));
-    } catch {
-      toast.error("OAuth Error", "Failed to connect to Google.");
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  }, [toast]);
+ const handleGoogleClick = useCallback(() => {
+  setIsGoogleLoading(true);
+  const baseUrl =
+    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
+  
+  // ✅ Direct redirect to backend Google OAuth
+  window.location.href = `${baseUrl}/auth/google`;
+}, []);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -134,12 +167,15 @@ export default function SignupForm({ toast }: SignupFormProps) {
               aria-hidden="true"
             />
             <input
-              {...register("fullName")}
+              {...register("fullName", {
+                onChange: () => handleInputChange("fullName"),
+              })}
               id="fullName"
               type="text"
               placeholder="Full Name"
-              className={`${styles.formInput} ${errors.fullName ? styles.inputError : ""
-                }`}
+              className={`${styles.formInput} ${
+                errors.fullName ? styles.inputError : ""
+              }`}
               aria-required="true"
             />
           </div>
@@ -160,12 +196,15 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-hidden="true"
               />
               <input
-                {...register("email")}
+                {...register("email", {
+                  onChange: () => handleInputChange("email"),
+                })}
                 id="email"
                 type="email"
                 placeholder="Email Address"
-                className={`${styles.formInput} ${errors.email ? styles.inputError : ""
-                  }`}
+                className={`${styles.formInput} ${
+                  errors.email ? styles.inputError : ""
+                }`}
                 aria-required="true"
               />
             </div>
@@ -184,12 +223,15 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-hidden="true"
               />
               <input
-                {...register("phone")}
+                {...register("phone", {
+                  onChange: () => handleInputChange("phone"),
+                })}
                 id="phone"
                 type="tel"
                 placeholder="Phone Number"
-                className={`${styles.formInput} ${errors.phone ? styles.inputError : ""
-                  }`}
+                className={`${styles.formInput} ${
+                  errors.phone ? styles.inputError : ""
+                }`}
                 aria-required="true"
               />
             </div>
@@ -212,8 +254,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
             <select
               {...register("city")}
               id="city"
-              className={`${styles.formSelect} ${errors.city ? styles.selectError : ""
-                }`}
+              className={`${styles.formSelect} ${
+                errors.city ? styles.selectError : ""
+              }`}
               aria-required="true"
             >
               <option value="">Select your city</option>
@@ -241,12 +284,15 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-hidden="true"
               />
               <input
-                {...register("password")}
+                {...register("password", {
+                  onChange: () => handleInputChange("password"),
+                })}
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                className={`${styles.formInput} ${styles.passwordInput} ${errors.password ? styles.inputError : ""
-                  }`}
+                className={`${styles.formInput} ${styles.passwordInput} ${
+                  errors.password ? styles.inputError : ""
+                }`}
                 aria-required="true"
               />
               <button
@@ -256,8 +302,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 <i
-                  className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"
-                    }`}
+                  className={`fa-solid ${
+                    showPassword ? "fa-eye-slash" : "fa-eye"
+                  }`}
                   aria-hidden="true"
                 />
               </button>
@@ -282,8 +329,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 id="confirmPassword"
                 type={showConfirm ? "text" : "password"}
                 placeholder="Confirm Password"
-                className={`${styles.formInput} ${styles.passwordInput} ${errors.confirmPassword ? styles.inputError : ""
-                  }`}
+                className={`${styles.formInput} ${styles.passwordInput} ${
+                  errors.confirmPassword ? styles.inputError : ""
+                }`}
                 aria-required="true"
               />
               <button
@@ -293,8 +341,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-label={showConfirm ? "Hide password" : "Show password"}
               >
                 <i
-                  className={`fa-solid ${showConfirm ? "fa-eye-slash" : "fa-eye"
-                    }`}
+                  className={`fa-solid ${
+                    showConfirm ? "fa-eye-slash" : "fa-eye"
+                  }`}
                   aria-hidden="true"
                 />
               </button>
@@ -365,18 +414,6 @@ export default function SignupForm({ toast }: SignupFormProps) {
           )}
         </div>
 
-        {/* ── Profile Image ───────────────────────────────────────────────── */}
-        <Controller
-          name="profileImage"
-          control={control}
-          render={({ field: { onChange }, fieldState: { error } }) => (
-            <ImageUploadPreview
-              onChange={onChange}
-              error={error?.message}
-            />
-          )}
-        />
-
         {/* ── Terms Checkbox ──────────────────────────────────────────────── */}
         <Controller
           name="terms"
@@ -411,8 +448,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 </div>
               </div>
               <label className={styles.checkboxLabel} htmlFor="terms">
-                I agree to the{" "}
-                <Link to="/terms">Terms of Service</Link> and{" "}
+                I agree to the <Link to="/terms">Terms of Service</Link> and{" "}
                 <Link to="/privacy">Privacy Policy</Link>
               </label>
             </div>

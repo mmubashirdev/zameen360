@@ -8,37 +8,25 @@ import type {
   VerifyOtpPayload,
 } from "../types/auth.types";
 
+// ─── Register ─────────────────────────────────────────────────────────────────
 
+export const registerUser = (data: object): Promise<RegisterResponse> =>
+  axiosInstance.post(AUTH_ENDPOINTS.REGISTER, data);
 
-export const registerUser = (
-  formData: FormData
-): Promise<RegisterResponse> =>
-  axiosInstance.post(AUTH_ENDPOINTS.REGISTER, formData);
+export const registerBuyer = (data: object): Promise<RegisterResponse> =>
+  axiosInstance.post(AUTH_ENDPOINTS.REGISTER_BUYER, data);
 
+export const registerSeller = (data: object): Promise<RegisterResponse> =>
+  axiosInstance.post(AUTH_ENDPOINTS.REGISTER_SELLER, data);
 
-
-export const registerBuyer = (
-  formData: FormData
-): Promise<RegisterResponse> =>
-  axiosInstance.post(AUTH_ENDPOINTS.REGISTER_BUYER, formData);
-
-
-
-export const registerSeller = (
-  formData: FormData
-): Promise<RegisterResponse> =>
-  axiosInstance.post(AUTH_ENDPOINTS.REGISTER_SELLER, formData);
-
-
-
+// ─── Login ────────────────────────────────────────────────────────────────────
 
 export const loginUser = (
   credentials: LoginFormValues
 ): Promise<ApiResponse<AuthSuccessPayload>> =>
   axiosInstance.post(AUTH_ENDPOINTS.LOGIN, credentials);
 
-  
-
+// ─── OTP ──────────────────────────────────────────────────────────────────────
 
 export const verifyOtp = (
   payload: VerifyOtpPayload
@@ -50,17 +38,23 @@ export const resendOtp = (payload: {
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.RESEND_OTP, payload);
 
+// ─── Password ─────────────────────────────────────────────────────────────────
 
 export const forgotPassword = (payload: {
   email: string;
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, payload);
 
+// ✅ Fixed - sends both 'otp' and 'otpCode'
 export const verifyResetOtp = (payload: {
   email: string;
   otp: string;
 }): Promise<ApiResponse> =>
-  axiosInstance.post(AUTH_ENDPOINTS.VERIFY_RESET_OTP, payload);
+  axiosInstance.post(AUTH_ENDPOINTS.VERIFY_RESET_OTP, {
+    email: payload.email,
+    otp: payload.otp,
+    otpCode: payload.otp,
+  });
 
 export const resetPassword = (payload: {
   email?: string;
@@ -70,7 +64,7 @@ export const resetPassword = (payload: {
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.RESET_PASSWORD, payload);
 
-
+// ─── Profile ──────────────────────────────────────────────────────────────────
 
 export const getProfile = (): Promise<ApiResponse> =>
   axiosInstance.get(AUTH_ENDPOINTS.PROFILE);

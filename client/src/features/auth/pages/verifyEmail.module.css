@@ -1,0 +1,472 @@
+/* ─── Page Layout ──────────────────────────────────────────────────────────── */
+
+.page {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  font-family: "Poppins", "Segoe UI", sans-serif;
+  background: #ffffff;
+}
+
+/* ─── LEFT SIDE ────────────────────────────────────────────────────────────── */
+
+.leftSide {
+  flex: 1;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.bgImage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.bgImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.45) 0%,
+    rgba(15, 23, 42, 0.65) 100%
+  );
+}
+
+/* ─── Logo Top Left ────────────────────────────────────────────────────────── */
+
+.logoBox {
+  position: relative;
+  z-index: 2;
+  width: 130px;
+  height: 90px;
+  background: #000000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.logoPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.logoText {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.logoText span {
+  color: #3b82f6;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+/* ─── Hero Content Center ──────────────────────────────────────────────────── */
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 40px;
+}
+
+.heroTitle {
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0 0 24px;
+  color: #ffffff;
+  letter-spacing: -0.5px;
+}
+
+.heroAccent {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+}
+
+.heroAccent::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 2px;
+}
+
+.heroSubtitle {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 520px;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ─── Stats Bottom ─────────────────────────────────────────────────────────── */
+
+.statsBox {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 28px 24px;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #ffffff;
+}
+
+.statIconWrap {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.statNumber {
+  font-size: 26px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ─── RIGHT SIDE ───────────────────────────────────────────────────────────── */
+
+.rightSide {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  min-height: 100vh;
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 36px 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ─── Back Link ────────────────────────────────────────────────────────────── */
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #3b82f6;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 28px;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: #2563eb;
+}
+
+/* ─── Shield Icon ──────────────────────────────────────────────────────────── */
+
+.shieldIconWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.shieldCircle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #bfdbfe;
+}
+
+.shieldCircle i {
+  font-size: 28px;
+  color: #3b82f6;
+}
+
+/* ─── Card Title ───────────────────────────────────────────────────────────── */
+
+.cardTitle {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 12px;
+  letter-spacing: -0.5px;
+}
+
+.cardSubtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 4px;
+}
+
+.emailMasked {
+  font-size: 14px;
+  font-weight: 700;
+  color: #3b82f6;
+  margin: 0 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+/* ─── Form ─────────────────────────────────────────────────────────────────── */
+
+.form {
+  width: 100%;
+}
+
+/* ─── OTP Inputs ───────────────────────────────────────────────────────────── */
+
+.otpContainer {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.otpInput {
+  width: 52px;
+  height: 60px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: "Poppins", monospace;
+}
+
+.otpInput:focus {
+  border-color: #3b82f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.otpInputFilled {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+/* ─── Expiry Timer ─────────────────────────────────────────────────────────── */
+
+.expiryText {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 24px;
+  font-weight: 500;
+}
+
+.expiryText i {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.timerValue {
+  color: #3b82f6;
+  font-weight: 700;
+}
+
+/* ─── Verify Button ────────────────────────────────────────────────────────── */
+
+.verifyBtn {
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transition: all 0.2s;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.verifyBtnActive {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
+}
+
+.verifyBtnActive:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 25px rgba(59, 130, 246, 0.3);
+}
+
+.verifyBtn:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btnLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ─── Resend ───────────────────────────────────────────────────────────────── */
+
+.resendText {
+  margin: 24px 0 0;
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.resendBtn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  transition: color 0.2s;
+}
+
+.resendBtn:hover:not(:disabled) {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.resendBtn:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ─── Animations ───────────────────────────────────────────────────────────── */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .leftSide {
+    display: none;
+  }
+
+  .rightSide {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 28px 24px;
+  }
+
+  .otpInput {
+    width: 44px;
+    height: 54px;
+    font-size: 20px;
+  }
+
+  .otpContainer {
+    gap: 6px;
+  }
+
+  .cardTitle {
+    font-size: 22px;
+  }
+}

@@ -290,7 +290,208 @@
 .inputWrapper {
   position: relative;
 }
+/* ─── Toast Container ─────────────────────────────────────────────────────── */
 
+.container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+  pointer-events: none;
+  font-family: "Poppins", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ─── Toast Card ──────────────────────────────────────────────────────────── */
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #ffffff;
+  padding: 16px 18px;
+  border-radius: 14px;
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  pointer-events: auto;
+  position: relative;
+  overflow: hidden;
+  min-width: 320px;
+  animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast.removing {
+  animation: slideOut 0.32s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* ─── Toast Types ─────────────────────────────────────────────────────────── */
+
+.success {
+  border-left: 4px solid #10b981;
+}
+
+.success .icon {
+  color: #10b981;
+}
+
+.success::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  animation: progress 4.5s linear forwards;
+  border-radius: 0 0 14px 14px;
+}
+
+.error {
+  border-left: 4px solid #ef4444;
+}
+
+.error .icon {
+  color: #ef4444;
+}
+
+.error::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  animation: progress 4.5s linear forwards;
+  border-radius: 0 0 14px 14px;
+}
+
+.info {
+  border-left: 4px solid #3b82f6;
+}
+
+.info .icon {
+  color: #3b82f6;
+}
+
+.info::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
+  animation: progress 4.5s linear forwards;
+  border-radius: 0 0 14px 14px;
+}
+
+/* ─── Icon ────────────────────────────────────────────────────────────────── */
+
+.icon {
+  flex-shrink: 0;
+  font-size: 22px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* ─── Content ─────────────────────────────────────────────────────────────── */
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  line-height: 1.3;
+}
+
+.message {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+/* ─── Close Button ────────────────────────────────────────────────────────── */
+
+.close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.close:hover {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────────── */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(120%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(120%) scale(0.9);
+  }
+}
+
+@keyframes progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .container {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+
+  .toast {
+    min-width: 0;
+    width: 100%;
+  }
+}
 .inputIcon {
   position: absolute;
   left: 14px;

@@ -5,7 +5,7 @@ import {
   verifyOtp,
   resendOtp,
 } from "../api/authApi";
-import { USER_ROLES, STORAGE_KEYS, FILE_UPLOAD } from "../constants/authConstants";
+import { USER_ROLES, STORAGE_KEYS } from "../constants/authConstants";
 import type {
   SignupFormValues,
   SignupServiceResult,
@@ -55,14 +55,7 @@ const normalizeUser = (
 
 // ─── FormData Builder ─────────────────────────────────────────────────────────
 
-const validateProfileImage = (file: File): void => {
-  if (!FILE_UPLOAD.ALLOWED_TYPES.includes(file.type)) {
-    throw new Error("Only JPG and PNG files are allowed.");
-  }
-  if (file.size > FILE_UPLOAD.MAX_SIZE_BYTES) {
-    throw new Error("Profile image must be less than 5MB.");
-  }
-};
+
 
 const buildSignupFormData = (data: SignupFormValues): FormData => {
   const formData = new FormData();
@@ -75,10 +68,7 @@ const buildSignupFormData = (data: SignupFormValues): FormData => {
   formData.append("confirmPassword", data.confirmPassword);
   formData.append("role", data.role.toUpperCase());
 
-  if (data.profileImage instanceof File) {
-    validateProfileImage(data.profileImage);
-    formData.append("profileImage", data.profileImage);
-  }
+ 
 
   return formData;
 };
