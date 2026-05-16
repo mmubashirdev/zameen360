@@ -48,7 +48,7 @@ export default function SuccessPage({ onLogin }: SuccessPageProps) {
             }}
             className="absolute inset-0 rounded-full bg-green-300"
           />
-          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 border-4 border-green-300 flex items-center justify-center">
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-right from-green-100 to-green-200 border-4 border-green-300 flex items-center justify-center">
             <motion.div
               initial={{ scale: 0, rotate: -45 }}
               animate={{ scale: 1, rotate: 0 }}
@@ -97,7 +97,7 @@ export default function SuccessPage({ onLogin }: SuccessPageProps) {
           transition={{ delay: 0.85 }}
           className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-left"
         >
-          <div className="w-9 h-9 flex-shrink-0 rounded-lg bg-white border border-blue-100 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-white border border-blue-100 flex items-center justify-center">
             <Shield size={18} className="text-blue-600" />
           </div>
           <div>

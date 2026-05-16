@@ -9,7 +9,7 @@ import {
   type LoginSchemaType,
 } from "../validations/loginValidationSchema";
 import type { ToastHook } from "../types/auth.types";
-
+import DashboardHome from "@features/landing/pages/DashboardHome";
 interface LoginFormProps {
   toast: ToastHook;
 }
@@ -46,7 +46,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
       toast.success("Welcome Back!", result.message ?? "Login successful.");
 
       setTimeout(() => {
-        navigate("/welcome", { replace: true });
+        navigate("/dashboard", { replace: true });
       }, 600);
     } catch (err) {
       const error = err as {

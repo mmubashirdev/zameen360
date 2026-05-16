@@ -30,7 +30,7 @@ export default function AuthButton({
         "w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm tracking-wide text-white transition-all duration-200",
         isDisabled
           ? "bg-gray-300 cursor-not-allowed"
-          : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30",
+          : "bg-gradient-to-right from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 hover:scale-[1.02] active:scale-[0.99] shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/30",
         className,
       ].join(" ")}
       {...rest}

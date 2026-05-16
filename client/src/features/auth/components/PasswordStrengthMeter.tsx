@@ -77,7 +77,7 @@ export default function PasswordStrengthMeter({
             <li key={i} className="flex items-center gap-2 text-xs">
               <span
                 className={[
-                  "w-4 h-4 rounded-full flex items-center justify-center 'flex-shrink-0",
+                  "w-4 h-4 rounded-full flex items-center justify-center",
                   ok ? "text-green-600" : "text-gray-300",
                 ].join(" ")}
               >
