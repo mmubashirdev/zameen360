@@ -48,10 +48,6 @@ export const signupSchema = z
     role: z.enum(["buyer", "seller"], {
       message: "Please select your role",
     }),
-
-    terms: z.literal(true, {
-      message: "You must agree to the Terms and Privacy Policy",
-    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

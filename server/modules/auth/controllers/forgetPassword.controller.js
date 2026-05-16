@@ -29,7 +29,7 @@ exports.verifyResetOtp = async (req, res) => {
     const latestOtp = await prisma.userVerification.findFirst({
       where: {
         userId: user.id,
-        otpType: "EMAIL",
+        otpType: "PASSWORD_RESET",
       },
       orderBy: { createdAt: "desc" },
     });

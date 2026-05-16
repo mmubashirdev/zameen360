@@ -8,7 +8,6 @@ import type {
   VerifyOtpPayload,
 } from "../types/auth.types";
 
-// ─── Register ─────────────────────────────────────────────────────────────────
 
 export const registerUser = (data: object): Promise<RegisterResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.REGISTER, data);
@@ -19,14 +18,14 @@ export const registerBuyer = (data: object): Promise<RegisterResponse> =>
 export const registerSeller = (data: object): Promise<RegisterResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.REGISTER_SELLER, data);
 
-// ─── Login ────────────────────────────────────────────────────────────────────
+
 
 export const loginUser = (
   credentials: LoginFormValues
 ): Promise<ApiResponse<AuthSuccessPayload>> =>
   axiosInstance.post(AUTH_ENDPOINTS.LOGIN, credentials);
 
-// ─── OTP ──────────────────────────────────────────────────────────────────────
+
 
 export const verifyOtp = (
   payload: VerifyOtpPayload
@@ -38,14 +37,13 @@ export const resendOtp = (payload: {
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.RESEND_OTP, payload);
 
-// ─── Password ─────────────────────────────────────────────────────────────────
+
 
 export const forgotPassword = (payload: {
   email: string;
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.FORGOT_PASSWORD, payload);
 
-// ✅ Fixed - sends both 'otp' and 'otpCode'
 export const verifyResetOtp = (payload: {
   email: string;
   otp: string;
@@ -64,7 +62,6 @@ export const resetPassword = (payload: {
 }): Promise<ApiResponse> =>
   axiosInstance.post(AUTH_ENDPOINTS.RESET_PASSWORD, payload);
 
-// ─── Profile ──────────────────────────────────────────────────────────────────
 
 export const getProfile = (): Promise<ApiResponse> =>
   axiosInstance.get(AUTH_ENDPOINTS.PROFILE);
