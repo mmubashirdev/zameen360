@@ -1,0 +1,229 @@
+/* featuredProperties.module.css */
+
+.section {
+  background-color: #f7f9fb;
+  padding: 80px 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #252838;
+  margin: 0 0 8px;
+}
+
+.title span {
+  color: #2b6aff;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Carousel Layout */
+.carouselWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.carouselViewport {
+  overflow: hidden;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.cardContainer {
+  display: flex;
+  gap: 24px;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Card Styling */
+.card {
+  min-width: calc(25% - 18px); /* 4 cards with 24px gap */
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(43, 106, 255, 0.1);
+  border-color: rgba(43, 106, 255, 0.2);
+}
+
+.imageWrapper {
+  position: relative;
+  height: 150px; 
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center; 
+  transition: transform 0.5s ease;
+}
+
+.card:hover .cardImage {
+  transform: scale(1.05);
+}
+
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  color: #ffffff;
+}
+
+.badgeSale {
+  background-color: #2b6aff;
+}
+
+.badgeRent {
+  background-color: #10b981; /* Green for rent as per typical real estate */
+}
+
+.cardContent {
+  padding: 20px;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #252838;
+  margin: 0 0 8px;
+}
+
+.cardLocation {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pinIcon {
+  font-size: 12px;
+}
+
+.cardPrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2b6aff;
+  margin: 0 0 16px;
+}
+
+.features {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.divider {
+  width: 4px;
+  height: 4px;
+  background-color: #9ca3af;
+  border-radius: 50%;
+}
+
+/* The exact Button requested - turns blue on hover */
+.detailsBtn {
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
+  color: #2b6aff;
+  border: 1.5px solid #2b6aff;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.detailsBtn:hover {
+  background-color: #2b6aff;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(43, 106, 255, 0.3);
+}
+
+/* Navigation Arrows */
+.arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  font-size: 24px;
+  color: #252838;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.arrow:hover {
+  background: #2b6aff;
+  color: #ffffff;
+  border-color: #2b6aff;
+  box-shadow: 0 4px 12px rgba(43, 106, 255, 0.2);
+}
+
+.arrowLeft { order: -1; }
+.arrowRight { order: 1; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .card {
+    min-width: calc(33.333% - 16px);
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    min-width: calc(50% - 12px);
+  }
+  .arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    min-width: 100%;
+  }
+  .container {
+    padding: 0 20px;
+  }
+}

@@ -6,9 +6,13 @@ function DashboardNavbar() {
   return (
     <>
       <nav className={styles.navbar}>
-        <img className={styles.logo} src={logo} alt="logo" />
+        <Link to="/">
+          <img className={styles.logo} src={logo} alt="Zameen 360 logo" />
+        </Link>
+
         <ul className={styles.navLinks}>
-          <li><Link to="/client/src/features/landing/pages/DashboardHome.tsx">Home</Link></li>
+        
+          <li><Link to="/">Home</Link></li>
           <li>Buy</li>
           <li>Rent</li>
           <li>Sell</li>
@@ -16,6 +20,7 @@ function DashboardNavbar() {
           <li>About Us</li>
           <li>Contact</li>
         </ul>
+
         <div className={styles.navActions}>
           <button className={styles.loginButton}>Login</button>
           <button className={styles.postPropertyButton}>Post Property</button>

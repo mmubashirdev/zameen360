@@ -1,0 +1,416 @@
+.hero {
+  background-color: #f7f9fb;
+  width: 100%;
+  min-height: 540px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.heroInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 40px 100px;
+  position: relative;
+  min-height: 480px;
+}
+
+/* Hero Image */
+.heroImageContainer {
+  position: absolute;
+  top: 0;
+  right: 0; /* CHANGED: Attached flush to the right side of the page */
+  width: 65%;
+  height: 100%;
+  z-index: 1;
+  animation: imageSlideIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; /* ADDED: Smooth entrance */
+}
+
+@keyframes imageSlideIn {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.heroImageFade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    #f7f9fb 0%,
+    #f7f9fb 5%,
+    rgba(247, 249, 251, 0.95) 15%,
+    rgba(247, 249, 251, 0.7) 30%,
+    rgba(247, 249, 251, 0.2) 50%,
+    rgba(247, 249, 251, 0) 70%
+  );
+  z-index: 2;
+}
+
+/* Hero Content */
+.heroContent {
+  position: relative;
+  z-index: 3;
+  max-width: 480px;
+  padding-top: 20px;
+  animation: contentFadeUp 0.8s 0.2s cubic-bezier(0.22, 1, 0.36, 1) both; /* ADDED: Smooth entrance */
+}
+
+@keyframes contentFadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.headline {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #252838;
+  margin: 0 0 20px;
+  letter-spacing: -0.5px;
+}
+
+.brandName {
+  color: #2b6aff;
+}
+
+.subHeadline {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: #6b7280;
+  margin: 0 0 32px;
+  max-width: 380px;
+}
+
+/* CTA Buttons */
+.ctaButtons {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background-color: #2b6aff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.btnPrimary:hover {
+  background-color: #1a56e0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(43, 106, 255, 0.3);
+}
+
+.arrowIcon {
+  flex-shrink: 0;
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 28px;
+  background-color: #ffffff;
+  color: #2b6aff;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid #2b6aff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.btnSecondary:hover {
+  background-color: #f0f5ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(43, 106, 255, 0.1);
+}
+
+/* Search Bar */
+.searchBarWrapper {
+  position: absolute;
+  bottom: -30px;
+  left: 40px;
+  right: 40px;
+  z-index: 10;
+  animation: searchFadeUp 0.8s 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; /* ADDED: Smooth entrance */
+}
+
+@keyframes searchFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.searchTabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 0;
+}
+
+.searchTab {
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #6b7280;
+  background: #ffffff;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+  border-radius: 10px 10px 0 0;
+  position: relative;
+}
+
+.searchTab:first-child {
+  border-top-left-radius: 10px;
+}
+
+.searchTabActive {
+  color: #2b6aff;
+  border-bottom-color: #2b6aff;
+  font-weight: 600;
+  background-color: #ffffff;
+}
+
+.searchTab:hover:not(.searchTabActive) {
+  color: #252838;
+  background-color: #f9fafb;
+}
+
+.searchBar {
+  display: flex;
+  align-items: stretch;
+  background: #ffffff;
+  border-radius: 0 12px 12px 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  padding: 8px;
+  gap: 0;
+}
+
+.searchField {
+  flex: 1;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  border-radius: 6px;
+  transition: background-color 0.2s ease; /* ADDED: Smooth hover */
+}
+
+.searchField:hover {
+  background-color: #f9fafb; /* ADDED: Smooth hover */
+}
+
+.searchLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #252838;
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+
+.searchInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pinIcon {
+  flex-shrink: 0;
+}
+
+.searchInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  color: #252838;
+  background: transparent;
+  font-family: inherit;
+  transition: color 0.2s ease; /* ADDED */
+}
+
+.searchInput::placeholder {
+  color: #6b7280;
+  transition: color 0.2s ease; /* ADDED */
+}
+
+.searchInput:focus::placeholder {
+  color: #9ca3af; /* ADDED: Smooth placeholder shift */
+}
+
+.searchDivider {
+  width: 1px;
+  background-color: #e5e7eb;
+  margin: 12px 0;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+/* IMPROVED: Select Smoothness */
+.searchSelectWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: background-color 0.2s ease; /* ADDED: Smooth hover background */
+}
+
+.searchSelectWrapper:hover {
+  background-color: #f9fafb; /* ADDED */
+}
+
+.searchSelect {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  color: #252838;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding: 4px 20px 4px 4px;
+  font-family: inherit;
+  transition: color 0.2s ease; /* ADDED: Smooth text color change on focus/select */
+}
+
+.searchSelect:hover {
+  color: #2b6aff; /* ADDED */
+}
+
+.searchSelect:focus {
+  color: #1a56e0; /* ADDED */
+}
+
+.chevronIcon {
+  position: absolute;
+  right: 0;
+  pointer-events: none;
+  flex-shrink: 0;
+  transition: transform 0.2s ease; /* ADDED: Smooth rotation effect */
+}
+
+.searchSelectWrapper:focus-within .chevronIcon {
+  transform: rotate(180deg); /* ADDED: Rotates chevron when select is open */
+}
+
+.searchButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background-color: #2b6aff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+
+.searchButton:hover {
+  background-color: #1a56e0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(43, 106, 255, 0.35);
+}
+
+.searchIcon {
+  flex-shrink: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .heroImageContainer {
+    width: 55%;
+    right: 0; /* CHANGED: Kept flush right on tablet */
+  }
+
+  .headline {
+    font-size: 36px;
+  }
+
+  .heroContent {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 768px) {
+  .heroInner {
+    padding: 40px 20px 120px;
+    min-height: auto;
+  }
+
+  .heroImageContainer {
+    position: relative;
+    width: 100%;
+    right: 0; /* CHANGED */
+    height: 260px;
+    margin-bottom: 24px;
+  }
+
+  .heroImageFade {
+    background: linear-gradient(
+      to top,
+      #f7f9fb 0%,
+      rgba(247, 249, 251, 0.3) 50%,
+      rgba(247, 249, 251, 0) 100%
+    );
+  }
+
+  .heroContent {
+    max-width: 100%;
+  }
+
+  .headline {
+    font-size: 30px;
+  }
+
+  .searchBarWrapper {
+    left: 20px;
+    right: 20px;
+    bottom: -60px;
+  }
+
+  .searchBar {
+    flex-direction: column;
+    border-radius: 0 12px 12px 12px;
+  }
+
+  .searchDivider {
+    width: 100%;
+    height: 1px;
+    margin: 0 12px;
+  }
+
+  .searchButton {
+    margin: 4px;
+    justify-content: center;
+  }
+}

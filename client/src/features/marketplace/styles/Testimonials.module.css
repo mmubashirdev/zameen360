@@ -1,0 +1,214 @@
+/* testimonials.module.css */
+
+.section {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 80px 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 56px;
+  animation: slideDown 0.8s ease-out;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0a1e3f;
+  margin: 0;
+}
+
+.title span {
+  color: #2563eb;
+}
+
+/* Carousel Layout */
+.carouselWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.carouselViewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.track {
+  display: flex;
+  gap: 24px;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Card Styling */
+.card {
+  min-width: calc(25% - 18px); /* 4 cards with 24px gap */
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 0.7s ease-out forwards;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(37, 99, 235, 0.1);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* Quote Icon */
+.quoteIcon {
+  font-size: 48px;
+  color: #dbeafe; /* Light blue quote */
+  font-family: serif;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+/* Stars */
+.stars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.star {
+  color: #f59e0b; /* Gold color */
+  font-size: 16px;
+}
+
+/* Review Text */
+.review {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #475569;
+  margin: 0 0 24px 0;
+  flex-grow: 1;
+}
+
+/* Profile Section */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 20px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+  transition: border-color 0.3s ease;
+}
+
+.card:hover .avatar {
+  border-color: #2563eb;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0a1e3f;
+  margin: 0 0 2px 0;
+}
+
+.location {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.location::before {
+  content: '📍';
+  font-size: 10px;
+}
+
+/* Navigation Arrows */
+.arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
+  font-size: 24px;
+  color: #0a1e3f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.arrow:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.arrowLeft { order: -1; }
+.arrowRight { order: 1; }
+
+/* Animations */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .card {
+    min-width: calc(33.333% - 16px);
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    min-width: calc(50% - 12px);
+  }
+  .arrow {
+    display: none;
+  }
+  .section {
+    padding: 60px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    min-width: 100%;
+  }
+  .container {
+    padding: 0 20px;
+  }
+}

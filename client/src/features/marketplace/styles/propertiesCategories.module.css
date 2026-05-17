@@ -1,0 +1,96 @@
+/* propertiesCategories.module.css */
+
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 30px 60px;
+  background-color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0a1a2f;
+  margin-bottom: 24px;
+  padding-left: 8px;
+}
+
+.container :global(.div-Containers) {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.container :global(.div-Containers) > div {
+  background-color: #ffffff;
+  border: 1px solid #eef0f3;
+  border-radius: 10px;
+  padding: 14px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  max-width: 160px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.container :global(.div-Containers) > div:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.hello {
+  font-size: 26px;
+  color: #2f6bff;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.container :global(.div-Containers) h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a1a2f;
+  margin: 2px 0 4px 0;
+}
+
+.container :global(.div-Containers) p {
+  font-size: 11px;
+  color: #8a93a4;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .container {
+    padding: 30px 40px;
+  }
+  .container :global(.div-Containers) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+  }
+  .container :global(.div-Containers) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .container h2 {
+    font-size: 18px;
+  }
+  
+  .hello {
+    font-size: 24px;
+  }
+}
