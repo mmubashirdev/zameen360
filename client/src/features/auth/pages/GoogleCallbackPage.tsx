@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { STORAGE_KEYS } from "../constants/authConstants";
 import { useAuthContext } from "../hooks/useAuth";
-import axiosInstance from "@shared/lib/axiosInstance";
+import axiosInstance from "@shared/lib/axios";
 
 export default function GoogleCallbackPage() {
   const navigate = useNavigate();

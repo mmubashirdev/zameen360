@@ -1,13 +1,15 @@
-import {Routes, Route } from "react-router-dom"
-import DashboardHome from "../pages/DashboardHome"
-function dashboardRoutes(){
-  return (
-    <>
-      <Routes>
-        <Route path="/dashboard" element={<DashboardHome/>}/>
-      </Routes>
-    </>
-  )
-}
+import DashboardHome from "../pages/DashboardHome";
 
-export default dashboardRoutes;
+const marketplaceRoutes = [
+  {
+    path: "/",
+    element: <DashboardHome />,
+  },
+
+  {
+    path: "/dashboard",
+    element: <DashboardHome />,
+  },
+];
+
+export default marketplaceRoutes;

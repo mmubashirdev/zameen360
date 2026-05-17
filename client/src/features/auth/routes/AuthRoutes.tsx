@@ -1,24 +1,34 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import SignupPage from "../pages/SignupPage";
 import LoginPage from "../pages/LoginPage";
+import SignupPage from "../pages/SignupPage";
 import VerifyEmailPage from "../pages/VerifyEmailPage";
-import GoogleCallbackPage from "../pages/GoogleCallbackPage"; // ← Add
+import GoogleCallbackPage from "../pages/GoogleCallbackPage";
 import AuthFlow from "../components/AuthFlow";
 
-export default function AuthRoutes() {
-  return (
-    <Routes>
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/verify-email" element={<VerifyEmailPage />} />
-      
-      {/* ✅ Google OAuth callback */}
-      <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
-      
-      <Route path="/forgot-password" element={<Navigate to="/auth" replace />} />
-      <Route path="/auth" element={<AuthFlow />} />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
-  );
-}
+const authRoutes = [
+  {
+    path: "/login",
+    element: <LoginPage />,
+  },
+
+  {
+    path: "/signup",
+    element: <SignupPage />,
+  },
+
+  {
+    path: "/verify-email",
+    element: <VerifyEmailPage />,
+  },
+
+  {
+    path: "/auth/google/callback",
+    element: <GoogleCallbackPage />,
+  },
+
+  {
+    path: "/auth",
+    element: <AuthFlow />,
+  },
+];
+
+export default authRoutes;

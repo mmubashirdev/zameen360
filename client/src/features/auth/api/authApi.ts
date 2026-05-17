@@ -1,4 +1,4 @@
-import axiosInstance from "@shared/lib/axiosInstance";
+import axiosInstance from "@shared/lib/axios";
 import { AUTH_ENDPOINTS } from "../constants/authConstants";
 import type {
   RegisterResponse,
