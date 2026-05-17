@@ -1,4 +1,4 @@
-import DashboardHome from "../pages/DashboardHome";
+import DashboardHome from "../pages/Marketplace";
 
 const marketplaceRoutes = [
   {
