@@ -8,9 +8,13 @@ import SuccessPage from "../pages/SuccessPage";
 
 type Step = 1 | 2 | 3 | 4;
 
-function AuthFlow() {
+interface AuthFlowProps {
+  initialStep?: Step;
+}
+
+function AuthFlow({ initialStep = 1 }: AuthFlowProps) {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(initialStep);
   const [email, setEmail] = useState<string>("");
 
   const goNext = () => setStep((s) => Math.min(4, s + 1) as Step);

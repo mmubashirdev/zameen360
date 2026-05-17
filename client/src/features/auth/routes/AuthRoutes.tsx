@@ -26,6 +26,11 @@ const authRoutes = [
   },
 
   {
+    path: "/forgot-password",
+    element: <AuthFlow initialStep={1} />,
+  },
+
+  {
     path: "/auth",
     element: <AuthFlow />,
   },
