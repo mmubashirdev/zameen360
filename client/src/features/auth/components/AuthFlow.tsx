@@ -34,7 +34,7 @@ function AuthFlow({ initialStep = 1 }: AuthFlowProps) {
           <ForgetPassword
             key="step1"
             onNext={goNext}
-            onBack={goBack}
+            onBack={goToLogin}
             setEmail={setEmail}
           />
         );

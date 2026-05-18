@@ -1,0 +1,199 @@
+/* ── AuthLayout ─────────────────────────────────────────────── */
+
+/* Outer container */
+.root {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  background: #ffffff;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ── Left Panel ──────────────────────────────────────────────── */
+.leftPanel {
+  position: relative;
+  width: 45%;
+  height: 100vh;
+  overflow: hidden;
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .leftPanel {
+    display: flex;
+  }
+}
+
+.heroBg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.40) 0%,
+    rgba(0, 0, 0, 0.55) 50%,
+    rgba(0, 0, 0, 0.80) 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  padding: 40px 48px;
+  color: #ffffff;
+}
+
+.heroLogoImg {
+  height: 190px;
+  width: auto;
+  object-fit: contain;
+  padding-bottom: 10px;
+}
+
+.heroBody {
+  max-width: 420px;
+}
+
+.heroHeading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  letter-spacing: -0.8px;
+}
+
+@media (min-width: 1280px) {
+  .heroHeading {
+    font-size: 3rem;
+  }
+}
+
+.heroAccent {
+  color: #60a5fa;
+  border-bottom: 4px solid #60a5fa;
+  padding-bottom: 4px;
+}
+
+.heroPara {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.7;
+}
+
+/* ── Stats Grid ──────────────────────────────────────────────── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.statIcon {
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 4px;
+}
+
+/* ── Right Panel ─────────────────────────────────────────────── */
+.rightPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  height: 100vh;
+  overflow-y: auto;
+  background: linear-gradient(160deg, #f8fafc 0%, #ffffff 100%);
+}
+
+@media (min-width: 640px) {
+  .rightPanel {
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rightPanel {
+    padding: 32px;
+  }
+}
+
+/* ── Mobile Logo ─────────────────────────────────────────────── */
+.mobileLogo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 1024px) {
+  .mobileLogo {
+    display: none;
+  }
+}
+
+.mobileLogoImg {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ── Form Card ───────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.08), 0 1px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f1f5f9;
+  padding: 28px 32px;
+}
+
+@media (min-width: 640px) {
+  .card {
+    padding: 36px 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 22px 20px;
+    border-radius: 16px;
+  }
+}

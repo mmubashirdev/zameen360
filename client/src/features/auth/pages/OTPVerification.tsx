@@ -16,6 +16,7 @@ import {
   clearOtpVerified,
 } from "../auth.slice";
 import type { AppDispatch, RootState } from "../../../app/stores/store";
+import styles from "../styles/otpVerification.module.css";
 
 interface OTPVerificationProps {
   onNext: () => void;
@@ -109,7 +110,6 @@ export default function OTPVerification({
     return `${m}:${sec}`;
   };
 
-  // ✅ Resend OTP
   const handleResend = useCallback(async () => {
     if (!email) {
       toast.error("Email missing. Please restart the process.");
@@ -138,7 +138,6 @@ export default function OTPVerification({
     }
   }, [email, dispatch]);
 
-  // ✅ Verify OTP
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -185,7 +184,7 @@ export default function OTPVerification({
       <button
         type="button"
         onClick={onBackToLogin}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-900 hover:text-blue-950 mb-6 transition-colors"
+        className={styles.backBtn}
       >
         <ArrowLeft size={16} />
         Back to Login
@@ -193,27 +192,25 @@ export default function OTPVerification({
 
       <StepIndicator currentStep={2} />
 
-      <div className="text-center mb-7">
+      <div className={styles.headerBlock}>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
-          className="w-16 h-16 mx-auto mb-5 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center"
+          className={styles.iconWrapper}
         >
-          <ShieldCheck size={26} className="text-blue-900" />
+          <ShieldCheck size={26} />
         </motion.div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          Verify Your Email
-        </h2>
-        <p className="text-sm text-gray-500">
+        <h2 className={styles.title}>Verify Your Email</h2>
+        <p className={styles.subtitle}>
           Enter the 6-digit code sent to
           <br />
-          <span className="font-bold text-blue-900">{maskedEmail}</span>
+          <span className={styles.emailHighlight}>{maskedEmail}</span>
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className={expired ? "opacity-50 pointer-events-none" : ""}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={expired ? styles.otpDisabled : ""}>
           <OTPInput
             length={6}
             value={otp}
@@ -223,29 +220,24 @@ export default function OTPVerification({
         </div>
 
         {(error || expired) && (
-          <p
-            role="alert"
-            className="flex items-center justify-center gap-1.5 text-xs text-red-600 font-medium"
-          >
+          <p role="alert" className={styles.errorMsg}>
             <AlertCircle size={13} />
             {error || "Verification code has expired"}
           </p>
         )}
 
-        <div className="flex items-center justify-center gap-1.5 text-sm">
+        <div className={styles.timerRow}>
           {expired ? (
-            <span className="flex items-center gap-1.5 text-red-600 font-bold">
+            <span className={styles.expiredMsg}>
               <AlertCircle size={14} />
-              Code Expired - Please request a new code
+              Code Expired — Please request a new code
             </span>
           ) : (
             <>
-              <Clock size={14} className="text-gray-500" />
-              <span className="text-gray-600">
+              <Clock size={14} />
+              <span>
                 Code expires in{" "}
-                <span className="font-bold text-blue-900">
-                  {formatTime(timeLeft)}
-                </span>
+                <span className={styles.timerValue}>{formatTime(timeLeft)}</span>
               </span>
             </>
           )}
@@ -259,17 +251,17 @@ export default function OTPVerification({
           {expired ? "Code Expired" : "Verify Code"}
         </AuthButton>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className={styles.footer}>
           Didn't receive the code?{" "}
           <button
             type="button"
             onClick={handleResend}
             disabled={!expired || isResending}
             className={[
-              "font-bold transition-colors",
+              styles.resendBtn,
               expired && !isResending
-                ? "text-blue-900 hover:text-blue-950 hover:underline cursor-pointer"
-                : "text-gray-400 cursor-not-allowed",
+                ? styles.resendActive
+                : styles.resendDisabled,
             ].join(" ")}
           >
             {isResending ? "Sending..." : "Resend Code"}

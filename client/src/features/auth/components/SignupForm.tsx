@@ -46,7 +46,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
       password: "",
       confirmPassword: "",
       role: undefined,
-      terms: undefined,
+      // terms: undefined,
     },
     mode: "onBlur",
   });

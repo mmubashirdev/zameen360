@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+import styles from "../styles/passwordStrengthMeter.module.css";
 
 interface PasswordStrengthMeterProps {
   password?: string;
@@ -23,20 +24,20 @@ const CRITERIA: Criterion[] = [
 ];
 
 const LABELS: string[] = ["", "Weak", "Fair", "Good", "Strong"];
-const SEG_COLORS: string[] = [
-  "bg-gray-200",
-  "bg-red-500",
-  "bg-orange-500",
-  "bg-yellow-500",
-  "bg-green-500",
-];
-const TEXT_COLORS: string[] = [
-  "text-gray-400",
-  "text-red-600",
-  "text-orange-600",
-  "text-yellow-600",
-  "text-green-600",
-];
+
+const SEG_CLASS_MAP: Record<number, string> = {
+  1: styles.seg1,
+  2: styles.seg2,
+  3: styles.seg3,
+  4: styles.seg4,
+};
+
+const STRENGTH_TEXT_CLASS_MAP: Record<number, string> = {
+  1: styles.strengthWeak,
+  2: styles.strengthFair,
+  3: styles.strengthGood,
+  4: styles.strengthStrong,
+};
 
 export default function PasswordStrengthMeter({
   password = "",
@@ -45,49 +46,42 @@ export default function PasswordStrengthMeter({
   const score = password ? Math.max(1, metCount) : 0;
 
   return (
-    <div className="mt-3">
+    <div className={styles.wrapper}>
       {/* Bar */}
-      <div className="flex items-center gap-3 mb-3">
-        <span className="text-xs text-gray-600 whitespace-nowrap">
-          Password Strength:
-        </span>
-        <div className="flex flex-1 gap-1.5">
+      <div className={styles.barRow}>
+        <span className={styles.barLabel}>Password Strength:</span>
+        <div className={styles.barSegments}>
           {[1, 2, 3, 4].map((seg) => (
             <div
               key={seg}
               className={[
-                "h-1.5 flex-1 rounded-full transition-all duration-300",
-                seg <= score ? SEG_COLORS[score] : "bg-gray-200",
+                styles.segment,
+                seg <= score ? SEG_CLASS_MAP[score] : styles.segEmpty,
               ].join(" ")}
             />
           ))}
         </div>
         {score > 0 && (
-          <span className={`text-xs font-semibold ${TEXT_COLORS[score]}`}>
+          <span className={[styles.strengthText, STRENGTH_TEXT_CLASS_MAP[score]].join(" ")}>
             {LABELS[score]}
           </span>
         )}
       </div>
 
       {/* Checklist */}
-      <ul className="space-y-1.5">
+      <ul className={styles.checklist}>
         {CRITERIA.map((c, i) => {
           const ok = c.test(password);
           return (
-            <li key={i} className="flex items-center gap-2 text-xs">
-              <span
-                className={[
-                  "w-4 h-4 rounded-full flex items-center justify-center",
-                  ok ? "text-green-600" : "text-gray-300",
-                ].join(" ")}
-              >
+            <li key={i} className={styles.checkItem}>
+              <span className={[styles.checkIcon, ok ? styles.checkIconOk : styles.checkIconFail].join(" ")}>
                 {ok ? (
                   <Check size={14} strokeWidth={3} />
                 ) : (
                   <X size={14} strokeWidth={2.5} />
                 )}
               </span>
-              <span className={ok ? "text-gray-700" : "text-gray-400"}>
+              <span className={ok ? styles.checkTextOk : styles.checkTextFail}>
                 {c.label}
               </span>
             </li>
