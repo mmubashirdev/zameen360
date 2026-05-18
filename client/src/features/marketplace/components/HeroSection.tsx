@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import styles from '../styles/HeroSection.module.css';
 // import image from "../assets/Gemini_Generated_Image_89vsbk89vsbk89vs.png"
 import image1 from "../assets/Screenshot 2026-05-18 010903.png"
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'buy' | 'rent'>('buy');
-
+  const navigate = useNavigate();
+  const navigationToCreateProperty = ()=>{
+    navigate("/post-property")
+  }
   return (
     <section className={styles.hero}>
       <div className={styles.heroInner}>
@@ -49,7 +53,7 @@ const HeroSection: React.FC = () => {
                 />
               </svg>
             </button>
-            <button className={styles.btnSecondary}>Post Property</button>
+            <button className={styles.btnSecondary} onClick={navigationToCreateProperty}>Post Property</button>
           </div>
         </div>
 

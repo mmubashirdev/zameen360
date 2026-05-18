@@ -1,4 +1,4 @@
-import AppRouter from "./Router";
+import AppRouter from "./routes/Router";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "@features/auth/context/AuthContext";
 function App() {

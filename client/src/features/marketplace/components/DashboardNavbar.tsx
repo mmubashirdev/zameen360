@@ -1,8 +1,15 @@
 import logo from "../../../assets/chatgpt_image_may_12__2026__11_24_22_pm_720-removebg-preview.png";
 import styles from '../styles/dashboardNavbar.module.css'
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function DashboardNavbar() {
+  const navigate = useNavigate()
+  const navigateToCreatePost = ()=>{
+    navigate("/post-property")
+  }
+  const navigateToLogin = ()=>{
+    navigate("/login")
+  }
   return (
     <>
       <nav className={styles.navbar}>
@@ -22,8 +29,8 @@ function DashboardNavbar() {
         </ul>
 
         <div className={styles.navActions}>
-          <button className={styles.loginButton}>Login</button>
-          <button className={styles.postPropertyButton}>Post Property</button>
+          <button className={styles.loginButton} onClick={navigateToLogin}>Login</button>
+          <button className={styles.postPropertyButton} onClick={navigateToCreatePost}>Post Property</button>
         </div>
       </nav>
     </>

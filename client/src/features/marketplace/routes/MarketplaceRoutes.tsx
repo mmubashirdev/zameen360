@@ -1,4 +1,6 @@
+import PropertyDetails from "../pages/PropertyDetails"; 
 import DashboardHome from "../pages/Marketplace";
+import CreatePropertyPost from "../pages/CreatePropertyPost";
 
 const marketplaceRoutes = [
   {
@@ -7,8 +9,16 @@ const marketplaceRoutes = [
   },
 
   {
-    path: "/dashboard",
+    path: "/marketplace",
     element: <DashboardHome />,
+  },
+  {
+    path: "/post-property",
+    element: <CreatePropertyPost />,
+  },
+  {
+    path: "/property",
+    element: <PropertyDetails />,
   },
 ];
 
