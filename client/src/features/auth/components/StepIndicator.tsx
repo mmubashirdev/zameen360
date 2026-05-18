@@ -1,5 +1,5 @@
-// client/src/features/auth/components/StepIndicator.tsx
 import { Check } from "lucide-react";
+import styles from "../styles/stepIndicator.module.css";
 
 interface StepIndicatorProps {
   currentStep: 1 | 2 | 3 | 4;
@@ -16,13 +16,13 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
   const progressPercent = ((currentStep - 1) / (STEPS.length - 1)) * 100;
 
   return (
-    <div className="mb-8">
-      <div className="relative flex items-start justify-between">
+    <div className={styles.wrapper}>
+      <div className={styles.track}>
         {/* Background line */}
-        <div className="absolute top-4 left-0 right-0 h-0.5 bg-gray-200 z-0" />
-        {/* Filled line */}
+        <div className={styles.trackBg} />
+        {/* Filled progress line */}
         <div
-          className="absolute top-4 left-0 h-0.5 bg-gradient-to-right from-blue-600 to-blue-500 transition-all duration-500 ease-out z-0"
+          className={styles.trackFill}
           style={{ width: `${progressPercent}%` }}
         />
 
@@ -31,30 +31,27 @@ export default function StepIndicator({ currentStep }: StepIndicatorProps) {
           const active = step.id === currentStep;
 
           return (
-            <div
-              key={step.id}
-              className="relative z-20 flex flex-col items-center gap-2"
-            >
+            <div key={step.id} className={styles.stepItem}>
               <div
                 className={[
-                  "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-all duration-300",
+                  styles.bubble,
                   done
-                    ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200"
+                    ? styles.bubbleDone
                     : active
-                      ? "bg-white border-blue-600 text-blue-600 ring-4 ring-blue-100"
-                      : "bg-white border-gray-200 text-gray-400",
+                    ? styles.bubbleActive
+                    : styles.bubbleDefault,
                 ].join(" ")}
               >
                 {done ? <Check size={14} strokeWidth={3} /> : step.id}
               </div>
               <span
                 className={[
-                  "text-[11px] sm:text-xs font-medium whitespace-nowrap transition-colors",
+                  styles.label,
                   active
-                    ? "text-blue-700 font-semibold"
+                    ? styles.labelActive
                     : done
-                      ? "text-gray-700"
-                      : "text-gray-400",
+                    ? styles.labelDone
+                    : styles.labelDefault,
                 ].join(" ")}
               >
                 {step.label}

@@ -8,6 +8,7 @@ import StepIndicator from "../components/StepIndicator";
 import AuthButton from "../components/AuthButton";
 import { clearAuthSuccess } from "../auth.slice";
 import type { AppDispatch } from "../../../app/stores/store";
+import styles from "../styles/resetSuccess.module.css";
 
 export default function ResetSuccess() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ export default function ResetSuccess() {
     <AuthLayout>
       <StepIndicator currentStep={4} />
 
-      <div className="text-center">
+      <div className={styles.container}>
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -32,29 +33,27 @@ export default function ResetSuccess() {
             damping: 14,
             delay: 0.1,
           }}
-          className="relative w-24 h-24 mx-auto mb-6"
+          className={styles.iconOuter}
         >
           <motion.div
             initial={{ scale: 0.5, opacity: 0.6 }}
             animate={{ scale: 1.3, opacity: 0 }}
             transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
-            className="absolute inset-0 rounded-full bg-green-300"
+            className={styles.ripple}
           />
-          <div className="relative w-24 h-24 rounded-full bg-gradient-to-right from-green-100 to-green-200 border-4 border-green-300 flex items-center justify-center">
+          <div className={styles.iconCircle}>
             <motion.div
               initial={{ scale: 0, rotate: -45 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
             >
-              <Check size={42} strokeWidth={3} className="text-green-600" />
+              <Check size={42} strokeWidth={3} />
             </motion.div>
           </div>
         </motion.div>
 
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          Password Reset Successful!
-        </h2>
-        <p className="text-sm text-gray-500 leading-relaxed mb-7">
+        <h2 className={styles.title}>Password Reset Successful!</h2>
+        <p className={styles.subtitle}>
           Your password has been reset successfully.
           <br />
           You can now login with your new password.
@@ -62,13 +61,13 @@ export default function ResetSuccess() {
 
         <AuthButton onClick={handleLogin}>Login to Your Account</AuthButton>
 
-        <div className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-blue-50/70 border border-blue-100 text-left">
-          <div className="w-9 h-9  rounded-lg bg-white border border-blue-100 flex items-center justify-center">
-            <Shield size={18} className="text-blue-600" />
+        <div className={styles.securityTip}>
+          <div className={styles.tipIconBox}>
+            <Shield size={18} />
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800">Security Tip</p>
-            <p className="text-xs text-gray-600 leading-relaxed mt-0.5">
+            <p className={styles.tipTitle}>Security Tip</p>
+            <p className={styles.tipText}>
               For better security, don't share your password with anyone.
             </p>
           </div>

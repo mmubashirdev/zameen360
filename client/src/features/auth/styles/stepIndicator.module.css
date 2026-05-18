@@ -1,0 +1,105 @@
+/* ── StepIndicator ───────────────────────────────────────────── */
+
+.wrapper {
+  margin-bottom: 32px;
+}
+
+.track {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+/* Background line */
+.trackBg {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+/* Filled progress line */
+.trackFill {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
+  transition: width 0.5s ease-out;
+  z-index: 0;
+}
+
+/* ── Step Item ───────────────────────────────────────────────── */
+.stepItem {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Step bubble */
+.bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 2px solid;
+  transition: all 0.3s;
+}
+
+.bubbleDone {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+}
+
+.bubbleActive {
+  background: #ffffff;
+  border-color: #2563eb;
+  color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.bubbleDefault {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+}
+
+/* Step label */
+.label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+@media (min-width: 640px) {
+  .label {
+    font-size: 0.72rem;
+  }
+}
+
+.labelActive {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.labelDone {
+  color: #475569;
+}
+
+.labelDefault {
+  color: #94a3b8;
+}

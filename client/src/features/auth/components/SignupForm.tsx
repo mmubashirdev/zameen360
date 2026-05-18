@@ -46,7 +46,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
       password: "",
       confirmPassword: "",
       role: undefined,
-      terms: undefined,
+      // terms: undefined,
     },
     mode: "onBlur",
   });
@@ -112,11 +112,11 @@ export default function SignupForm({ toast }: SignupFormProps) {
     window.location.href = `${baseUrl}/auth/google`;
   }, []);
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  
 
   return (
     <div className={styles.formContainer}>
-      {/* Header */}
+      
       <div className={styles.formHeader}>
         <h2 className={styles.formTitle}>Create Account</h2>
         <p className={styles.formSubtitle}>
@@ -129,9 +129,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
         noValidate
         autoComplete="off"
       >
-        {/* ── Row 1: Full Name + City ─────────────────────────────────── */}
+       
         <div className={styles.formGroupRow}>
-          {/* Full Name */}
+      
           <div className={styles.formGroup}>
             <div className={styles.inputWrapper}>
               <i

@@ -12,17 +12,18 @@ import {
   clearAuthSuccess,
 } from "../auth.slice";
 import type { AppDispatch, RootState } from "../../../app/stores/store";
+import styles from "../styles/forgotPassword.module.css";
 
 interface ForgotPasswordProps {
   onNext: () => void;
   setEmail: (email: string) => void;
-  onBack: () => void;  // ✅ ADDED
+  onBack: () => void;
 }
 
 export default function ForgotPassword({
   onNext,
   setEmail,
-  onBack,  // ✅ ADDED
+  onBack,
 }: ForgotPasswordProps) {
   const [emailLocal, setEmailLocal] = useState<string>("");
   const [error, setError] = useState<string>("");
@@ -75,44 +76,35 @@ export default function ForgotPassword({
 
   return (
     <AuthLayout>
-      {/* ✅ Back to Login - Dark Blue */}
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-900 hover:text-blue-950 mb-6 transition-colors"
-      >
+      {/* Back to Login */}
+      <button type="button" onClick={onBack} className={styles.backBtn}>
         <ArrowLeft size={16} />
         Back to Login
       </button>
 
-      <div className="text-center mb-7">
+      <div className={styles.headerBlock}>
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, duration: 0.3 }}
-          className="w-16 h-16 mx-auto mb-5 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center"
+          className={styles.iconWrapper}
         >
-          <Lock size={26} className="text-blue-900" />
+          <Lock size={26} />
         </motion.div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-          Forgot Password?
-        </h2>
-        <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto">
+        <h2 className={styles.title}>Forgot Password?</h2>
+        <p className={styles.subtitle}>
           Don't worry! Enter your registered email address and we'll send you a
           verification code to reset your password.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} noValidate className="space-y-5">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-semibold text-gray-800 mb-2"
-          >
+      <form onSubmit={handleSubmit} noValidate className={styles.form}>
+        <div className={styles.fieldGroup}>
+          <label htmlFor="email" className={styles.label}>
             Email Address
           </label>
-          <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+          <div className={styles.inputWrapper}>
+            <span className={styles.inputIcon}>
               <Mail size={18} />
             </span>
             <input
@@ -125,20 +117,13 @@ export default function ForgotPassword({
               onChange={handleChange}
               disabled={loading}
               className={[
-                // ✅ Dark black text, semi-bold weight
-                "w-full pl-11 pr-4 py-3 text-sm font-semibold text-black rounded-xl border outline-none transition-all duration-200 bg-gray-50",
-                "placeholder:text-gray-400 placeholder:font-normal",
-                error
-                  ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-100"
-                  : "border-gray-200 focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100",
+                styles.input,
+                error ? styles.inputError : "",
               ].join(" ")}
             />
           </div>
           {error && (
-            <p
-              role="alert"
-              className="mt-2 flex items-center gap-1.5 text-xs text-red-600 font-medium"
-            >
+            <p role="alert" className={styles.errorMsg}>
               <AlertCircle size={13} /> {error}
             </p>
           )}
@@ -149,13 +134,9 @@ export default function ForgotPassword({
         </AuthButton>
       </form>
 
-      <p className="text-center text-sm text-gray-600 mt-6">
+      <p className={styles.footer}>
         Remember your password?{" "}
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-blue-900 font-bold hover:text-blue-950 hover:underline transition-colors"
-        >
+        <button type="button" onClick={onBack} className={styles.footerLink}>
           Login
         </button>
       </p>

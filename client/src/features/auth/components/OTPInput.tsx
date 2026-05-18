@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import type { ChangeEvent, KeyboardEvent, ClipboardEvent } from "react";
+import styles from "../styles/otpInput.module.css";
 
 interface OTPInputProps {
   length?: number;
@@ -16,7 +17,6 @@ export default function OTPInput({
 }: OTPInputProps) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Build digit array of fixed length
   const digits: string[] = Array.from({ length }, (_, i) => value[i] || "");
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function OTPInput({
   };
 
   return (
-    <div className="flex justify-center gap-2 sm:gap-3" onPaste={handlePaste}>
+    <div className={styles.container} onPaste={handlePaste}>
       {digits.map((d, i) => (
         <input
           key={i}
@@ -82,12 +82,12 @@ export default function OTPInput({
           onFocus={(e) => e.target.select()}
           aria-label={`Digit ${i + 1}`}
           className={[
-            "w-11 h-14 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-xl border-2 outline-none transition-all duration-200 bg-gray-50 text-gray-900",
+            styles.digitInput,
             hasError
-              ? "border-red-400 bg-red-50 focus:border-red-500 focus:ring-4 focus:ring-red-100"
+              ? styles.digitError
               : d
-                ? "border-blue-500 bg-blue-50 text-blue-700 scale-105"
-                : "border-gray-200 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:scale-105",
+              ? styles.digitFilled
+              : "",
           ].join(" ")}
         />
       ))}
