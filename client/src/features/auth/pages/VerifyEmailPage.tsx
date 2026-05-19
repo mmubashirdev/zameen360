@@ -5,10 +5,51 @@ import { useToast } from "@shared/hooks/useToast";
 import { useAuth } from "../hooks/useAuth";
 import styles from "../pages/verifyemail.module.css";
 
+const EMAIL_OTP_EXPIRY_MS = 60 * 1000;
+const RESEND_COOLDOWN_MS = 60 * 1000;
+const VERIFY_EMAIL_RESEND_KEY = "verify_email_resend_expiry";
+const VERIFY_EMAIL_CODE_KEY = "verify_email_code_expiry";
+const VERIFY_EMAIL_PENDING_EMAIL_KEY = "verify_email_pending_email";
+
 interface VerifyEmailLocationState {
   email?: string;
   userId?: string;
+  otpExpiresAt?: string;
+  resendAvailableAt?: string;
 }
+
+const getRemainingSeconds = (timestampMs: number) =>
+  Math.max(0, Math.ceil((timestampMs - Date.now()) / 1000));
+
+const parseTimestamp = (value?: string | null) => {
+  if (!value) return null;
+  const parsed = Number(value);
+  if (Number.isFinite(parsed)) return parsed;
+
+  const isoParsed = Date.parse(value);
+  return Number.isFinite(isoParsed) ? isoParsed : null;
+};
+
+const initializeTimer = (
+  storageKey: string,
+  preferredTimestamp: string | undefined,
+  fallbackMs: number
+) => {
+  const preferredTime = parseTimestamp(preferredTimestamp);
+  if (preferredTime !== null) {
+    sessionStorage.setItem(storageKey, String(preferredTime));
+    return getRemainingSeconds(preferredTime);
+  }
+
+  const storedTime = parseTimestamp(sessionStorage.getItem(storageKey));
+  if (storedTime !== null) {
+    return getRemainingSeconds(storedTime);
+  }
+
+  const fallbackTime = Date.now() + fallbackMs;
+  sessionStorage.setItem(storageKey, String(fallbackTime));
+  return getRemainingSeconds(fallbackTime);
+};
 
 export default function VerifyEmailPage() {
   const location = useLocation();
@@ -17,73 +58,68 @@ export default function VerifyEmailPage() {
   const { verifyEmail, resendVerificationOtp, isLoading } = useAuth();
   const state = (location.state as VerifyEmailLocationState | null) ?? null;
 
-  const [email] = useState(state?.email ?? "");
+  const [email] = useState(
+    () =>
+      state?.email ??
+      sessionStorage.getItem(VERIFY_EMAIL_PENDING_EMAIL_KEY) ??
+      ""
+  );
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isResending, setIsResending] = useState(false);
-  const [resendTimer, setResendTimer] = useState(() => {
-    const savedExpiry = sessionStorage.getItem("verify_email_resend_expiry");
-    if (savedExpiry) {
-      const remaining = Math.max(0, Math.ceil((parseInt(savedExpiry, 10) - Date.now()) / 1000));
-      return remaining;
-    } else {
-      const expiryTime = Date.now() + 60 * 1000;
-      sessionStorage.setItem("verify_email_resend_expiry", expiryTime.toString());
-      return 60;
-    }
-  });
-
-  const [expiryTimer, setExpiryTimer] = useState(() => {
-    const savedExpiry = sessionStorage.getItem("verify_email_code_expiry");
-    if (savedExpiry) {
-      const remaining = Math.max(0, Math.ceil((parseInt(savedExpiry, 10) - Date.now()) / 1000));
-      return remaining;
-    } else {
-      const expiryTime = Date.now() + 60 * 1000;
-      sessionStorage.setItem("verify_email_code_expiry", expiryTime.toString());
-      return 60;
-    }
-  });
+  const [resendTimer, setResendTimer] = useState(() =>
+    initializeTimer(
+      VERIFY_EMAIL_RESEND_KEY,
+      state?.resendAvailableAt,
+      RESEND_COOLDOWN_MS
+    )
+  );
+  const [expiryTimer, setExpiryTimer] = useState(() =>
+    initializeTimer(
+      VERIFY_EMAIL_CODE_KEY,
+      state?.otpExpiresAt,
+      EMAIL_OTP_EXPIRY_MS
+    )
+  );
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const cleanedOtp = useMemo(() => otp.join(""), [otp]);
+  const isCodeExpired = expiryTimer <= 0;
 
-  // ── Auto focus first input ──────────────────────────────
   useEffect(() => {
     inputRefs.current[0]?.focus();
   }, []);
 
-  // ── Resend cooldown timer ───────────────────────────────
+  useEffect(() => {
+    if (state?.email) {
+      sessionStorage.setItem(VERIFY_EMAIL_PENDING_EMAIL_KEY, state.email);
+    }
+  }, [state?.email]);
+
   useEffect(() => {
     if (resendTimer <= 0) return;
-    const interval = setInterval(() => {
-      setResendTimer((prev) => {
-        const nextVal = prev - 1;
-        if (nextVal <= 0) {
-          clearInterval(interval);
-        }
-        return nextVal;
-      });
+
+    const timer = window.setTimeout(() => {
+      setResendTimer((prev) => Math.max(prev - 1, 0));
     }, 1000);
-    return () => clearInterval(interval);
+
+    return () => window.clearTimeout(timer);
   }, [resendTimer]);
 
-  // ── Code expiry timer ───────────────────────────────────
   useEffect(() => {
     if (expiryTimer <= 0) return;
-    const interval = setInterval(() => {
-      setExpiryTimer((prev) => {
-        const nextVal = prev - 1;
-        if (nextVal <= 0) {
-          clearInterval(interval);
-        }
-        return nextVal;
-      });
+
+    const timer = window.setTimeout(() => {
+      setExpiryTimer((prev) => Math.max(prev - 1, 0));
     }, 1000);
-    return () => clearInterval(interval);
+
+    return () => window.clearTimeout(timer);
   }, [expiryTimer]);
 
-  const cleanedOtp = useMemo(() => otp.join(""), [otp]);
+  useEffect(() => {
+    if (!isCodeExpired) return;
+    setOtp(["", "", "", "", "", ""]);
+  }, [isCodeExpired]);
 
-  // ── Format timer ────────────────────────────────────────
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -92,22 +128,26 @@ export default function VerifyEmailPage() {
       .padStart(2, "0")}`;
   };
 
-  // ── OTP Handlers ────────────────────────────────────────
-  const handleOtpChange = useCallback((index: number, value: string) => {
-    const digit = value.replace(/\D/g, "").slice(-1);
+  const handleOtpChange = useCallback(
+    (index: number, value: string) => {
+      if (isCodeExpired) return;
 
-    setOtp((prev) => {
-      const newOtp = [...prev];
-      newOtp[index] = digit;
-      return newOtp;
-    });
+      const digit = value.replace(/\D/g, "").slice(-1);
 
-    if (digit && index < 5) {
-      requestAnimationFrame(() => {
-        inputRefs.current[index + 1]?.focus();
+      setOtp((prev) => {
+        const newOtp = [...prev];
+        newOtp[index] = digit;
+        return newOtp;
       });
-    }
-  }, []);
+
+      if (digit && index < 5) {
+        requestAnimationFrame(() => {
+          inputRefs.current[index + 1]?.focus();
+        });
+      }
+    },
+    [isCodeExpired]
+  );
 
   const handleOtpKeyDown = useCallback(
     (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -133,29 +173,50 @@ export default function VerifyEmailPage() {
     []
   );
 
-  const handleOtpPaste = useCallback((e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    if (!pasted) return;
+  const handleOtpPaste = useCallback(
+    (e: React.ClipboardEvent) => {
+      if (isCodeExpired) return;
 
-    const newOtp = ["", "", "", "", "", ""];
-    for (let i = 0; i < 6; i++) {
-      newOtp[i] = pasted[i] || "";
-    }
-    setOtp(newOtp);
+      e.preventDefault();
+      const pasted = e.clipboardData
+        .getData("text")
+        .replace(/\D/g, "")
+        .slice(0, 6);
 
-    const focusIndex = Math.min(pasted.length, 5);
-    requestAnimationFrame(() => {
-      inputRefs.current[focusIndex]?.focus();
-    });
-  }, []);
+      if (!pasted) return;
 
-  // ── Verify Handler ──────────────────────────────────────
+      const newOtp = ["", "", "", "", "", ""];
+      for (let i = 0; i < 6; i++) {
+        newOtp[i] = pasted[i] || "";
+      }
+      setOtp(newOtp);
+
+      const focusIndex = Math.min(pasted.length, 5);
+      requestAnimationFrame(() => {
+        inputRefs.current[focusIndex]?.focus();
+      });
+    },
+    [isCodeExpired]
+  );
+
+  const clearVerifyEmailSession = () => {
+    sessionStorage.removeItem(VERIFY_EMAIL_RESEND_KEY);
+    sessionStorage.removeItem(VERIFY_EMAIL_CODE_KEY);
+    sessionStorage.removeItem(VERIFY_EMAIL_PENDING_EMAIL_KEY);
+  };
+
   const handleVerify = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!email.trim()) {
+      toast.error("Email Required", "No email found. Please sign up again.");
+      return;
+    }
+
+    if (isCodeExpired) {
+      toast.error("Code Expired", "Please request a new verification code.");
+      return;
+    }
 
     if (cleanedOtp.length !== 6) {
       toast.error("Incomplete Code", "Please enter the full 6-digit code.");
@@ -168,15 +229,18 @@ export default function VerifyEmailPage() {
         otpCode: cleanedOtp,
       });
 
-      sessionStorage.removeItem("verify_email_resend_expiry");
-      sessionStorage.removeItem("verify_email_code_expiry");
+      clearVerifyEmailSession();
       toast.success("Email Verified!", "Account activated successfully.");
-      navigate("/dashboard", { replace: true });
+      navigate("/marketplace", { replace: true });
     } catch (err) {
       const message =
         typeof err === "object" && err !== null && "message" in err
           ? String((err as { message: string }).message)
           : "Invalid or expired code.";
+
+      if (message.toLowerCase().includes("expired")) {
+        setExpiryTimer(0);
+      }
 
       toast.error("Verification Failed", message);
       setOtp(["", "", "", "", "", ""]);
@@ -184,7 +248,6 @@ export default function VerifyEmailPage() {
     }
   };
 
-  // ── Resend Handler ──────────────────────────────────────
   const handleResend = async () => {
     if (!email.trim()) {
       toast.error("Email Required", "No email found. Please sign up again.");
@@ -194,15 +257,24 @@ export default function VerifyEmailPage() {
 
     setIsResending(true);
     try {
-      const message = await resendVerificationOtp(email.trim().toLowerCase());
-      toast.success("Code Sent!", message || "New code sent.");
-      
-      const newExpiry = Date.now() + 60 * 1000;
-      sessionStorage.setItem("verify_email_resend_expiry", newExpiry.toString());
-      sessionStorage.setItem("verify_email_code_expiry", newExpiry.toString());
+      const result = await resendVerificationOtp(email.trim().toLowerCase());
+      toast.success("Code Sent!", result.message || "New code sent.");
 
-      setResendTimer(60);
-      setExpiryTimer(60);
+      const resendAvailableAt =
+        parseTimestamp(result.data?.resendAvailableAt) ??
+        Date.now() + RESEND_COOLDOWN_MS;
+      const otpExpiresAt =
+        parseTimestamp(result.data?.otpExpiresAt) ??
+        Date.now() + EMAIL_OTP_EXPIRY_MS;
+
+      sessionStorage.setItem(
+        VERIFY_EMAIL_RESEND_KEY,
+        String(resendAvailableAt)
+      );
+      sessionStorage.setItem(VERIFY_EMAIL_CODE_KEY, String(otpExpiresAt));
+
+      setResendTimer(getRemainingSeconds(resendAvailableAt));
+      setExpiryTimer(getRemainingSeconds(otpExpiresAt));
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (err) {
@@ -216,7 +288,6 @@ export default function VerifyEmailPage() {
     }
   };
 
-  // ── Mask Email - Split into local & domain ──────────────
   const emailLocal = useMemo(() => {
     if (!email) return "";
     const local = email.split("@")[0] || "";
@@ -231,7 +302,6 @@ export default function VerifyEmailPage() {
 
   return (
     <div className={styles.page}>
-      {/* ─── LEFT SIDE - Hero ──────────────────────────────────── */}
       <div className={styles.leftSide}>
         <div className={styles.bgImage}>
           <img
@@ -241,7 +311,6 @@ export default function VerifyEmailPage() {
           <div className={styles.overlay} />
         </div>
 
-        {/* Logo Top Left */}
         <div className={styles.logoBox}>
           <div className={styles.logoPlaceholder}>
             <span className={styles.logoText}>
@@ -250,7 +319,6 @@ export default function VerifyEmailPage() {
           </div>
         </div>
 
-        {/* Hero Content Center */}
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
             Find. Buy. Sell.
@@ -259,12 +327,11 @@ export default function VerifyEmailPage() {
             <span className={styles.heroAccent}>360°</span>
           </h1>
           <p className={styles.heroSubtitle}>
-            Discover the best properties, connect with trusted agents, and
-            make smart real estate decisions.
+            Discover the best properties, connect with trusted agents, and make
+            smart real estate decisions.
           </p>
         </div>
 
-        {/* Stats Bottom */}
         <div className={styles.statsBox}>
           <div className={styles.statItem}>
             <div className={styles.statIconWrap}>
@@ -290,29 +357,22 @@ export default function VerifyEmailPage() {
         </div>
       </div>
 
-      {/* ─── RIGHT SIDE - Verify Form ─────────────────────────── */}
       <div className={styles.rightSide}>
         <div className={styles.card}>
-          {/* Back to Login */}
           <Link to="/login" className={styles.backLink}>
             <i className="fa-solid fa-arrow-left" />
             Back to Login
           </Link>
 
-          {/* Shield Icon */}
           <div className={styles.shieldIconWrap}>
             <div className={styles.shieldCircle}>
               <i className="fa-solid fa-shield-halved" aria-hidden="true" />
             </div>
           </div>
 
-          {/* Title */}
           <h2 className={styles.cardTitle}>Verify Your Email</h2>
-          <p className={styles.cardSubtitle}>
-            Enter the 6-digit code sent to
-          </p>
+          <p className={styles.cardSubtitle}>Enter the 6-digit code sent to</p>
 
-          {/* ✅ Email split into spans (using DIV not P) */}
           <div className={styles.emailMasked}>
             {email ? (
               <>
@@ -327,12 +387,8 @@ export default function VerifyEmailPage() {
             )}
           </div>
 
-          {/* OTP Form */}
           <form onSubmit={handleVerify} noValidate className={styles.form}>
-            <div
-              className={styles.otpContainer}
-              onPaste={handleOtpPaste}
-            >
+            <div className={styles.otpContainer} onPaste={handleOtpPaste}>
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -343,6 +399,7 @@ export default function VerifyEmailPage() {
                   inputMode="numeric"
                   maxLength={1}
                   value={digit}
+                  disabled={isCodeExpired}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
                   onFocus={(e) => e.target.select()}
@@ -354,21 +411,29 @@ export default function VerifyEmailPage() {
               ))}
             </div>
 
-            {/* Expiry Timer */}
             <p className={styles.expiryText}>
               <i className="fa-regular fa-clock" aria-hidden="true" />
-              Code expires in{" "}
-              <span className={styles.timerValue}>
-                {formatTime(expiryTimer)}
-              </span>
+              {isCodeExpired ? (
+                <>
+                  Code expired. <span className={styles.timerValue}>Resend required</span>
+                </>
+              ) : (
+                <>
+                  Code expires in{" "}
+                  <span className={styles.timerValue}>
+                    {formatTime(expiryTimer)}
+                  </span>
+                </>
+              )}
             </p>
 
-            {/* Verify Button */}
             <button
               type="submit"
-              disabled={isLoading || cleanedOtp.length !== 6}
+              disabled={isLoading || cleanedOtp.length !== 6 || isCodeExpired}
               className={`${styles.verifyBtn} ${
-                cleanedOtp.length === 6 ? styles.verifyBtnActive : ""
+                cleanedOtp.length === 6 && !isCodeExpired
+                  ? styles.verifyBtnActive
+                  : ""
               }`}
             >
               {isLoading ? (
@@ -376,13 +441,14 @@ export default function VerifyEmailPage() {
                   <span className={styles.spinner} />
                   Verifying...
                 </span>
+              ) : isCodeExpired ? (
+                "Code Expired"
               ) : (
                 "Verify Code"
               )}
             </button>
           </form>
 
-          {/* Resend */}
           <p className={styles.resendText}>
             Didn't receive the code?{" "}
             <button
@@ -394,7 +460,7 @@ export default function VerifyEmailPage() {
               {isResending
                 ? "Sending..."
                 : resendTimer > 0
-                ? `Resend in ${resendTimer}s`
+                ? `Resend in ${formatTime(resendTimer)}`
                 : "Resend Code"}
             </button>
           </p>

@@ -3,14 +3,18 @@ const prisma = require("../../../configs/prisma");
 const generateOTP = require("../../../utils/generateOTP");
 const { sendOTPEmail } = require("../../../utils/sendEmail");
 
+const EMAIL_OTP_EXPIRY_MS = 60 * 1000;
+const RESEND_OTP_COOLDOWN_MS = 60 * 1000;
+
 const registerUser = async (data, ip, userAgent) => {
   const { fullName, email, phone, password, confirmPassword, role, city } = data;
 
-  // ── Validation ──────────────────────────────────────────
   if (!fullName) throw { status: 400, message: "Full name required." };
   if (!email) throw { status: 400, message: "Email required." };
   if (!password) throw { status: 400, message: "Password required." };
-  if (!confirmPassword) throw { status: 400, message: "Confirm password required." };
+  if (!confirmPassword) {
+    throw { status: 400, message: "Confirm password required." };
+  }
 
   if (password !== confirmPassword) {
     throw { status: 400, message: "Passwords don't match." };
@@ -19,45 +23,25 @@ const registerUser = async (data, ip, userAgent) => {
     throw { status: 400, message: "Password min 8 characters." };
   }
 
-  // ── Normalize email ─────────────────────────────────────
   const normalizedEmail = email.toLowerCase().trim();
 
-  // ── Check if email exists ───────────────────────────────
   const existing = await prisma.user.findUnique({
     where: { email: normalizedEmail },
   });
 
   if (existing) {
-    // ✅ NEW LOGIC: If user is NOT verified, delete and re-register
-    if (!existing.isVerified) {
-      console.log(`🔄 Unverified user found, deleting old record: ${normalizedEmail}`);
-
-      // Delete all related data (cascade)
-      await prisma.$transaction([
-        prisma.userVerification.deleteMany({ where: { userId: existing.id } }),
-        prisma.userActivityLog.deleteMany({ where: { userId: existing.id } }),
-        prisma.userProfile.deleteMany({ where: { userId: existing.id } }),
-        prisma.sellerDetail.deleteMany({ where: { userId: existing.id } }),
-        prisma.userSession.deleteMany({ where: { userId: existing.id } }),
-        prisma.user.delete({ where: { id: existing.id } }),
-      ]);
-
-      console.log(`✅ Old unverified user deleted, proceeding with fresh registration`);
-    } else {
-      // ✅ User is verified - block registration
-      throw {
-        status: 400,
-        message: "Email already registered. Please login instead.",
-      };
-    }
+    throw {
+      status: 409,
+      message: existing.isVerified
+        ? "Email already registered. Please login instead."
+        : "Email already exists. Please verify your email or use a different email.",
+    };
   }
 
-  // ── Hash Password ───────────────────────────────────────
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   const userRole = role === "SELLER" ? "SELLER" : "BUYER";
 
-  // ── Create User (fresh) ─────────────────────────────────
   const user = await prisma.user.create({
     data: {
       fullName: fullName.trim(),
@@ -72,8 +56,10 @@ const registerUser = async (data, ip, userAgent) => {
   });
 
   const otp = generateOTP();
+  const now = Date.now();
+  const otpExpiry = new Date(now + EMAIL_OTP_EXPIRY_MS);
+  const resendAvailableAt = new Date(now + RESEND_OTP_COOLDOWN_MS);
 
-  // ── Parallel DB Operations ──────────────────────────────
   await Promise.all([
     prisma.userProfile.create({
       data: { userId: user.id, profileComplete: false },
@@ -86,7 +72,7 @@ const registerUser = async (data, ip, userAgent) => {
         userId: user.id,
         otpCode: otp,
         otpType: "EMAIL",
-        otpExpiry: new Date(Date.now() + 10 * 60 * 1000),
+        otpExpiry,
         ipAddress: ip,
       },
     }),
@@ -102,7 +88,6 @@ const registerUser = async (data, ip, userAgent) => {
     }),
   ]);
 
-  // ── Email background mein ───────────────────────────────
   sendOTPEmail(normalizedEmail, otp, "Email Verification").catch((err) =>
     console.error("Email failed:", err.message)
   );
@@ -113,6 +98,8 @@ const registerUser = async (data, ip, userAgent) => {
     email: user.email,
     role: user.role,
     isVerified: false,
+    otpExpiresAt: otpExpiry.toISOString(),
+    resendAvailableAt: resendAvailableAt.toISOString(),
   };
 };
 

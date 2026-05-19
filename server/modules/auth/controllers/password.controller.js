@@ -12,7 +12,8 @@ exports.forgotPassword = async (req, res) => {
 
 exports.verifyResetOTP = async (req, res) => {
   try {
-    const { email, otpCode } = req.body;
+    const { email } = req.body;
+    const otpCode = req.body.otpCode || req.body.otp;
 
     console.log("verifyResetOTP Request Body:", { email, otpCode });
 

@@ -28,6 +28,27 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
       fallback
     );
   }
+
+  if (error && typeof error === "object") {
+    const customError = error as {
+      message?: unknown;
+      response?: {
+        data?: {
+          message?: string;
+          error?: string;
+        };
+      };
+    };
+
+    if (typeof customError.message === "string" && customError.message) {
+      return customError.message;
+    }
+
+    if (customError.response?.data?.message || customError.response?.data?.error) {
+      return customError.response.data.message || customError.response.data.error || fallback;
+    }
+  }
+
   return error instanceof Error ? error.message : fallback;
 };
 
@@ -51,8 +72,19 @@ export const resendOtp = createAsyncThunk(
   "auth/resendOtp",
   async (email: string, { rejectWithValue }) => {
     try {
-      // Reuse forgotPassword API or use resend endpoint
-      const response = await authApi.forgotPassword({ email });
+      const response = await authApi.resendOtp({ email });
+      return response;
+    } catch (error: unknown) {
+      return rejectWithValue(getErrorMessage(error, "Failed to resend OTP"));
+    }
+  }
+);
+
+export const resendResetOtp = createAsyncThunk(
+  "auth/resendResetOtp",
+  async (email: string, { rejectWithValue }) => {
+    try {
+      const response = await authApi.resendResetOtp({ email });
       return response;
     } catch (error: unknown) {
       return rejectWithValue(getErrorMessage(error, "Failed to resend OTP"));
@@ -151,6 +183,20 @@ const authSlice = createSlice({
         state.successMessage = "New OTP sent to your email";
       })
       .addCase(resendOtp.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+
+      .addCase(resendResetOtp.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.successMessage = null;
+      })
+      .addCase(resendResetOtp.fulfilled, (state) => {
+        state.loading = false;
+        state.successMessage = "New OTP sent to your email";
+      })
+      .addCase(resendResetOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

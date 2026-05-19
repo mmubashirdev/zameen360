@@ -6,7 +6,12 @@ import {
   resendOtp,
 } from "../api/authApi";
 import { USER_ROLES, STORAGE_KEYS } from "../constants/authConstants";
-import type { User } from "../types/auth.types";
+import type {
+  LoginServiceResult,
+  ResendOtpServiceResult,
+  SignupServiceResult,
+  User,
+} from "../types/auth.types";
 
 
 
@@ -42,11 +47,17 @@ const normalizeUser = (user: any): User => ({
 });
 
 const getError = (error: any, fallback: string) => {
-  const data = error.response?.data;
-  const message = data?.message || error.message || fallback;
+  const data = error?.response?.data;
+  const message =
+    data?.message ||
+    (typeof error?.message === "string" ? error.message : "") ||
+    fallback;
   const err = new Error(message) as any;
   if (data && typeof data === "object") {
     Object.assign(err, data);
+  }
+  if (error && typeof error === "object") {
+    Object.assign(err, error);
   }
   return err;
 };
@@ -56,18 +67,19 @@ const getError = (error: any, fallback: string) => {
 
 // sign up ???
 
-export const handleSignup = async (data: any) => {
+export const handleSignup = async (data: any): Promise<SignupServiceResult> => {
   try {
     const isSeller = data.role?.toUpperCase() === USER_ROLES.SELLER;
     const response = await (isSeller ? registerSeller(data) : registerBuyer(data));
 
-    if (response?.data?.token) {
-      persistAuth(response.data.token, normalizeUser(response.data));
-    } else {
-      throw new Error("Invalid response structure: Missing token or data");
+    if (!response?.data?.userId || !response.data.email) {
+      throw new Error("Invalid signup response structure");
     }
 
-    return response;
+    return {
+      data: response.data,
+      message: response.message,
+    };
   } catch (error: any) {
     throw getError(error, "Signup failed");
   }
@@ -77,20 +89,27 @@ export const handleSignup = async (data: any) => {
 
 
 
+
 // ??? login 
 
-export const handleLogin = async (data: any) => {
+export const handleLogin = async (data: any): Promise<LoginServiceResult> => {
   try {
     const response = await loginUser(data);
+    const authPayload = response?.data;
 
-    if (response?.data?.user && response?.data?.accessToken) {
-      const user = normalizeUser(response.data.user);
-      persistAuth(response.data.accessToken, user);
-    } else {
-      throw new Error("Invalid response structure: Missing user or accessToken");
+    if (!authPayload?.user || !authPayload.accessToken) {
+      throw new Error("Invalid login response structure");
     }
 
-    return response;
+    const user = normalizeUser(authPayload.user);
+    persistAuth(authPayload.accessToken, user);
+
+    return {
+      user,
+      token: authPayload.accessToken,
+      refreshToken: authPayload.refreshToken,
+      message: response.message,
+    };
   } catch (error: any) {
     throw getError(error, "Login failed");
   }
@@ -100,18 +119,24 @@ export const handleLogin = async (data: any) => {
 // verify email 
 
 
-export const handleVerifyEmail = async (payload: any) => {
+export const handleVerifyEmail = async (payload: any): Promise<LoginServiceResult> => {
   try {
     const response = await verifyOtp(payload);
+    const authPayload = response?.data;
 
-    if (response?.data?.user && response?.data?.accessToken) {
-      const user = normalizeUser(response.data.user);
-      persistAuth(response.data.accessToken, user);
-    } else {
-      throw new Error("Invalid response structure: Missing user or accessToken");
+    if (!authPayload?.user || !authPayload.accessToken) {
+      throw new Error("Invalid verification response structure");
     }
 
-    return response;
+    const user = normalizeUser(authPayload.user);
+    persistAuth(authPayload.accessToken, user);
+
+    return {
+      user,
+      token: authPayload.accessToken,
+      refreshToken: authPayload.refreshToken,
+      message: response.message,
+    };
   } catch (error: any) {
     throw getError(error, "Verification failed");
   }
@@ -121,10 +146,15 @@ export const handleVerifyEmail = async (payload: any) => {
 
 // resend otp
 
-export const handleResendOtp = async (email: string) => {
+export const handleResendOtp = async (
+  email: string
+): Promise<ResendOtpServiceResult> => {
   try {
     const response = await resendOtp({ email });
-    return response.message;
+    return {
+      message: response.message,
+      data: response.data,
+    };
   } catch (error: any) {
     throw getError(error, "Failed to resend OTP");
   }

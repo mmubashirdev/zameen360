@@ -26,11 +26,29 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   const [isLoading, setIsLoading] = useState(false);
 
-  const execute = async (serviceFn: Function, args: any, updateContext?: boolean) => {
+  const hasAuthSession = (
+    value: unknown,
+  ): value is { user: AuthContextType["user"]; token: string } => {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      "user" in value &&
+      "token" in value &&
+      typeof (value as { token?: unknown }).token === "string"
+    );
+  };
+
+  const execute = async <TArgs, TResult>(
+    serviceFn: (args: TArgs) => Promise<TResult>,
+    args: TArgs,
+    updateContext?: boolean,
+  ): Promise<TResult> => {
     setIsLoading(true);
     try {
       const result = await serviceFn(args);
-      if (updateContext && result.token) ctx?.setUser?.(result.user, result.token);
+      if (updateContext && hasAuthSession(result)) {
+        ctx?.setUser?.(result.user, result.token);
+      }
       ctx?.setError?.(null);
       return result;
     } catch (error: any) {

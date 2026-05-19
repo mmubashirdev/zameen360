@@ -10,7 +10,7 @@ import StepIndicator from "../components/StepIndicator";
 import OTPInput from "../components/OTPInput";
 import {
   verifyOTP,
-  resendOtp,
+  resendResetOtp,
   clearAuthError,
   clearAuthSuccess,
   clearOtpVerified,
@@ -136,7 +136,7 @@ export default function OTPVerification({
     setOtp("");
 
     try {
-      await dispatch(resendOtp(email)).unwrap();
+      await dispatch(resendResetOtp(email)).unwrap();
       const expiry = Date.now() + 60 * 1000;
       sessionStorage.setItem("otp_expiry_time", String(expiry));
       setTimeLeft(60);

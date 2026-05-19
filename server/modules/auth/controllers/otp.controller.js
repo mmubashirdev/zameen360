@@ -2,8 +2,8 @@ const service = require("../services/otp.service");
 
 exports.sendOTP = async (req, res) => {
   try {
-    await service.sendOTPService(req.body.email, req.ip);
-    res.status(200).json({ success: true, message: "OTP sent." });
+    const data = await service.sendOTPService(req.body.email, req.ip);
+    res.status(200).json({ success: true, message: "OTP sent.", data });
   } catch (e) {
     res.status(e.status || 500).json({
       success: false,

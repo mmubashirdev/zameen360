@@ -3,14 +3,19 @@ const prisma = require("../../../configs/prisma");
 const generateOTP = require("../../../utils/generateOTP");
 const { sendPasswordResetEmail } = require("../../../utils/sendEmail");
 
-// ✅ Forgot Password - OTP generate karke email bhejo
+const RESET_OTP_EXPIRY_MS = 60 * 1000;
+const RESET_PASSWORD_WINDOW_MS = 10 * 60 * 1000;
+
 const forgotPasswordService = async (email, ip) => {
   if (!email) throw { status: 400, message: "Email required." };
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
+
   if (!user) throw { status: 404, message: "User not found." };
 
-  // ✅ Purane unused OTPs mark as used
   await prisma.userVerification.updateMany({
     where: {
       userId: user.id,
@@ -26,18 +31,17 @@ const forgotPasswordService = async (email, ip) => {
   });
 
   const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 60 * 1000); // 60 seconds
+  const otpExpiry = new Date(Date.now() + RESET_OTP_EXPIRY_MS);
 
   console.log("=== Generated OTP ===");
-  console.log("Email:", email);
+  console.log("Email:", normalizedEmail);
   console.log("OTP:", otp);
   console.log("Expiry:", otpExpiry);
 
-  // ✅ Naya OTP save karo
   await prisma.userVerification.create({
     data: {
       userId: user.id,
-      otpCode: String(otp), // ✅ String ensure karo
+      otpCode: String(otp),
       otpType: "PASSWORD_RESET",
       otpExpiry,
       ipAddress: ip,
@@ -47,13 +51,13 @@ const forgotPasswordService = async (email, ip) => {
   await prisma.passwordReset.create({
     data: {
       userId: user.id,
-      resetToken: String(otp), // ✅ String ensure karo
+      resetToken: String(otp),
       tokenExpiry: otpExpiry,
       ipAddress: ip,
     },
   });
 
-  await sendPasswordResetEmail(email, otp);
+  await sendPasswordResetEmail(normalizedEmail, otp);
 
   await prisma.userActivityLog.create({
     data: {
@@ -68,22 +72,29 @@ const forgotPasswordService = async (email, ip) => {
   return true;
 };
 
-// ✅ Verify OTP - Sirf check karo, mark as used mat karo (reset password mein hoga)
 const verifyResetOTPService = async (email, otpCode) => {
-  if (!email || !otpCode) throw { status: 400, message: "Email and OTP required." };
+  if (!email || !otpCode) {
+    throw { status: 400, message: "Email and OTP required." };
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+  const sanitizedOtpCode = String(otpCode).trim();
 
   console.log("=== Verify Reset OTP ===");
-  console.log("Email:", email);
-  console.log("OTP Code:", otpCode);
+  console.log("Email:", normalizedEmail);
+  console.log("OTP Code:", sanitizedOtpCode);
   console.log("OTP Type:", typeof otpCode);
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
+
   if (!user) throw { status: 404, message: "User not found." };
 
   const verification = await prisma.userVerification.findFirst({
     where: {
       userId: user.id,
-      otpCode: String(otpCode).trim(), // ✅ String trim karo
+      otpCode: sanitizedOtpCode,
       otpType: "PASSWORD_RESET",
       isUsed: false,
       otpExpiry: { gte: new Date() },
@@ -94,7 +105,6 @@ const verifyResetOTPService = async (email, otpCode) => {
   console.log("Verification Found:", verification ? "YES" : "NO");
 
   if (!verification) {
-    // ✅ Failed attempt log karo
     const latest = await prisma.userVerification.findFirst({
       where: {
         userId: user.id,
@@ -110,7 +120,7 @@ const verifyResetOTPService = async (email, otpCode) => {
         data: { attempts: latest.attempts + 1 },
       });
       console.log("Stored OTP:", latest.otpCode);
-      console.log("Received OTP:", otpCode);
+      console.log("Received OTP:", sanitizedOtpCode);
       console.log("Expiry:", latest.otpExpiry);
       console.log("Is Expired:", latest.otpExpiry < new Date());
     }
@@ -118,21 +128,52 @@ const verifyResetOTPService = async (email, otpCode) => {
     throw { status: 400, message: "Invalid or expired OTP." };
   }
 
-  // ✅ Sirf verify karo, isUsed: true mat karo abhi
-  // Reset password step mein mark hoga
+  const resetSession = await prisma.passwordReset.findFirst({
+    where: {
+      userId: user.id,
+      resetToken: sanitizedOtpCode,
+      isUsed: false,
+      tokenExpiry: { gte: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!resetSession) {
+    throw { status: 400, message: "Invalid or expired OTP." };
+  }
+
+  const resetAllowedUntil = new Date(Date.now() + RESET_PASSWORD_WINDOW_MS);
+  const verifiedAt = new Date();
+
+  await prisma.$transaction([
+    prisma.userVerification.update({
+      where: { id: verification.id },
+      data: { verifiedAt },
+    }),
+    prisma.passwordReset.update({
+      where: { id: resetSession.id },
+      data: { tokenExpiry: resetAllowedUntil },
+    }),
+  ]);
+
   return {
-    email,
+    email: normalizedEmail,
     otpVerified: true,
-    verificationId: verification.id, // ✅ ID return karo
+    verificationId: verification.id,
+    resetAllowedUntil: resetAllowedUntil.toISOString(),
   };
 };
 
-// ✅ Reset Password
 const resetPasswordService = async (data, ip) => {
   const { email, otpCode, newPassword, confirmPassword } = data;
 
   console.log("=== RESET PASSWORD START ===");
-  console.log("Received Data:", { email, otpCode, newPassword: !!newPassword, confirmPassword: !!confirmPassword });
+  console.log("Received Data:", {
+    email,
+    otpCode,
+    newPassword: !!newPassword,
+    confirmPassword: !!confirmPassword,
+  });
 
   if (!email || !otpCode || !newPassword || !confirmPassword) {
     throw { status: 400, message: "All fields required." };
@@ -144,11 +185,15 @@ const resetPasswordService = async (data, ip) => {
     throw { status: 400, message: "Minimum 8 characters required." };
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const sanitizedOtpCode = String(otpCode).trim();
+  const user = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
+  });
+
   console.log("User Found:", user ? user.id : "NOT FOUND");
   if (!user) throw { status: 404, message: "User not found." };
 
-  // ✅ Debug logging
   const allOTPs = await prisma.userVerification.findMany({
     where: { userId: user.id, otpType: "PASSWORD_RESET" },
     orderBy: { createdAt: "desc" },
@@ -160,28 +205,48 @@ const resetPasswordService = async (data, ip) => {
     console.log(`OTP ${i + 1}:`, {
       id: o.id,
       storedOTP: o.otpCode,
-      receivedOTP: otpCode,
-      isMatch: o.otpCode === String(otpCode).trim(),
+      receivedOTP: sanitizedOtpCode,
+      isMatch: o.otpCode === sanitizedOtpCode,
       isUsed: o.isUsed,
       expiry: o.otpExpiry,
+      verifiedAt: o.verifiedAt,
       isExpired: o.otpExpiry < new Date(),
     });
   });
 
-  // Find valid verification record
-  const v = await prisma.userVerification.findFirst({
+  const verification = await prisma.userVerification.findFirst({
     where: {
       userId: user.id,
-      otpCode: String(otpCode).trim(),
+      otpCode: sanitizedOtpCode,
       otpType: "PASSWORD_RESET",
       isUsed: false,
-      otpExpiry: { gte: new Date() },
+      verifiedAt: { not: null },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  if (!v) {
-    throw { status: 400, message: "Invalid or expired OTP." };
+  if (!verification) {
+    throw {
+      status: 400,
+      message: "Please verify your OTP before resetting the password.",
+    };
+  }
+
+  const resetSession = await prisma.passwordReset.findFirst({
+    where: {
+      userId: user.id,
+      resetToken: sanitizedOtpCode,
+      isUsed: false,
+      tokenExpiry: { gte: new Date() },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (!resetSession) {
+    throw {
+      status: 400,
+      message: "Your password reset session has expired. Please verify OTP again.",
+    };
   }
 
   const salt = await bcrypt.genSalt(12);
@@ -193,11 +258,11 @@ const resetPasswordService = async (data, ip) => {
       data: { passwordHash: hashed },
     }),
     prisma.userVerification.update({
-      where: { id: v.id },
-      data: { isUsed: true, verifiedAt: new Date() },
+      where: { id: verification.id },
+      data: { isUsed: true },
     }),
-    prisma.passwordReset.updateMany({
-      where: { userId: user.id, resetToken: String(otpCode).trim(), isUsed: false },
+    prisma.passwordReset.update({
+      where: { id: resetSession.id },
       data: { isUsed: true, resetAt: new Date() },
     }),
     prisma.userSession.updateMany({
@@ -226,22 +291,25 @@ const resetPasswordService = async (data, ip) => {
   return true;
 };
 
-
-// ✅ Change Password (Logged in user ke liye)
 const changePasswordService = async (userId, passwordHash, data, ip) => {
   const { currentPassword, newPassword, confirmPassword } = data;
 
-  if (!currentPassword || !newPassword || !confirmPassword)
+  if (!currentPassword || !newPassword || !confirmPassword) {
     throw { status: 400, message: "All fields required." };
+  }
 
-  if (newPassword !== confirmPassword)
+  if (newPassword !== confirmPassword) {
     throw { status: 400, message: "Passwords don't match." };
+  }
 
-  if (newPassword.length < 8)
+  if (newPassword.length < 8) {
     throw { status: 400, message: "Minimum 8 characters required." };
+  }
 
   const isValid = await bcrypt.compare(currentPassword, passwordHash);
-  if (!isValid) throw { status: 400, message: "Current password is incorrect." };
+  if (!isValid) {
+    throw { status: 400, message: "Current password is incorrect." };
+  }
 
   const salt = await bcrypt.genSalt(12);
   const hashed = await bcrypt.hash(newPassword, salt);

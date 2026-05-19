@@ -1,4 +1,4 @@
-import PropertyDetails from "../pages/PropertyDetails"; 
+import PropertyDetails from "../pages/propertyDetails"; 
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 

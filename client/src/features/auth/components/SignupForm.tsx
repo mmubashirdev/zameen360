@@ -45,7 +45,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
       password: "",
       confirmPassword: "",
       role: undefined,
-      // terms: undefined,
+      
     },
     mode: "onBlur",
   });
@@ -60,6 +60,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
       try {
         const result = await signup(data);
         setSubmitSuccess(true);
+        sessionStorage.removeItem("verify_email_resend_expiry");
+        sessionStorage.removeItem("verify_email_code_expiry");
+        sessionStorage.setItem("verify_email_pending_email", result.data.email);
         toast.success(
           "Account Created!",
           "Please verify your email to continue."
@@ -68,6 +71,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
           state: {
             userId: result.data?.userId,
             email: result.data?.email,
+            otpExpiresAt: result.data?.otpExpiresAt,
+            resendAvailableAt: result.data?.resendAvailableAt,
           },
         });
       } catch (err) {

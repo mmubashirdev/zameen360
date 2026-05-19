@@ -45,7 +45,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
       toast.success("Welcome Back!", result.message ?? "Login successful.");
 
 
-      navigate("/dashboard", { replace: true });
+      navigate("/marketplace", { replace: true });
     } catch (err) {
       const error = err as {
         message?: string;

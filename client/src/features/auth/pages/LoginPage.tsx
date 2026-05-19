@@ -4,8 +4,6 @@ import { ToastContainer } from "@shared/components/Toast";
 import { useToast } from "@shared/hooks/useToast";
 import { HERO_FEATURES } from "../constants/authConstants";
 import loginBg from "@features/auth/assets/Gemini_Generated_Image_1092l1092l1092l1.png"; 
-import image1 from "../assets/photo-1721815693498-cc28507c0ba2.avif"
-import image2 from "../assets/photo-1722421492323-eaf9c401befe.avif"
 
 export default function LoginPage() {
   const toast = useToast();
