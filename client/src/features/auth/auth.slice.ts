@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
 import * as authApi from "./api/authApi";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 
 export interface AuthState {
   loading: boolean;
@@ -17,39 +17,6 @@ const initialState: AuthState = {
   successMessage: null,
   emailForReset: null,
   otpVerified: false,
-};
-
-const getErrorMessage = (error: unknown, fallback: string): string => {
-  if (axios.isAxiosError(error)) {
-    return (
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      error.message ||
-      fallback
-    );
-  }
-
-  if (error && typeof error === "object") {
-    const customError = error as {
-      message?: unknown;
-      response?: {
-        data?: {
-          message?: string;
-          error?: string;
-        };
-      };
-    };
-
-    if (typeof customError.message === "string" && customError.message) {
-      return customError.message;
-    }
-
-    if (customError.response?.data?.message || customError.response?.data?.error) {
-      return customError.response.data.message || customError.response.data.error || fallback;
-    }
-  }
-
-  return error instanceof Error ? error.message : fallback;
 };
 
 // ─── Forgot Password ─────────────────────────────────────────────────────────

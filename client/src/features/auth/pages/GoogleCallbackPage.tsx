@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { STORAGE_KEYS } from "../constants/authConstants";
 import { useAuthContext } from "../hooks/useAuth";
 import axiosInstance from "@shared/lib/axios";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 
 export default function GoogleCallbackPage() {
   const navigate = useNavigate();
@@ -69,7 +70,10 @@ export default function GoogleCallbackPage() {
           navigate("/login?error=profile_failed", { replace: true });
         }
       } catch (err) {
-        console.error("Profile fetch error:", err);
+        console.error(
+          "Profile fetch error:",
+          getErrorMessage(err, "Failed to load profile")
+        );
         navigate("/login?error=profile_failed", { replace: true });
       }
     };

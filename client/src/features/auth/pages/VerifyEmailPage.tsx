@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer } from "@shared/components/Toast";
 import { useToast } from "@shared/hooks/useToast";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 import { useAuth } from "../hooks/useAuth";
 import styles from "../pages/verifyemail.module.css";
 
@@ -233,10 +234,7 @@ export default function VerifyEmailPage() {
       toast.success("Email Verified!", "Account activated successfully.");
       navigate("/marketplace", { replace: true });
     } catch (err) {
-      const message =
-        typeof err === "object" && err !== null && "message" in err
-          ? String((err as { message: string }).message)
-          : "Invalid or expired code.";
+      const message = getErrorMessage(err, "Invalid or expired code.");
 
       if (message.toLowerCase().includes("expired")) {
         setExpiryTimer(0);
@@ -278,10 +276,7 @@ export default function VerifyEmailPage() {
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
     } catch (err) {
-      const message =
-        typeof err === "object" && err !== null && "message" in err
-          ? String((err as { message: string }).message)
-          : "Could not resend code.";
+      const message = getErrorMessage(err, "Could not resend code.");
       toast.error("Resend Failed", message);
     } finally {
       setIsResending(false);

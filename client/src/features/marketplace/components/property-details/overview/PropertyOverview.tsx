@@ -59,7 +59,7 @@ const PropertyOverview = () => {
         {propertyData.badges.map((badge) => (
           <span
             key={badge}
-            className={`px-3 py-1 rounded text-xs font-medium ${badgeStyles[badge] || "bg-gray-100 text-gray-700"}`}
+            className={`mb-4 px-3 py-1 rounded text-xs font-medium ${badgeStyles[badge] || "bg-gray-100 text-gray-700"}`}
           >
             {badge}
           </span>
@@ -67,7 +67,7 @@ const PropertyOverview = () => {
       </div>
 
       {/* FEATURES GRID */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 border rounded-xl p-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 border border-gray-200 shadow-lg mb-4 rounded-xl p-4">
         {propertyData.features.map((feature) => (
           <div
             key={feature.label}
@@ -85,7 +85,7 @@ const PropertyOverview = () => {
         <h2 className="text-lg font-semibold mb-2 text-gray-900">
           DESCRIPTION
         </h2>
-        <div className="space-y-2 text-sm text-gray-600 leading-relaxed">
+        <div className="space-y-2 text-sm text-gray-600 leading-relaxed mb-4">
           {propertyData.description.map((para, idx) => (
             <p key={idx}>{para}</p>
           ))}

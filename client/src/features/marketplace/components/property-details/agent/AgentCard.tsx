@@ -3,7 +3,7 @@ import { Phone, Mail, BadgeCheck, Star } from "lucide-react";
 
 const AgentCard = () => {
   return (
-    <div className="border rounded-xl p-5 bg-white">
+    <div className="border border-gray-200 shadow-lg rounded-xl p-5 bg-white">
       <h3 className="text-sm font-semibold text-gray-500 mb-4">
         LISTING AGENT
       </h3>
@@ -19,7 +19,7 @@ const AgentCard = () => {
             <h3 className="font-semibold text-gray-900">Usman Khalid</h3>
             <BadgeCheck
               size={16}
-              className="text-blue-600 fill-blue-600 text-white"
+              className="fill-blue-600 text-white"
             />
           </div>
           <p className="text-gray-500 text-xs">Senior Property Consultant</p>
@@ -34,15 +34,15 @@ const AgentCard = () => {
       </div>
 
       <div className="space-y-2">
-        <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition">
+        <button className="mb-3 h-12 w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition">
           <Phone size={16} />
           Call Now
         </button>
-        <button className="w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition">
+        <button className="mb-3 h-12 w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition">
           <Phone size={16} />
           WhatsApp
         </button>
-        <button className="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition">
+        <button className="mb-3 h-12 w-full border border-blue-600 text-blue-600 hover:bg-blue-50 py-2.5 rounded-lg flex items-center justify-center gap-2 text-sm font-medium transition">
           <Mail size={16} />
           Email Agent
         </button>

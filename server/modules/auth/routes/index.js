@@ -5,5 +5,7 @@ router.use(require("./otp.routes"));
 router.use(require("./password.routes"));
 router.use(require("./profile.routes"));
 
+router.use(require("./google.routes"));
+
 router.use(require("./admin.routes"));
 module.exports = router;

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "../styles/login.module.css";
 import { useAuth, detectErrorField } from "../hooks/useAuth";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 import {
   loginSchema,
   type LoginSchemaType,
@@ -47,12 +48,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
 
       navigate("/marketplace", { replace: true });
     } catch (err) {
-      const error = err as {
-        message?: string;
-        requiresVerification?: boolean;
-      };
-
-      const message = error.message ?? "Login failed. Please try again.";
+      const message = getErrorMessage(err, "Login failed. Please try again.");
 
       const field = detectErrorField(message);
 

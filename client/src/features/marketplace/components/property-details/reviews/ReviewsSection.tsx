@@ -8,7 +8,7 @@ const ReviewsSection = () => {
   );
 
   return (
-    <div className="border rounded-xl p-6">
+    <div className="border border-gray-200 mt-5 rounded-xl p-6">
       <h2 className="text-lg font-semibold mb-4 text-gray-900">
         REVIEWS ({propertyData.totalReviews})
       </h2>
