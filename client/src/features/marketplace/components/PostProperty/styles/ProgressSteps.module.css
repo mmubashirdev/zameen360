@@ -1,0 +1,39 @@
+.container { margin: 24px 0; }
+.steps { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.stepWrap { display: flex; align-items: center; flex-direction: column; position: relative; flex: 1; max-width: 200px; }
+.circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+.active { background: #2563eb; color: white; }
+.label { font-size: 13px; color: #6b7280; margin-top: 8px; }
+.activeLabel { color: #2563eb; font-weight: 600; }
+.line {
+  position: absolute;
+  top: 22px;
+  left: 60%;
+  right: -40%;
+  height: 2px;
+  background: #e5e7eb;
+}
+.progressBar {
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  margin-top: 16px;
+}
+.progressFill { height: 100%; background: #2563eb; border-radius: 4px; }
+.info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 8px;
+}

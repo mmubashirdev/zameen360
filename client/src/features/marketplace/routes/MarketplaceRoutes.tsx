@@ -1,6 +1,7 @@
 import PropertyDetails from "../pages/propertyDetails"; 
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
+import MediaAndDetail from "../pages/MediaAndDetail"
 
 const marketplaceRoutes = [
   {
@@ -20,6 +21,11 @@ const marketplaceRoutes = [
     path: "/property",
     element: <PropertyDetails />,
   },
+
+{
+  path: "/media-and-details",
+  element: <MediaAndDetail />,
+}
 ];
 
 export default marketplaceRoutes;
