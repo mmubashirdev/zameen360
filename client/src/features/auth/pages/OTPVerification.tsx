@@ -31,7 +31,21 @@ export default function OTPVerification({
   email,
 }: OTPVerificationProps) {
   const [otp, setOtp] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState<number>(60);
+
+  const [timeLeft, setTimeLeft] = useState<number>(() => {
+    const savedExpiry = sessionStorage.getItem("otp_expiry_time");
+    if (savedExpiry === "expired") {
+      return 0;
+    }
+    if (savedExpiry) {
+      const remaining = Math.max(0, Math.ceil((Number(savedExpiry) - Date.now()) / 1000));
+      return remaining;
+    }
+    const expiry = Date.now() + 60 * 1000;
+    sessionStorage.setItem("otp_expiry_time", String(expiry));
+    return 60;
+  });
+
   const [error, setError] = useState<string>("");
   const [isResending, setIsResending] = useState<boolean>(false);
 
@@ -53,7 +67,6 @@ export default function OTPVerification({
   }, [email]);
 
   // ── Handle API errors ─────────────────────────────────
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!apiError) return;
 
@@ -65,6 +78,7 @@ export default function OTPVerification({
     if (lowerError.includes("expired")) {
       setTimeLeft(0);
       setOtp("");
+      sessionStorage.setItem("otp_expiry_time", "expired");
     } else if (
       lowerError.includes("invalidated") ||
       lowerError.includes("no longer valid")
@@ -78,11 +92,12 @@ export default function OTPVerification({
     if (!otpVerified) return;
 
     toast.success("Email verified!");
+    sessionStorage.setItem("auth_flow_otp", otp);
     dispatch(clearOtpVerified());
     dispatch(clearAuthSuccess());
+    sessionStorage.removeItem("otp_expiry_time");
     onNext();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [otpVerified]);
+  }, [otpVerified, onNext, dispatch, otp]);
 
   // ── Timer countdown ───────────────────────────────────
   useEffect(() => {
@@ -96,12 +111,12 @@ export default function OTPVerification({
   }, [timeLeft]);
 
   // ── Auto-clear on expiry ──────────────────────────────
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (timeLeft !== 0) return;
 
     setOtp("");
-    setError("Verification code has expired. Please request a new code.");
+    // setError("Verification code has expired. Please request a new code.");
+    sessionStorage.setItem("otp_expiry_time", "expired");
   }, [timeLeft]);
 
   const formatTime = (s: number): string => {
@@ -122,6 +137,8 @@ export default function OTPVerification({
 
     try {
       await dispatch(resendOtp(email)).unwrap();
+      const expiry = Date.now() + 60 * 1000;
+      sessionStorage.setItem("otp_expiry_time", String(expiry));
       setTimeLeft(60);
       toast.success("New verification code sent to your email!");
     } catch (err: unknown) {
@@ -166,6 +183,7 @@ export default function OTPVerification({
 
       if (message.toLowerCase().includes("expired")) {
         setTimeLeft(0);
+        sessionStorage.setItem("otp_expiry_time", "expired");
       }
     }
   };

@@ -78,6 +78,7 @@ export interface RegisterResponseData {
   email: string;
   role: UserRole;
   isVerified: boolean;
+  token?: string; // Added token property
 }
 
 export type RegisterResponse = ApiResponse<RegisterResponseData>;

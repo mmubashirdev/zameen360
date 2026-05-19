@@ -1,10 +1,10 @@
 import styles from "../styles/auth.module.css";
 import AuthNavbar         from "../components/AuthNavbar";
-
 import SignupForm         from "../components/SignupForm";
-
 import { useToast }       from "@shared/hooks/useToast";
 import { HERO_FEATURES }  from "../constants/authConstants";
+import image from "../assets/photo-1594540992254-0e2239661647.avif"
+
 
 export default function SignupPage() {
   const toast = useToast();
@@ -18,7 +18,7 @@ export default function SignupPage() {
         <section className={styles.hero} aria-label="Property showcase">
           <div className={styles.heroBg}>
             <img
-              src="https://z-cdn-media.chatglm.cn/files/a6875cfd-97b4-4c6f-88f1-550d6a8fd092.png?auth_key=1878622656-5f4a780eeb0a4af0b8d855181ebfd693-0-f41294470d4d33f18e0c299f8ffe047e"
+              src={image}
               alt="Luxury modern villa with pool at dusk"
             />
           </div>

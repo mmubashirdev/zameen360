@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ForgetPassword from "../pages/ForgetPassword";
@@ -14,16 +14,44 @@ interface AuthFlowProps {
 
 function AuthFlow({ initialStep = 1 }: AuthFlowProps) {
   const navigate = useNavigate();
-  const [step, setStep] = useState<Step>(initialStep);
-  const [email, setEmail] = useState<string>("");
+
+  const [step, setStep] = useState<Step>(() => {
+    const savedStep = sessionStorage.getItem("auth_flow_step");
+    return savedStep ? (Number(savedStep) as Step) : initialStep;
+  });
+
+  const [email, setEmail] = useState<string>(() => {
+    return sessionStorage.getItem("auth_flow_email") || "";
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem("auth_flow_step", String(step));
+  }, [step]);
+
+  useEffect(() => {
+    sessionStorage.setItem("auth_flow_email", email);
+  }, [email]);
 
   const goNext = () => setStep((s) => Math.min(4, s + 1) as Step);
-  const goBack = () => setStep((s) => Math.max(1, s - 1) as Step);
 
-  // ✅ Direct redirect to login page
+  const goBack = () => {
+    setStep((s) => {
+      const nextStep = Math.max(1, s - 1) as Step;
+      if (nextStep === 1) {
+        sessionStorage.removeItem("auth_flow_step");
+        sessionStorage.removeItem("auth_flow_email");
+        sessionStorage.removeItem("otp_expiry_time");
+      }
+      return nextStep;
+    });
+  };
+
   const goToLogin = () => {
     setStep(1);
     setEmail("");
+    sessionStorage.removeItem("auth_flow_step");
+    sessionStorage.removeItem("auth_flow_email");
+    sessionStorage.removeItem("otp_expiry_time");
     navigate("/login");
   };
 

@@ -27,7 +27,7 @@ const HeroSection: React.FC = () => {
         <div className={styles.heroContent}>
           <h1 className={styles.headline}>
             Find Your Dream{' '}
-            Property with{' '}
+            Property  with     {' '}
             <span className={styles.brandName}>Zameen 360</span>
           </h1>
           <p className={styles.subHeadline}>

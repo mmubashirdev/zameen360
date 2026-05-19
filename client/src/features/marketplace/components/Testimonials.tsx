@@ -6,7 +6,7 @@ import styles from "../styles/Testimonials.module.css";
 
 function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const itemsPerPage = 4;
+  const itemsPerPage = 3;
   const maxIndex = testimonialsData.length - itemsPerPage;
 
   const prevSlide = () => {
@@ -38,22 +38,25 @@ function Testimonials() {
             >
               {testimonialsData.map((client: Testimonial) => (
                 <div className={styles.card} key={client.id}>
-                  <div className={styles.quoteIcon}>&ldquo;</div>
-                  
-                  <div className={styles.stars}>
-                    {Array.from({ length: client.rating }).map((_, i) => (
-                      <span key={i} className={styles.star}>&#9733;</span>
-                    ))}
-                  </div>
-
-                  <p className={styles.review}>{client.review}</p>
-
+                  {/* Top: profile (avatar and name/location) */}
                   <div className={styles.profile}>
                     <img src={client.avatar} alt={client.name} className={styles.avatar} />
                     <div>
                       <h4 className={styles.name}>{client.name}</h4>
-                      <p className={styles.location}>{client.location}</p>
+                      <p className={styles.location}>
+                        <i className="fa-solid fa-location-dot"></i> {client.location}
+                      </p>
                     </div>
+                  </div>
+
+                  {/* Middle: review/description */}
+                  <p className={styles.review}>{client.review}</p>
+
+                  {/* Bottom: stars */}
+                  <div className={styles.stars}>
+                    {Array.from({ length: client.rating }).map((_, i) => (
+                      <span key={i} className={styles.star}>&#9733;</span>
+                    ))}
                   </div>
                 </div>
               ))}

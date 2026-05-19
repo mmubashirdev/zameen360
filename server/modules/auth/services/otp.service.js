@@ -31,7 +31,7 @@ const sendOTPService = async (email, ip) => {
       userId: user.id,
       otpCode: otp,
       otpType: "EMAIL",
-      otpExpiry: new Date(Date.now() + 10 * 60 * 1000),
+      otpExpiry: new Date(Date.now() + 60 * 1000), // 60 seconds
       ipAddress: ip,
     },
   });

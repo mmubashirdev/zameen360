@@ -20,8 +20,30 @@ export default function VerifyEmailPage() {
   const [email] = useState(state?.email ?? "");
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isResending, setIsResending] = useState(false);
-  const [resendTimer, setResendTimer] = useState(0);
-  const [expiryTimer, setExpiryTimer] = useState(60);
+  const [resendTimer, setResendTimer] = useState(() => {
+    const savedExpiry = sessionStorage.getItem("verify_email_resend_expiry");
+    if (savedExpiry) {
+      const remaining = Math.max(0, Math.ceil((parseInt(savedExpiry, 10) - Date.now()) / 1000));
+      return remaining;
+    } else {
+      const expiryTime = Date.now() + 60 * 1000;
+      sessionStorage.setItem("verify_email_resend_expiry", expiryTime.toString());
+      return 60;
+    }
+  });
+
+  const [expiryTimer, setExpiryTimer] = useState(() => {
+    const savedExpiry = sessionStorage.getItem("verify_email_code_expiry");
+    if (savedExpiry) {
+      const remaining = Math.max(0, Math.ceil((parseInt(savedExpiry, 10) - Date.now()) / 1000));
+      return remaining;
+    } else {
+      const expiryTime = Date.now() + 60 * 1000;
+      sessionStorage.setItem("verify_email_code_expiry", expiryTime.toString());
+      return 60;
+    }
+  });
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // ── Auto focus first input ──────────────────────────────
@@ -33,7 +55,13 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (resendTimer <= 0) return;
     const interval = setInterval(() => {
-      setResendTimer((prev) => prev - 1);
+      setResendTimer((prev) => {
+        const nextVal = prev - 1;
+        if (nextVal <= 0) {
+          clearInterval(interval);
+        }
+        return nextVal;
+      });
     }, 1000);
     return () => clearInterval(interval);
   }, [resendTimer]);
@@ -42,7 +70,13 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     if (expiryTimer <= 0) return;
     const interval = setInterval(() => {
-      setExpiryTimer((prev) => prev - 1);
+      setExpiryTimer((prev) => {
+        const nextVal = prev - 1;
+        if (nextVal <= 0) {
+          clearInterval(interval);
+        }
+        return nextVal;
+      });
     }, 1000);
     return () => clearInterval(interval);
   }, [expiryTimer]);
@@ -134,8 +168,10 @@ export default function VerifyEmailPage() {
         otpCode: cleanedOtp,
       });
 
+      sessionStorage.removeItem("verify_email_resend_expiry");
+      sessionStorage.removeItem("verify_email_code_expiry");
       toast.success("Email Verified!", "Account activated successfully.");
-      navigate("/dasboard", { replace: true });
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       const message =
         typeof err === "object" && err !== null && "message" in err
@@ -160,6 +196,11 @@ export default function VerifyEmailPage() {
     try {
       const message = await resendVerificationOtp(email.trim().toLowerCase());
       toast.success("Code Sent!", message || "New code sent.");
+      
+      const newExpiry = Date.now() + 60 * 1000;
+      sessionStorage.setItem("verify_email_resend_expiry", newExpiry.toString());
+      sessionStorage.setItem("verify_email_code_expiry", newExpiry.toString());
+
       setResendTimer(60);
       setExpiryTimer(60);
       setOtp(["", "", "", "", "", ""]);

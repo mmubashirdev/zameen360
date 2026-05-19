@@ -10,7 +10,7 @@
 .heroInner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 60px 40px 100px;
+  padding: 60px 40px 105px;
   position: relative;
   min-height: 480px;
 }
@@ -395,7 +395,7 @@
   .searchBarWrapper {
     left: 20px;
     right: 20px;
-    bottom: -60px;
+    bottom: -55px;
   }
 
   .searchBar {

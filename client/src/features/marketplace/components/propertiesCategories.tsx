@@ -3,7 +3,10 @@ import styles from "../styles/propertiesCategories.module.css"
 function PropertiesCategories() {
   return (
     <div className={styles.container}>
-      <h2>Properties Categories</h2>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Properties <span>Categories</span></h2>
+        <p className={styles.subtitle}>Find your dream home by choosing a category</p>
+      </div>
       <div className='div-Containers'>
         <div>
             <i className={`ri-home-4-fill ${styles.hello}`}></i>

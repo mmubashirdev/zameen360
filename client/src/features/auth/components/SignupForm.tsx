@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-
 import styles from "../styles/auth.module.css";
 import {
   signupSchema,
@@ -67,8 +66,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
         );
         navigate("/verify-email", {
           state: {
-            userId: result.user?.userId,
-            email: result.user?.email,
+            userId: result.data?.userId,
+            email: result.data?.email,
           },
         });
       } catch (err) {
@@ -94,7 +93,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
     [signup, navigate, toast, setError]
   );
 
-  const onValidationError = useCallback(() => {}, []);
+  const onValidationError = useCallback(() => { }, []);
 
   const handleInputChange = useCallback(
     (fieldName: keyof SignupSchemaType) => {
@@ -112,11 +111,11 @@ export default function SignupForm({ toast }: SignupFormProps) {
     window.location.href = `${baseUrl}/auth/google`;
   }, []);
 
-  
+
 
   return (
     <div className={styles.formContainer}>
-      
+
       <div className={styles.formHeader}>
         <h2 className={styles.formTitle}>Create Account</h2>
         <p className={styles.formSubtitle}>
@@ -129,9 +128,9 @@ export default function SignupForm({ toast }: SignupFormProps) {
         noValidate
         autoComplete="off"
       >
-       
+
         <div className={styles.formGroupRow}>
-      
+
           <div className={styles.formGroup}>
             <div className={styles.inputWrapper}>
               <i
@@ -145,9 +144,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 id="fullName"
                 type="text"
                 placeholder="Full Name"
-                className={`${styles.formInput} ${
-                  errors.fullName ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${errors.fullName ? styles.inputError : ""
+                  }`}
                 aria-required="true"
               />
             </div>
@@ -169,9 +167,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
               <select
                 {...register("city")}
                 id="city"
-                className={`${styles.formSelect} ${
-                  errors.city ? styles.selectError : ""
-                }`}
+                className={`${styles.formSelect} ${errors.city ? styles.selectError : ""
+                  }`}
                 aria-required="true"
               >
                 <option value="">Select your city</option>
@@ -206,9 +203,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 id="email"
                 type="email"
                 placeholder="Email Address"
-                className={`${styles.formInput} ${
-                  errors.email ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${errors.email ? styles.inputError : ""
+                  }`}
                 aria-required="true"
               />
             </div>
@@ -221,21 +217,34 @@ export default function SignupForm({ toast }: SignupFormProps) {
           </div>
 
           <div className={styles.formGroup}>
-            <div className={styles.inputWrapper}>
-              <i
-                className={`fa-solid fa-phone ${styles.inputIcon}`}
-                aria-hidden="true"
-              />
+            <div className={`${styles.inputWrapper} ${styles.phoneInputWrapper}`}>
+              <div className={styles.countryPrefix}>
+                <span className={styles.flag}>🇵🇰</span>
+                <span className={styles.code}>+92</span>
+              </div>
               <input
                 {...register("phone", {
-                  onChange: () => handleInputChange("phone"),
+                  onChange: (e) => {
+                    handleInputChange("phone");
+                    let val = e.target.value;
+                    val = val.replace(/\D/g, ""); // Keep only digits
+                    if (val.startsWith("92") && val.length > 10) {
+                      val = val.substring(2);
+                    }
+                    if (val.startsWith("0")) {
+                      val = val.substring(1);
+                    }
+                    if (val.length > 10) {
+                      val = val.substring(0, 10);
+                    }
+                    setValue("phone", val, { shouldValidate: true });
+                  },
                 })}
                 id="phone"
                 type="tel"
-                placeholder="Phone Number"
-                className={`${styles.formInput} ${
-                  errors.phone ? styles.inputError : ""
-                }`}
+                placeholder="300 1234567"
+                className={`${styles.formInput} ${styles.phoneInput} ${errors.phone ? styles.inputError : ""
+                  }`}
                 aria-required="true"
               />
             </div>
@@ -263,9 +272,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
-                className={`${styles.formInput} ${styles.passwordInput} ${
-                  errors.password ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${styles.passwordInput} ${errors.password ? styles.inputError : ""
+                  }`}
                 aria-required="true"
               />
               <button
@@ -275,9 +283,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 <i
-                  className={`fa-solid ${
-                    showPassword ? "fa-eye-slash" : "fa-eye"
-                  }`}
+                  className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"
+                    }`}
                   aria-hidden="true"
                 />
               </button>
@@ -302,9 +309,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 id="confirmPassword"
                 type={showConfirm ? "text" : "password"}
                 placeholder="Confirm Password"
-                className={`${styles.formInput} ${styles.passwordInput} ${
-                  errors.confirmPassword ? styles.inputError : ""
-                }`}
+                className={`${styles.formInput} ${styles.passwordInput} ${errors.confirmPassword ? styles.inputError : ""
+                  }`}
                 aria-required="true"
               />
               <button
@@ -314,9 +320,8 @@ export default function SignupForm({ toast }: SignupFormProps) {
                 aria-label={showConfirm ? "Hide password" : "Show password"}
               >
                 <i
-                  className={`fa-solid ${
-                    showConfirm ? "fa-eye-slash" : "fa-eye"
-                  }`}
+                  className={`fa-solid ${showConfirm ? "fa-eye-slash" : "fa-eye"
+                    }`}
                   aria-hidden="true"
                 />
               </button>

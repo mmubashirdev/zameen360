@@ -80,7 +80,13 @@ export const resetPassword = createAsyncThunk(
   "auth/resetPassword",
   async (data: { email: string; password: string }, { rejectWithValue }) => {
     try {
-      const response = await authApi.resetPassword(data);
+      const otpCode = sessionStorage.getItem("auth_flow_otp") || "";
+      const response = await authApi.resetPassword({
+        email: data.email,
+        token: otpCode,
+        password: data.password,
+      });
+      sessionStorage.removeItem("auth_flow_otp");
       return response;
     } catch (error: unknown) {
       return rejectWithValue(

@@ -6,24 +6,18 @@ import {
   resendOtp,
 } from "../api/authApi";
 import { USER_ROLES, STORAGE_KEYS } from "../constants/authConstants";
-import type {
-  SignupFormValues,
-  SignupServiceResult,
-  LoginFormValues,
-  LoginServiceResult,
-  User,
-  AuthSuccessPayload,
-  VerifyOtpPayload,
-} from "../types/auth.types";
+import type { User } from "../types/auth.types";
+
+
 
 // ─── Storage Helpers ──────────────────────────────────────────────────────────
 
-const persistAuth = (token: string, user: User): void => {
+const persistAuth = (token: string, user: User) => {
   localStorage.setItem(STORAGE_KEYS.TOKEN, token);
   localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 };
 
-export const clearAuth = (): void => {
+export const clearAuth = () => {
   localStorage.removeItem(STORAGE_KEYS.TOKEN);
   localStorage.removeItem(STORAGE_KEYS.USER);
 };
@@ -31,130 +25,111 @@ export const clearAuth = (): void => {
 export const getStoredUser = (): User | null => {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USER);
-    return raw ? (JSON.parse(raw) as User) : null;
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
 };
 
-export const getStoredToken = (): string | null =>
-  localStorage.getItem(STORAGE_KEYS.TOKEN);
+export const getStoredToken = () => localStorage.getItem(STORAGE_KEYS.TOKEN);
 
-const normalizeUser = (user: AuthSuccessPayload["user"] | User): User => ({
-  userId:
-    ("userId" in user && user.userId) || ("id" in user && user.id)
-      ? ("userId" in user && user.userId) || ("id" in user && user.id) || ""
-      : "",
+const normalizeUser = (user: any): User => ({
+  userId: user.userId || user.id || "",
   fullName: user.fullName,
   email: user.email,
   role: user.role,
   isVerified: user.isVerified,
 });
 
-// ─── Payload Builder ──────────────────────────────────────────────────────────
-
-const buildSignupPayload = (data: SignupFormValues): object => {
-  return {
-    fullName: data.fullName.trim(),
-    email: data.email.trim().toLowerCase(),
-    phone: data.phone.trim(),
-    city: data.city,
-    password: data.password,
-    confirmPassword: data.confirmPassword,
-    role: data.role.toUpperCase(),
-  };
+const getError = (error: any, fallback: string) => {
+  const data = error.response?.data;
+  const message = data?.message || error.message || fallback;
+  const err = new Error(message) as any;
+  if (data && typeof data === "object") {
+    Object.assign(err, data);
+  }
+  return err;
 };
 
-// ─── Signup Service ───────────────────────────────────────────────────────────
 
-/**
- * Builds JSON payload, calls role-specific endpoint,
- * persists token if returned, and returns normalized result.
- */
-export const signupService = async (
-  formValues: SignupFormValues,
-): Promise<SignupServiceResult> => {
-  const role = formValues.role.toUpperCase();
-  const payload = buildSignupPayload(formValues);
 
-  // Route to correct endpoint based on role
-  const apiFn = role === USER_ROLES.SELLER ? registerSeller : registerBuyer;
 
-  /*
-    Backend response shape:
-    {
-      success: true,
-      message: "Registered successfully. Please verify your email.",
-      data: { userId, fullName, email, role, isVerified }
+// sign up ???
+
+export const handleSignup = async (data: any) => {
+  try {
+    const isSeller = data.role?.toUpperCase() === USER_ROLES.SELLER;
+    const response = await (isSeller ? registerSeller(data) : registerBuyer(data));
+
+    if (response?.data?.token) {
+      persistAuth(response.data.token, normalizeUser(response.data));
+    } else {
+      throw new Error("Invalid response structure: Missing token or data");
     }
-  */
-  const response = await apiFn(payload);
 
-  if (!response.success || !response.data) {
-    throw new Error(response.message ?? "Registration failed.");
+    return response;
+  } catch (error: any) {
+    throw getError(error, "Signup failed");
   }
-
-  // Persist auth if token is returned (future-proof)
-  if (response.token) {
-    persistAuth(response.token, normalizeUser(response.data));
-  }
-
-  return {
-    user: response.data,
-    message: response.message,
-  };
 };
 
-// ─── Login Service ────────────────────────────────────────────────────────────
 
-export const loginService = async (
-  credentials: LoginFormValues,
-): Promise<LoginServiceResult> => {
-  const response = await loginUser(credentials);
 
-  if (!response.success || !response.data) {
-    throw new Error(response.message ?? "Login failed.");
+
+
+// ??? login 
+
+export const handleLogin = async (data: any) => {
+  try {
+    const response = await loginUser(data);
+
+    if (response?.data?.user && response?.data?.accessToken) {
+      const user = normalizeUser(response.data.user);
+      persistAuth(response.data.accessToken, user);
+    } else {
+      throw new Error("Invalid response structure: Missing user or accessToken");
+    }
+
+    return response;
+  } catch (error: any) {
+    throw getError(error, "Login failed");
   }
-
-  const user = normalizeUser(response.data.user);
-  const token = response.data.accessToken;
-
-  persistAuth(token, user);
-
-  return { user, token, message: response.message };
 };
 
-export const verifyEmailService = async (
-  payload: VerifyOtpPayload,
-): Promise<LoginServiceResult> => {
-  const response = await verifyOtp(payload);
 
-  if (!response.success || !response.data) {
-    throw new Error(response.message ?? "Verification failed.");
+// verify email 
+
+
+export const handleVerifyEmail = async (payload: any) => {
+  try {
+    const response = await verifyOtp(payload);
+
+    if (response?.data?.user && response?.data?.accessToken) {
+      const user = normalizeUser(response.data.user);
+      persistAuth(response.data.accessToken, user);
+    } else {
+      throw new Error("Invalid response structure: Missing user or accessToken");
+    }
+
+    return response;
+  } catch (error: any) {
+    throw getError(error, "Verification failed");
   }
-
-  const user = normalizeUser(response.data.user);
-  const token = response.data.accessToken;
-
-  persistAuth(token, user);
-
-  return { user, token, message: response.message };
 };
 
-export const resendVerificationOtpService = async (
-  email: string,
-): Promise<string> => {
-  const response = await resendOtp({ email });
 
-  if (!response.success) {
-    throw new Error(response.message ?? "Failed to resend OTP.");
+
+// resend otp
+
+export const handleResendOtp = async (email: string) => {
+  try {
+    const response = await resendOtp({ email });
+    return response.message;
+  } catch (error: any) {
+    throw getError(error, "Failed to resend OTP");
   }
-
-  return response.message;
 };
 
-// ─── Logout Service ───────────────────────────────────────────────────────────
 
-export const logoutService = (): void => {
-  clearAuth();
-};
+
+export const handleLogout = () => clearAuth();

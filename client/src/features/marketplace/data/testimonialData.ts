@@ -22,7 +22,7 @@ export const testimonialsData: Testimonial[] = [
     location: "Karachi",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80",
     review: "I found the perfect apartment for rent within two days of browsing. The search filters are very detailed, and I didn't have to deal with any misleading ads. Great platform!",
-    rating: 5
+    rating: 4
   },
   {
     id: 3,
@@ -38,7 +38,7 @@ export const testimonialsData: Testimonial[] = [
     location: "Rawalpindi",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80",
     review: "The market insights and area guides on Zameen 360 helped me make an informed investment decision. The transparency and data accuracy are what set this platform apart.",
-    rating: 5
+    rating: 4
   },
   {
     id: 5,
