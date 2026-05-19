@@ -1,10 +1,4 @@
-
-
-*{
-    padding: 0;
-    margin: 0;
-}
-
+/* dashboardNavbar.module.css */
 
 .navbar {
   display: flex;
@@ -39,6 +33,7 @@
   animation: fadeScale 0.8s 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
   transition: transform 0.3s ease;
   cursor: pointer;
+  display: block;
 }
 
 .logo:hover {
@@ -81,12 +76,13 @@
 .navLinks li {
   position: relative;
   padding: 8px 16px;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 15px;
   font-weight: 500;
   color: #1e293b;
   cursor: pointer;
   transition: color 0.3s ease;
+  white-space: nowrap;
 }
 
 .navLinks li a {
@@ -98,7 +94,7 @@
 
 /* Hover underline animation */
 .navLinks li::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 2px;
   left: 50%;
@@ -106,7 +102,8 @@
   height: 2.5px;
   background: linear-gradient(90deg, #0052cc, #2684ff);
   border-radius: 2px;
-  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), left 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .navLinks li:hover {
@@ -118,7 +115,6 @@
   left: 15%;
 }
 
-/* Active state */
 .navLinks li:active {
   color: #003d99;
 }
@@ -128,13 +124,27 @@
 }
 
 /* Staggered entrance for each link */
-.navLinks li:nth-child(1) { animation: linkSlide 0.4s 0.55s ease both; }
-.navLinks li:nth-child(2) { animation: linkSlide 0.4s 0.62s ease both; }
-.navLinks li:nth-child(3) { animation: linkSlide 0.4s 0.69s ease both; }
-.navLinks li:nth-child(4) { animation: linkSlide 0.4s 0.76s ease both; }
-.navLinks li:nth-child(5) { animation: linkSlide 0.4s 0.83s ease both; }
-.navLinks li:nth-child(6) { animation: linkSlide 0.4s 0.90s ease both; }
-.navLinks li:nth-child(7) { animation: linkSlide 0.4s 0.97s ease both; }
+.navLinks li:nth-child(1) {
+  animation: linkSlide 0.4s 0.55s ease both;
+}
+.navLinks li:nth-child(2) {
+  animation: linkSlide 0.4s 0.62s ease both;
+}
+.navLinks li:nth-child(3) {
+  animation: linkSlide 0.4s 0.69s ease both;
+}
+.navLinks li:nth-child(4) {
+  animation: linkSlide 0.4s 0.76s ease both;
+}
+.navLinks li:nth-child(5) {
+  animation: linkSlide 0.4s 0.83s ease both;
+}
+.navLinks li:nth-child(6) {
+  animation: linkSlide 0.4s 0.9s ease both;
+}
+.navLinks li:nth-child(7) {
+  animation: linkSlide 0.4s 0.97s ease both;
+}
 
 @keyframes linkSlide {
   0% {
@@ -147,18 +157,67 @@
   }
 }
 
-/* --- Nav Actions (Buttons) --- */
+/* --- Nav Actions --- */
 .navActions {
   display: flex;
   align-items: center;
   gap: 12px;
   animation: fadeScale 0.7s 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  flex-shrink: 0;
 }
 
-/* --- Login Button --- */
+/* --- User Info --- */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+/* --- Avatar (image) --- */
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #0052cc;
+  flex-shrink: 0;
+}
+
+/* --- Avatar Fallback (initials) --- */
+.avatarFallback {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #2684ff;
+  color: #ffffff;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 82, 204, 0.25);
+  user-select: none;
+}
+
+/* --- User Name --- */
+.userName {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0052cc;
+  white-space: nowrap;
+}
+
+/* --- Login / Logout Button --- */
 .loginButton {
-  padding: 9px 24px;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  padding: 9px 16px;
+  font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: #0052cc;
@@ -170,11 +229,11 @@
   overflow: hidden;
   transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
   z-index: 1;
+  white-space: nowrap;
 }
 
-/* Fill animation on hover */
 .loginButton::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -186,11 +245,6 @@
   transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.loginButton:hover {
-  color: #ffffff;
-  border-color: #0052cc;
-  box-shadow: 0 4px 14px rgba(0, 82, 204, 0.3);
-}
 
 .loginButton:hover::before {
   width: 100%;
@@ -204,7 +258,7 @@
 /* --- Post Property Button --- */
 .postPropertyButton {
   padding: 9px 24px;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-family: "Inter", "Segoe UI", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
@@ -214,13 +268,16 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.35s ease;
+  transition: transform 0.3s ease, box-shadow 0.35s ease,
+    background 0.35s ease;
   box-shadow: 0 4px 14px rgba(0, 82, 204, 0.25);
+  white-space: nowrap;
+  z-index: 1;
 }
 
-/* Shimmer sweep animation */
+/* Shimmer sweep */
 .postPropertyButton::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
@@ -232,13 +289,17 @@
     rgba(255, 255, 255, 0.3) 50%,
     transparent 100%
   );
-  transition: none;
   animation: shimmer 3s 1.5s infinite;
+  z-index: 0;
 }
 
 @keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .postPropertyButton:hover {
@@ -252,15 +313,16 @@
   box-shadow: 0 2px 8px rgba(0, 82, 204, 0.3);
 }
 
-/* --- Pulse ring on Post Property button (subtle CTA attention) --- */
+/* Pulse ring */
 .postPropertyButton::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: 8px;
   border: 2px solid rgba(0, 82, 204, 0.4);
   animation: pulseRing 2.5s 2s infinite;
   pointer-events: none;
+  z-index: 0;
 }
 
 @keyframes pulseRing {
@@ -279,6 +341,17 @@
 }
 
 /* --- Responsive --- */
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 0 24px;
+  }
+
+  .navLinks li {
+    padding: 8px 10px;
+    font-size: 13.5px;
+  }
+}
+
 @media (max-width: 900px) {
   .navbar {
     padding: 0 20px;
@@ -289,7 +362,7 @@
   }
 
   .navLinks li {
-    padding: 8px 10px;
+    padding: 8px 8px;
     font-size: 13px;
   }
 
@@ -297,6 +370,10 @@
   .postPropertyButton {
     padding: 8px 16px;
     font-size: 13px;
+  }
+
+  .userName {
+    display: none;
   }
 }
 
@@ -308,4 +385,57 @@
   .navbar {
     padding: 0 16px;
   }
+
+  .loginButton,
+  .postPropertyButton {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+}
+
+/* --- Avatar container & dropdown --- */
+.avatarContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.avatarButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-left: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.dropdownMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #ffffff;
+  box-shadow: 0 6px 24px rgba(2, 6, 23, 0.12);
+  border-radius: 10px;
+  padding: 8px;
+  min-width: 160px;
+  z-index: 2000;
+}
+
+.dropdownItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #0f172a;
+  border-radius: 6px;
+}
+
+.dropdownItem:hover {
+  background: #f1f5f9;
 }
