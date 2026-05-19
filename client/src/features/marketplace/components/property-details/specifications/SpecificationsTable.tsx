@@ -7,12 +7,12 @@ const SpecificationsTable = () => {
   const right = propertyData.specifications.slice(half);
 
   return (
-    <div className="border-t pt-6">
+    <div className="border-t border-t-gray-200 pt-6">
       <h2 className="text-lg font-semibold mb-4 text-gray-900">
         SPECIFICATIONS
       </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 border rounded-lg overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 border border-gray-200 shadow-lg rounded-lg overflow-hidden">
         <div>
           {left.map((spec, idx) => (
             <div

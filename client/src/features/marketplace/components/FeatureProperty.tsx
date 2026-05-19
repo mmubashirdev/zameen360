@@ -3,10 +3,10 @@ import { useState } from "react";
 import { propertiesData } from "../data/propertyData";
 import type { Property } from "../data/propertyData";
 import styles from "../styles/FeatureProperty.module.css";
-
+import { useNavigate } from "react-router-dom";
 function FeaturedProperties() {
   const [currentIndex, setCurrentIndex] = useState(0);
-
+  const navigate = useNavigate();
   // Show 4 cards on desktop, slide 1 at a time
   const itemsPerPage = 4; 
   const maxIndex = propertiesData.length - itemsPerPage;
@@ -18,6 +18,10 @@ function FeaturedProperties() {
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
   };
+
+  const navigateToPropertyDetails = () => {
+    navigate("/property");
+  }
 
   return (
     <section className={styles.section}>
@@ -58,7 +62,7 @@ function FeaturedProperties() {
                       <span className={styles.divider}></span>
                       <span>{property.area}</span>
                     </div>
-                    <button className={styles.detailsBtn}>View Details</button>
+                    <button className={styles.detailsBtn} onClick={navigateToPropertyDetails}>View Details</button>
                   </div>
                 </div>
               ))}

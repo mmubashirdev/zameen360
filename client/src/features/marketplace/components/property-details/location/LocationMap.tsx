@@ -19,22 +19,20 @@ const iconMap: Record<string, React.ReactNode> = {
 
 const LocationMap = () => {
   return (
-    <div className="border-t pt-6" id="map">
+    <div className="border-t border-t-gray-200 pt-6 mb-4" id="map">
       <h2 className="text-lg font-semibold mb-4 text-gray-900">
         LOCATION & NEARBY PLACES
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Map placeholder */}
-        <div className="relative h-64 bg-gray-100 rounded-lg overflow-hidden border">
-          <img
-            src="https://maps.googleapis.com/maps/api/staticmap?center=Lahore,Pakistan&zoom=14&size=600x400"
-            alt="map"
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                "https://via.placeholder.com/600x400/e5e7eb/9ca3af?text=Map+View";
-            }}
+        <div className="relative h-64 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
+          <iframe
+            title="map"
+            src="https://www.google.com/maps?q=Lahore,Pakistan&z=14&output=embed"
+            className="w-full h-full border-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
           />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
             <MapPin size={32} className="text-blue-600 fill-blue-600" />

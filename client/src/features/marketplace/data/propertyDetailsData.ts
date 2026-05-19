@@ -1,5 +1,8 @@
 // src/features/marketplace/data/propertyDetailsData.ts
-import house1 from "../assets/00.webp";
+import house1 from "../../marketplace/assets/Screenshot 2026-05-18 010903.png";
+import house2 from "../../marketplace/assets/image copy.png";
+import house3 from "../../marketplace/assets/image copy 2.png";
+import house4 from "../../marketplace/assets/image.png";
 
 type PropertyFeature = {
   label: string;
@@ -64,7 +67,7 @@ export const propertyData: PropertyData = {
   location: "DHA Phase 6, Lahore, Punjab",
   fullLocation: "DHA Phase 6, Lahore",
   propertyId: "Z360-LHR-6543",
-  images: [house1, house1, house1, house1, house1],
+  images: [house1, house2, house4, house3, house4],
   badges: ["For Sale", "Featured", "Premium", "Verified"],
 
   features: [

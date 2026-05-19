@@ -10,7 +10,7 @@ const PropertyGallery = () => {
         <img
           src={propertyData.images[0]}
           alt="property"
-          className="w-full h-[420px] object-cover rounded-2xl"
+          className="w-full h-105 object-cover rounded-2xl"
         />
 
         <button className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium">
@@ -29,7 +29,7 @@ const PropertyGallery = () => {
       </div>
 
       {/* THUMBNAILS */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-5 gap-3 mt-2">
         {propertyData.images.slice(0, 4).map((image, index) => (
           <img
             key={index}
