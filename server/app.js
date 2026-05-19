@@ -6,7 +6,7 @@ const passport = require("./configs/passport");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-
+const index = require("./modules/auth/routes/index");
 const app = express();
 
 app.use(cors());
@@ -19,8 +19,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
-app.use("/api/auth", require("./modules/auth/routes"));
-app.use("/api/auth", require("./modules/auth/routes/google.routes"))
+// API calling
+app.use("/api/auth", index);
+
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
 });
