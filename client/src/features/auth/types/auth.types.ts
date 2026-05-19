@@ -6,9 +6,10 @@ export interface User {
   userId: string;
   fullName: string;
   email: string;
+  profilePicture?: string;
   role: UserRole;
   isVerified: boolean;
-}
+} 
 
 export interface AuthState {
   user: User | null;
@@ -96,6 +97,7 @@ export interface AuthContextType extends AuthState {
   setLoading: (loading: boolean) => void;
   setUser: (user: User | null, token?: string) => void;
   setError: (error: string | null) => void;
+  isAuthenticated: boolean;
   logout: () => void;
 }
 

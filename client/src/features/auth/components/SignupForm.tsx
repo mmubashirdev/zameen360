@@ -9,6 +9,7 @@ import {
 } from "../validations/signupSchema";
 import { useAuth, detectErrorField } from "../hooks/useAuth";
 import { PAKISTAN_CITIES } from "../constants/authConstants";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 import type { ToastHook } from "../types/auth.types";
 
 import PasswordStrength from "./PasswordStrength";
@@ -76,10 +77,10 @@ export default function SignupForm({ toast }: SignupFormProps) {
           },
         });
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Something went wrong. Please try again.";
+        const message = getErrorMessage(
+          err,
+          "Something went wrong. Please try again."
+        );
 
         const field = detectErrorField(message);
 
