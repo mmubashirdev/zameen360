@@ -6,14 +6,17 @@ import {
   resendOtp,
 } from "../api/authApi";
 import { USER_ROLES, STORAGE_KEYS } from "../constants/authConstants";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 import type {
+  AuthSuccessPayload,
+  LoginFormValues,
   LoginServiceResult,
   ResendOtpServiceResult,
+  SignupPayload,
   SignupServiceResult,
   User,
+  VerifyOtpPayload,
 } from "../types/auth.types";
-
-
 
 // ─── Storage Helpers ──────────────────────────────────────────────────────────
 
@@ -38,7 +41,7 @@ export const getStoredUser = (): User | null => {
 
 export const getStoredToken = () => localStorage.getItem(STORAGE_KEYS.TOKEN);
 
-const normalizeUser = (user: any): User => ({
+const normalizeUser = (user: AuthSuccessPayload["user"]): User => ({
   userId: user.userId || user.id || "",
   fullName: user.fullName,
   email: user.email,
@@ -46,13 +49,19 @@ const normalizeUser = (user: any): User => ({
   isVerified: user.isVerified,
 });
 
-const getError = (error: any, fallback: string) => {
-  const data = error?.response?.data;
-  const message =
-    data?.message ||
-    (typeof error?.message === "string" ? error.message : "") ||
-    fallback;
-  const err = new Error(message) as any;
+const getError = (error: unknown, fallback: string) => {
+  const data =
+    error && typeof error === "object" && "response" in error
+      ? (
+          error as {
+            response?: {
+              data?: unknown;
+            };
+          }
+        ).response?.data
+      : undefined;
+  const message = getErrorMessage(error, fallback);
+  const err = new Error(message) as Error & Record<string, unknown>;
   if (data && typeof data === "object") {
     Object.assign(err, data);
   }
@@ -62,15 +71,16 @@ const getError = (error: any, fallback: string) => {
   return err;
 };
 
-
-
-
 // sign up ???
 
-export const handleSignup = async (data: any): Promise<SignupServiceResult> => {
+export const handleSignup = async (
+  data: SignupPayload,
+): Promise<SignupServiceResult> => {
   try {
     const isSeller = data.role?.toUpperCase() === USER_ROLES.SELLER;
-    const response = await (isSeller ? registerSeller(data) : registerBuyer(data));
+    const response = await (isSeller
+      ? registerSeller(data)
+      : registerBuyer(data));
 
     if (!response?.data?.userId || !response.data.email) {
       throw new Error("Invalid signup response structure");
@@ -80,19 +90,16 @@ export const handleSignup = async (data: any): Promise<SignupServiceResult> => {
       data: response.data,
       message: response.message,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw getError(error, "Signup failed");
   }
 };
 
+// ??? login
 
-
-
-
-
-// ??? login 
-
-export const handleLogin = async (data: any): Promise<LoginServiceResult> => {
+export const handleLogin = async (
+  data: LoginFormValues,
+): Promise<LoginServiceResult> => {
   try {
     const response = await loginUser(data);
     const authPayload = response?.data;
@@ -110,16 +117,16 @@ export const handleLogin = async (data: any): Promise<LoginServiceResult> => {
       refreshToken: authPayload.refreshToken,
       message: response.message,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw getError(error, "Login failed");
   }
 };
 
+// verify email
 
-// verify email 
-
-
-export const handleVerifyEmail = async (payload: any): Promise<LoginServiceResult> => {
+export const handleVerifyEmail = async (
+  payload: VerifyOtpPayload,
+): Promise<LoginServiceResult> => {
   try {
     const response = await verifyOtp(payload);
     const authPayload = response?.data;
@@ -137,17 +144,15 @@ export const handleVerifyEmail = async (payload: any): Promise<LoginServiceResul
       refreshToken: authPayload.refreshToken,
       message: response.message,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw getError(error, "Verification failed");
   }
 };
 
-
-
 // resend otp
 
 export const handleResendOtp = async (
-  email: string
+  email: string,
 ): Promise<ResendOtpServiceResult> => {
   try {
     const response = await resendOtp({ email });
@@ -155,11 +160,9 @@ export const handleResendOtp = async (
       message: response.message,
       data: response.data,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw getError(error, "Failed to resend OTP");
   }
 };
-
-
 
 export const handleLogout = () => clearAuth();

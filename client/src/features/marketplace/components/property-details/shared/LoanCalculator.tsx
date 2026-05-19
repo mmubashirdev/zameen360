@@ -1,7 +1,7 @@
 
 const MortgageCalculator = () => {
   return (
-    <div className="border rounded-xl p-5 bg-white">
+    <div className="border border-gray-200 shadow-lg rounded-xl p-5 bg-white mt-4">
       <h3 className="text-sm font-semibold text-gray-500 mb-4">
         MORTGAGE CALCULATOR
       </h3>
@@ -14,7 +14,7 @@ const MortgageCalculator = () => {
           <input
             type="text"
             defaultValue="125,000,000"
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -24,7 +24,7 @@ const MortgageCalculator = () => {
           <input
             type="text"
             defaultValue="25,000,000"
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -34,7 +34,7 @@ const MortgageCalculator = () => {
           <input
             type="text"
             defaultValue="100,000,000"
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <div>
@@ -44,14 +44,14 @@ const MortgageCalculator = () => {
           <input
             type="text"
             defaultValue="11.5"
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
         <div>
           <label className="text-xs text-gray-600 block mb-1">
             Loan Tenure
           </label>
-          <select className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <select className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
             <option>20 Years</option>
             <option>15 Years</option>
             <option>10 Years</option>
@@ -59,7 +59,7 @@ const MortgageCalculator = () => {
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t">
+      <div className="mt-4 pt-4 border-t border-t-gray-200">
         <p className="text-xs text-gray-500">Estimated Monthly Payment</p>
         <p className="text-xl font-bold text-blue-600">PKR 1,201,000</p>
         <a

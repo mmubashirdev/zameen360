@@ -8,6 +8,7 @@ import AuthLayout from "../components/AuthLayout";
 import AuthButton from "../components/AuthButton";
 import StepIndicator from "../components/StepIndicator";
 import OTPInput from "../components/OTPInput";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 import {
   verifyOTP,
   resendResetOtp,
@@ -142,12 +143,7 @@ export default function OTPVerification({
       setTimeLeft(60);
       toast.success("New verification code sent to your email!");
     } catch (err: unknown) {
-      const message =
-        typeof err === "string"
-          ? err
-          : err instanceof Error
-          ? err.message
-          : "Failed to resend code";
+      const message = getErrorMessage(err, "Failed to resend code");
       toast.error(message);
       setError(message);
     } finally {
@@ -171,12 +167,7 @@ export default function OTPVerification({
     try {
       await dispatch(verifyOTP({ email, otp })).unwrap();
     } catch (err: unknown) {
-      const message =
-        typeof err === "string"
-          ? err
-          : err instanceof Error
-          ? err.message
-          : "Verification failed";
+      const message = getErrorMessage(err, "Verification failed");
 
       setOtp("");
       setError(message);

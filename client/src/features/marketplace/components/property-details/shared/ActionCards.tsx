@@ -9,7 +9,7 @@ const ActionsCard = () => {
   ];
 
   return (
-    <div className="border rounded-xl p-5 bg-white">
+    <div className="border border-gray-200 shadow-lg mt-4 rounded-xl p-5 bg-white">
       <h3 className="text-sm font-semibold text-gray-500 mb-4">ACTIONS</h3>
       <div className="space-y-3">
         {actions.map((action) => (

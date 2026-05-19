@@ -19,7 +19,7 @@ const iconMap: Record<string, React.ReactNode> = {
 
 const LocationMap = () => {
   return (
-    <div className="border-t border-t-gray-200 pt-6 mb-4" id="map">
+    <div className="border-t border-t-gray-200 pt-6 mb-5" id="map">
       <h2 className="text-lg font-semibold mb-4 text-gray-900">
         LOCATION & NEARBY PLACES
       </h2>

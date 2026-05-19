@@ -6,7 +6,13 @@ import {
   handleVerifyEmail,
   handleResendOtp,
 } from "../services/authService";
-import type { AuthContextType } from "../types/auth.types";
+import type {
+  AuthContextType,
+  LoginFormValues,
+  SignupPayload,
+  VerifyOtpPayload,
+} from "../types/auth.types";
+import { getErrorMessage } from "@shared/utils/errorHandler";
 
 export function useAuthContext(): AuthContextType {
   const ctx = useContext(AuthContext);
@@ -51,8 +57,8 @@ export function useAuth() {
       }
       ctx?.setError?.(null);
       return result;
-    } catch (error: any) {
-      ctx?.setError?.(error.message);
+    } catch (error: unknown) {
+      ctx?.setError?.(getErrorMessage(error));
       throw error;
     } finally {
       setIsLoading(false);
@@ -60,9 +66,10 @@ export function useAuth() {
   };
 
   return {
-    signup: (data: any) => execute(handleSignup, data),
-    login: (data: any) => execute(handleLogin, data, true),
-    verifyEmail: (data: any) => execute(handleVerifyEmail, data, true),
+    signup: (data: SignupPayload) => execute(handleSignup, data),
+    login: (data: LoginFormValues) => execute(handleLogin, data, true),
+    verifyEmail: (data: VerifyOtpPayload) =>
+      execute(handleVerifyEmail, data, true),
     resendVerificationOtp: (email: string) => execute(handleResendOtp, email),
     isLoading,
   };

@@ -10,7 +10,7 @@ const SafetyTips = () => {
   ];
 
   return (
-    <div className="border rounded-xl p-5 bg-white">
+    <div className="border border-gray-200 shadow-lg mt-4 rounded-xl p-5 bg-white">
       <h3 className="text-sm font-semibold text-gray-500 mb-4">SAFETY TIPS</h3>
       <ul className="space-y-3">
         {tips.map((tip) => (
@@ -18,10 +18,7 @@ const SafetyTips = () => {
             key={tip}
             className="flex items-start gap-2 text-sm text-gray-700"
           >
-            <ShieldCheck
-              size={16}
-              className="text-blue-600 shrink-0 mt-0.5"
-            />
+            <ShieldCheck size={16} className="text-blue-600 shrink-0 mt-0.5" />
             <span>{tip}</span>
           </li>
         ))}
