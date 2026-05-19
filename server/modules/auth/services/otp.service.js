@@ -6,17 +6,22 @@ const {
   generateRefreshToken,
 } = require("../../../utils/generateToken");
 
-// ─── Send OTP (also used for resend) ─────────────────────────────────────────
+const EMAIL_OTP_EXPIRY_MS = 60 * 1000;
+const RESEND_OTP_COOLDOWN_MS = 60 * 1000;
 
 const sendOTPService = async (email, ip) => {
   if (!email) throw { status: 400, message: "Email required." };
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
   if (!user) throw { status: 404, message: "User not found." };
 
   const otp = generateOTP();
+  const now = Date.now();
+  const otpExpiry = new Date(now + EMAIL_OTP_EXPIRY_MS);
+  const resendAvailableAt = new Date(now + RESEND_OTP_COOLDOWN_MS);
 
-  // ✅ Step 1: INVALIDATE all old OTPs first (sequential to ensure order)
   await prisma.userVerification.updateMany({
     where: {
       userId: user.id,
@@ -25,36 +30,36 @@ const sendOTPService = async (email, ip) => {
     data: { isUsed: true },
   });
 
-  // ✅ Step 2: Create new OTP
   await prisma.userVerification.create({
     data: {
       userId: user.id,
       otpCode: otp,
       otpType: "EMAIL",
-      otpExpiry: new Date(Date.now() + 10 * 60 * 1000),
+      otpExpiry,
       ipAddress: ip,
     },
   });
 
-  // ✅ Step 3: Send email in background
-  sendOTPEmail(email, otp, "Email Verification")
-    .then(() => console.log(`✅ OTP sent to ${email}`))
-    .catch((err) => console.error(`❌ Email failed:`, err.message));
+  sendOTPEmail(normalizedEmail, otp, "Email Verification")
+    .then(() => console.log(`OTP sent to ${normalizedEmail}`))
+    .catch((err) => console.error("Email failed:", err.message));
 
-  return true;
+  return {
+    otpExpiresAt: otpExpiry.toISOString(),
+    resendAvailableAt: resendAvailableAt.toISOString(),
+  };
 };
-
-// ─── Verify OTP - STRICT validation ──────────────────────────────────────────
 
 const verifyOTPService = async (email, otpCode, ip, userAgent) => {
   if (!email || !otpCode) {
     throw { status: 400, message: "Email and OTP required." };
   }
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const normalizedEmail = email.toLowerCase().trim();
+  const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
   if (!user) throw { status: 404, message: "User not found." };
 
-  // ✅ STEP 1: Find LATEST OTP record (regardless of status)
   const latestOtp = await prisma.userVerification.findFirst({
     where: {
       userId: user.id,
@@ -70,7 +75,6 @@ const verifyOTPService = async (email, otpCode, ip, userAgent) => {
     };
   }
 
-  // ✅ STEP 2: Check if already used (old OTP after resend)
   if (latestOtp.isUsed) {
     throw {
       status: 400,
@@ -78,18 +82,6 @@ const verifyOTPService = async (email, otpCode, ip, userAgent) => {
     };
   }
 
-  // ✅ STEP 3: Check if matches
-  if (latestOtp.otpCode !== otpCode) {
-    // Increment attempts
-    await prisma.userVerification.update({
-      where: { id: latestOtp.id },
-      data: { attempts: latestOtp.attempts + 1 },
-    });
-
-    throw { status: 400, message: "Invalid OTP code." };
-  }
-
-  // ✅ STEP 4: Check expiry
   if (latestOtp.otpExpiry < new Date()) {
     await prisma.userVerification.update({
       where: { id: latestOtp.id },
@@ -102,11 +94,18 @@ const verifyOTPService = async (email, otpCode, ip, userAgent) => {
     };
   }
 
-  // ✅ STEP 5: Valid OTP - Generate tokens
+  if (latestOtp.otpCode !== otpCode) {
+    await prisma.userVerification.update({
+      where: { id: latestOtp.id },
+      data: { attempts: latestOtp.attempts + 1 },
+    });
+
+    throw { status: 400, message: "Invalid OTP code." };
+  }
+
   const accessToken = generateAccessToken(user.id, user.role);
   const refreshToken = generateRefreshToken(user.id, user.role);
 
-  // ✅ STEP 6: Mark as used + verify user
   await Promise.all([
     prisma.userVerification.update({
       where: { id: latestOtp.id },
@@ -136,10 +135,9 @@ const verifyOTPService = async (email, otpCode, ip, userAgent) => {
     }),
   ]);
 
-  // ✅ Send welcome email in background
-  sendWelcomeEmail(email, user.fullName)
-    .then(() => console.log(`✅ Welcome email sent to ${email}`))
-    .catch((err) => console.error(`❌ Welcome email failed:`, err.message));
+  sendWelcomeEmail(normalizedEmail, user.fullName)
+    .then(() => console.log(`Welcome email sent to ${normalizedEmail}`))
+    .catch((err) => console.error("Welcome email failed:", err.message));
 
   return {
     user: {

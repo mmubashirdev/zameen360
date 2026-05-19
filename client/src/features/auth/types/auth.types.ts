@@ -78,9 +78,17 @@ export interface RegisterResponseData {
   email: string;
   role: UserRole;
   isVerified: boolean;
+  token?: string;
+  otpExpiresAt?: string;
+  resendAvailableAt?: string;
 }
 
 export type RegisterResponse = ApiResponse<RegisterResponseData>;
+
+export interface OtpDeliveryData {
+  otpExpiresAt?: string;
+  resendAvailableAt?: string;
+}
 
 // ─── Context Types ────────────────────────────────────────────────────────────
 
@@ -135,14 +143,20 @@ export interface PasswordStrengthResult {
 // ─── Service Return Types ─────────────────────────────────────────────────────
 
 export interface SignupServiceResult {
-  user: RegisterResponseData;
+  data: RegisterResponseData;
   message: string;
+}
+
+export interface ResendOtpServiceResult {
+  message: string;
+  data?: OtpDeliveryData;
 }
 
 export interface LoginServiceResult {
   user: User;
   token: string;
   message: string;
+  refreshToken?: string;
 }
 
 export interface VerifyOtpPayload {

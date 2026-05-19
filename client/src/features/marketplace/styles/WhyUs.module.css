@@ -1,18 +1,34 @@
 /* WhyUs.module.css */
 
 .mainContainer {
-    padding: 25px 80px;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 40px;
     background-color: #ffffff;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.mainContainer h1 {
-    font-size: 22px;
-    font-weight: 700;
-    color: #0a1f44;
-    margin: 0 0 24px 0;
-    text-align: left;
-    animation: fadeInDown 0.7s ease forwards;
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeInDown 0.7s ease forwards;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0a1e3f;
+  margin: 0 0 10px 0;
+}
+
+.title span {
+  color: #2563eb;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
 }
 
 .cardsWrapper {
@@ -147,10 +163,6 @@
 @media (max-width: 768px) {
     .mainContainer {
         padding: 30px 20px;
-    }
-
-    .mainContainer h1 {
-        text-align: center;
     }
 
     .cardsWrapper {

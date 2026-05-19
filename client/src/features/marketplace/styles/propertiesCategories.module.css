@@ -9,12 +9,26 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.container h2 {
-  font-size: 22px;
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 36px;
   font-weight: 700;
-  color: #0a1a2f;
-  margin-bottom: 24px;
-  padding-left: 8px;
+  color: #0a1e3f;
+  margin: 0 0 10px 0;
+}
+
+.title span {
+  color: #2563eb;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #64748b;
+  margin: 0;
 }
 
 .container :global(.div-Containers) {

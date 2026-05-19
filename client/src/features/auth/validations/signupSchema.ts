@@ -27,7 +27,20 @@ export const signupSchema = z
           /^(\+92|0)?[3][0-9]{9}$/.test(cleaned) ||
           /^\+?\d{7,15}$/.test(cleaned)
         );
-      }, "Enter a valid phone (e.g., +92 300 1234567)"),
+      }, "Enter a valid phone (e.g., +92 300 1234567)")
+      .transform((val) => {
+        const digitsOnly = val.replace(/\D/g, "");
+        if (digitsOnly.startsWith("92") && digitsOnly.length > 10) {
+          return `+${digitsOnly}`;
+        }
+        if (digitsOnly.startsWith("0")) {
+          return `+92${digitsOnly.substring(1)}`;
+        }
+        if (digitsOnly.length === 10) {
+          return `+92${digitsOnly}`;
+        }
+        return val;
+      }),
 
     city: z.string().min(1, "Please select your city"),
 

@@ -28,7 +28,8 @@
   padding: 50px 44px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 48px;
   overflow: hidden;
   order: 1;
 }
@@ -73,13 +74,13 @@
 .heroContent {
   position: relative;
   z-index: 2;
-  max-width: 420px;
-  margin-top: 40px;
+  max-width: 480px;
+  margin-top: 120px;
   color: #ffffff;
 }
 
 .heroTitle {
-  font-size: 2.25rem;
+  font-size: 3.75rem;
   font-weight: 700;
   line-height: 1.15;
   margin-bottom: 1.1rem;
@@ -97,10 +98,10 @@
 }
 
 .heroSubtitle {
-  font-size: 0.85rem;
+  font-size: 1rem;
   line-height: 1.6;
-  color: #e2e8f0;
-  max-width: 380px;
+  color: #ffffff;
+  max-width: 440px;
   font-weight: 400;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
 }
@@ -194,39 +195,33 @@
 /* ── Full-Height Form Card ───────────────────────────────────── */
 .formCard {
   width: 100%;
-  max-width: 380px;
-  height: 100%;
+  max-width: 420px;
   background: #ffffff;
-  padding: 28px 16px;
+  padding: 40px 32px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  border-radius: 20px;
 }
 
 /* ── Brand Header (Bigger Logo) ──────────────────────────────── */
 .brand {
   text-align: center;
-  margin-bottom: 8px;
+  margin-top: 15px; /* Leaves the elegant top spacer block previously occupied by the logo */
+  margin-bottom: 12px;
 }
 
 .brandLogo {
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none; /* Hides the logo graphic itself as requested */
 }
 
 .brandLogo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  display: none;
 }
 
 .brandName {
-  font-size: 1.45rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #0f172a;
   margin-bottom: 2px;
@@ -238,7 +233,7 @@
 }
 
 .brandTagline {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: #64748b;
   margin: 0;
 }
@@ -246,25 +241,25 @@
 /* ── Welcome Text ────────────────────────────────────────────── */
 .welcomeTitle {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.45rem;
   font-weight: 700;
   color: #0f172a;
   margin-top: 8px;
-  margin-bottom: 3px;
+  margin-bottom: 6px;
 }
 
 .welcomeSubtitle {
   text-align: center;
-  font-size: 0.74rem;
+  font-size: 0.88rem;
   color: #64748b;
-  margin-bottom: 14px;
+  margin-bottom: 24px;
 }
 
 /* ── Form ────────────────────────────────────────────────────── */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 16px;
 }
 
 .inputGroup {
@@ -275,29 +270,29 @@
 
 .inputIcon {
   position: absolute;
-  left: 13px;
+  left: 14px;
   color: #94a3b8;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   pointer-events: none;
   z-index: 1;
 }
 
 .input {
   width: 100%;
-  padding: 10px 13px 10px 38px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.78rem;
+  padding: 12px 14px 12px 42px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.88rem;
   font-family: inherit;
   color: #0f172a;
   background: #fff;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: all 0.2s ease;
 }
 
 .input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
 }
 
 .input::placeholder {
@@ -310,17 +305,17 @@
 
 .inputError:focus {
   border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
 }
 
 .passwordToggle {
   position: absolute;
-  right: 12px;
+  right: 14px;
   background: none;
   border: none;
   color: #94a3b8;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   padding: 3px;
   display: flex;
   align-items: center;
@@ -333,8 +328,8 @@
 
 .errorText {
   color: #ef4444;
-  font-size: 0.66rem;
-  margin-top: 2px;
+  font-size: 0.78rem;
+  margin-top: 4px;
   margin-left: 3px;
 }
 
@@ -343,8 +338,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 2px;
-  margin-bottom: 3px;
+  margin-top: 4px;
+  margin-bottom: 4px;
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -352,26 +347,26 @@
 .checkboxWrapper {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
 }
 
 .checkbox {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   accent-color: #2563eb;
   cursor: pointer;
 }
 
 .checkboxLabel {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: #475569;
   font-weight: 500;
 }
 
 .forgotLink {
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: #2563eb;
   font-weight: 600;
   text-decoration: none;
@@ -386,17 +381,18 @@
 /* ── Submit Button ───────────────────────────────────────────── */
 .submitBtn {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   background: #2563eb;
   color: #fff;
   border: none;
-  border-radius: 10px;
-  font-size: 0.8rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-  margin-top: 3px;
+  transition: all 0.2s ease;
+  margin-top: 6px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 }
 
 .submitBtn:hover:not(:disabled) {
@@ -416,10 +412,10 @@
 .divider {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 9px 0;
+  gap: 12px;
+  margin: 16px 0;
   color: #94a3b8;
-  font-size: 0.66rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -434,20 +430,20 @@
 /* ── Google Button ───────────────────────────────────────────── */
 .googleBtn {
   width: 100%;
-  padding: 9px;
+  padding: 11px;
   background: #fff;
   color: #0f172a;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  font-size: 0.78rem;
-  font-weight: 500;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: background 0.2s, border-color 0.2s;
+  transition: all 0.2s ease;
 }
 
 .googleBtn:hover {
@@ -456,15 +452,15 @@
 }
 
 .googleIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 /* ── Footer ──────────────────────────────────────────────────── */
 .formFooter {
   text-align: center;
-  margin-top: 11px;
-  font-size: 0.74rem;
+  margin-top: 18px;
+  font-size: 0.85rem;
   color: #64748b;
 }
 
@@ -490,11 +486,15 @@
   }
 
   .heroTitle {
-    font-size: 2.1rem;
+    font-size: 3.75rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1rem;
   }
 
   .heroContent {
-    margin-top: 28px;
+    margin-top: 90px;
   }
 
   .formSection {
@@ -511,15 +511,15 @@
   }
 
   .heroTitle {
-    font-size: 1.85rem;
+    font-size: 3.75rem;
   }
 
   .heroSubtitle {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 
   .heroContent {
-    margin-top: 22px;
+    margin-top: 70px;
   }
 
   .heroFeatures {
@@ -894,12 +894,12 @@
   }
 
   .heroTitle {
-    font-size: 1.75rem;
+    font-size: 3.75rem;
     margin-bottom: 0.8rem;
   }
 
   .heroSubtitle {
-    font-size: 0.78rem;
+    font-size: 1rem;
   }
 
   .heroSide {

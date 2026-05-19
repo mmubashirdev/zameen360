@@ -11,8 +11,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   transition: color 0.2s;
 }
 
@@ -24,7 +23,7 @@
 .iconWrapper {
   width: 64px;
   height: 64px;
-  margin: 0 auto 20px;
+  margin: 0 auto 12px;
   border-radius: 50%;
   background: #eff6ff;
   border: 1px solid #dbeafe;
@@ -37,7 +36,7 @@
 /* ── Header ──────────────────────────────────────────────────── */
 .headerBlock {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 
 .title {
@@ -63,7 +62,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
 /* ── OTP Input Container ─────────────────────────────────────── */

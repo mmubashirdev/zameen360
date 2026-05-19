@@ -5,17 +5,8 @@ function PopularLocations() {
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-
-        <h1 className={styles.title}>
-          Popular Locations
-          </h1>
-
-        <a href="#" className={styles.viewAll}>
-          View All Cities
-          <span className={styles.arrow}>→</span>
-        </a>
-
-
+        <h2 className={styles.title}>Popular <span>Locations</span></h2>
+        <p className={styles.subtitle}>Explore properties in Pakistan's most prominent cities</p>
       </div>
 
       <div className={styles.container}>
@@ -35,6 +26,13 @@ function PopularLocations() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className={styles.bottomActions}>
+        <a href="#" className={styles.viewAll}>
+          <span className={styles.viewAllText}>View All Cities</span>
+          <span className={styles.arrow}>→</span>
+        </a>
       </div>
     </section>
   )

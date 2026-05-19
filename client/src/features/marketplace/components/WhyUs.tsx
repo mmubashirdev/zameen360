@@ -5,7 +5,10 @@ import {mdiShieldCheckOutline,mdiAccountMultipleCheckOutline,mdiMagnify,mdiCheck
 function WhyUs() {
     return (
         <div className={styles.mainContainer}>
-            <h1>Why Choose Zameen 360?</h1>
+            <div className={styles.header}>
+                <h2 className={styles.title}>Why Choose <span>Zameen 360?</span></h2>
+                <p className={styles.subtitle}>Pakistan's most trusted real estate partner</p>
+            </div>
 
             <div className={styles.cardsWrapper}>
                 <div className={styles.subContainer}>

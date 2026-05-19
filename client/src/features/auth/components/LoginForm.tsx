@@ -29,7 +29,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
     defaultValues: {
       email: "",
       password: "",
-      rememberMe: false,
+
     },
   });
 
@@ -38,15 +38,14 @@ export default function LoginForm({ toast }: LoginFormProps) {
       const result = await login({
         email: data.email.trim().toLowerCase(),
         password: data.password,
-        rememberMe: !!data.rememberMe,
       });
 
       console.log("login result:", result);
 
       toast.success("Welcome Back!", result.message ?? "Login successful.");
 
-     
-      navigate("/dashboard", { replace: true });
+
+      navigate("/marketplace", { replace: true });
     } catch (err) {
       const error = err as {
         message?: string;
@@ -68,7 +67,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
           message: message,
         });
       } else {
-        // For "Invalid credentials" - show on password
+
         setError("password", {
           type: "manual",
           message: message,
@@ -77,7 +76,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
     }
   };
 
-  // Clear error when user types
+
   const handleInputChange = (fieldName: keyof LoginSchemaType) => {
     if (errors[fieldName]?.type === "manual") {
       clearErrors(fieldName);
@@ -128,9 +127,8 @@ export default function LoginForm({ toast }: LoginFormProps) {
               type="email"
               autoComplete="username"
               placeholder="Email Address"
-              className={`${styles.input} ${
-                errors.email ? styles.inputError : ""
-              }`}
+              className={`${styles.input} ${errors.email ? styles.inputError : ""
+                }`}
               {...register("email", {
                 onChange: () => handleInputChange("email"),
               })}
@@ -151,9 +149,8 @@ export default function LoginForm({ toast }: LoginFormProps) {
               type={showPassword ? "text" : "password"}
               autoComplete="current-password"
               placeholder="Password"
-              className={`${styles.input} ${
-                errors.password ? styles.inputError : ""
-              }`}
+              className={`${styles.input} ${errors.password ? styles.inputError : ""
+                }`}
               {...register("password", {
                 onChange: () => handleInputChange("password"),
               })}
@@ -165,9 +162,8 @@ export default function LoginForm({ toast }: LoginFormProps) {
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               <i
-                className={`fa-solid ${
-                  showPassword ? "fa-eye-slash" : "fa-eye"
-                }`}
+                className={`fa-solid ${showPassword ? "fa-eye-slash" : "fa-eye"
+                  }`}
                 aria-hidden="true"
               />
             </button>
@@ -209,7 +205,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
-  
+
           <path
             fill="#4285F4"
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

@@ -7,7 +7,7 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 40px;
 }
@@ -51,10 +51,10 @@
 
 /* Card Styling */
 .card {
-  min-width: calc(25% - 18px); /* 4 cards with 24px gap */
+  min-width: calc(33.333% - 16px); /* 3 cards with 24px gap */
   background: #ffffff;
   border-radius: 16px;
-  padding: 32px 24px;
+  padding: 20px 24px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.04);
   border: 1px solid #e5e7eb;
   position: relative;
@@ -85,7 +85,7 @@
 .stars {
   display: flex;
   gap: 4px;
-  margin-bottom: 16px;
+  margin-top: auto;
 }
 
 .star {
@@ -98,7 +98,7 @@
   font-size: 14px;
   line-height: 1.65;
   color: #475569;
-  margin: 0 0 24px 0;
+  margin: 0 0 12px 0;
   flex-grow: 1;
 }
 
@@ -107,8 +107,9 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
 }
 
 .avatar {
@@ -137,12 +138,12 @@
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
 
-.location::before {
-  content: '📍';
-  font-size: 10px;
+.location i {
+  color: #2563eb;
+  font-size: 11px;
 }
 
 /* Navigation Arrows */
@@ -188,7 +189,7 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .card {
-    min-width: calc(33.333% - 16px);
+    min-width: calc(50% - 12px);
   }
 }
 
