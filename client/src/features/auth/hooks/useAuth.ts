@@ -51,7 +51,7 @@ export function useAuth() {
       }
       ctx?.setError?.(null);
       return result;
-    } catch (error: any) {
+    } catch (error: object) {
       ctx?.setError?.(error.message);
       throw error;
     } finally {
