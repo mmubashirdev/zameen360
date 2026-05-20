@@ -3,12 +3,8 @@ const passport = require("../../../configs/passport");
 const { generateAccessToken, generateRefreshToken } = require("../../../utils/generateToken");
 const prisma = require("../../../configs/prisma");
 
-// ─── Initiate Google OAuth ────────────────────────────────────────────────────
 
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
+router.get( "/google", passport.authenticate("google", {scope: ["profile", "email"],
     session: false,
   })
 );
