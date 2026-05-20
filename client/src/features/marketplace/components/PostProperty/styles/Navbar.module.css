@@ -1,0 +1,59 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.logo { display: flex; align-items: center; gap: 8px; }
+.logoIcon { color: #2563eb; width: 28px; height: 28px; }
+.logoText { font-size: 22px; font-weight: 700; color: #111827; }
+.logoAccent { color: #2563eb; }
+
+.navLinks {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.navItem {
+  color: #4b5563;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.navItem:hover { color: #2563eb; }
+
+.navActions { display: flex; align-items: center; gap: 20px; }
+.postBtn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.icon { color: #6b7280; cursor: pointer; }
+
+.notification { position: relative; }
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #2563eb;
+  color: white;
+  font-size: 10px;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.profile img { width: 36px; height: 36px; border-radius: 50%; }
