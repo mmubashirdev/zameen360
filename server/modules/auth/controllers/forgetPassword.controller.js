@@ -70,7 +70,6 @@ exports.verifyResetOtp = async (req, res) => {
       });
     }
 
-    // ✅ Mark verified but DON'T mark used yet
     await prisma.userVerification.update({
       where: { id: latestOtp.id },
       data: { verifiedAt: new Date() },

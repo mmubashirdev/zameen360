@@ -5,28 +5,27 @@ enum Role {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  fullName        String    @map("full_name")
-  email           String    @unique
-  phone           String?
-  passwordHash    String    @map("password_hash")
-  role            Role      @default(BUYER)
-  city            String?
-  profilePicture  String?   @map("profile_picture")
-  trustScore      Decimal?  @default(0) @map("trust_score") @db.Decimal(5, 2)
-  isVerified      Boolean   @default(false) @map("is_verified")
-  isActive        Boolean   @default(true) @map("is_active")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
-  googleId        String?  @unique
-  profile         UserProfile?
-  sellerDetail    SellerDetail?
-  trustScoreData  TrustScore?
-  verifications   UserVerification[]
-  sessions        UserSession[]
-  notifications   UserNotification[]
-  passwordResets  PasswordReset[]
-  activityLogs    UserActivityLog[]
+  id             Int           @id @default(autoincrement())
+  fullName       String        @map("full_name")
+  email          String        @unique
+  phone          String?
+  passwordHash   String        @map("password_hash")
+  role           Role          @default(BUYER)
+  city           String?
+  profilePicture String?       @map("profile_picture")
+  trustScore     Decimal?      @default(0) @map("trust_score") @db.Decimal(5, 2)
+  isVerified     Boolean       @default(false) @map("is_verified")
+  isActive       Boolean       @default(true) @map("is_active")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  googleId       String?       @unique
+  profile        UserProfile?
+  sellerDetail   SellerDetail?
+
+  verifications  UserVerification[]
+  sessions       UserSession[]
+  passwordResets PasswordReset[]
+  activityLogs   UserActivityLog[]
 
   @@map("users")
 }
