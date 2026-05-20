@@ -1,12 +1,18 @@
 import { ClipboardList } from 'lucide-react';
 import styles from '../PostProperty/styles/ProgressSteps.module.css';
 
-const ProgressSteps = () => {
+interface ProgressStepsProps {
+  currentStep?: number;
+}
+
+const ProgressSteps = ({ currentStep = 1 }: ProgressStepsProps) => {
   const steps = [
-    { num: 1, label: 'Property Info', active: true },
-    { num: 2, label: 'Media & Location', active: false },
-    { num: 3, label: 'Review & Publish', active: false },
+    { num: 1, label: 'Property Info', active: currentStep === 1 },
+    { num: 2, label: 'Media & Location', active: currentStep === 2 },
+    { num: 3, label: 'Review & Publish', active: currentStep === 3 },
   ];
+
+  const progressPercentage = (currentStep / 3) * 100;
 
   return (
     <div className={styles.container}>
@@ -22,11 +28,11 @@ const ProgressSteps = () => {
         ))}
       </div>
       <div className={styles.progressBar}>
-        <div className={styles.progressFill} style={{ width: '33%' }} />
+        <div className={styles.progressFill} style={{ width: `${progressPercentage}%` }} />
       </div>
       <div className={styles.info}>
-        <span>33% Complete</span>
-        <span>Step 1 of 3</span>
+        <span>{Math.round(progressPercentage)}% Complete</span>
+        <span>Step {currentStep} of 3</span>
       </div>
     </div>
   );

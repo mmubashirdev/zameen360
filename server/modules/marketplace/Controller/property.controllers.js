@@ -46,6 +46,7 @@ exports.createProperty = async (req, res) => {
     );
 
     const property = await prisma.property.create({
+      
       data: {
         // Basic Info
         purpose: d.purpose || null,
