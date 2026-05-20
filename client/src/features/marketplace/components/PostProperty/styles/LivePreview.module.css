@@ -1,0 +1,53 @@
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+.card { background: white; padding: 16px; border: 1px solid #e5e7eb; border-radius: 8px; }
+.header { display: flex; align-items: center; gap: 8px; color: #374151; }
+.headerTitle { font-weight: 600; }
+.subtitle { font-size: 12px; color: #6b7280; margin: 4px 0 12px; }
+
+.imageWrap { position: relative; border-radius: 8px; overflow: hidden; }
+.imageWrap img { width: 100%; height: 180px; object-fit: cover; display: block; }
+.tag {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: #2563eb;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.heart { position: absolute; top: 8px; right: 8px; color: white; }
+
+.propTitle { font-size: 14px; font-weight: 600; margin: 12px 0 4px; color: #111827; }
+.location { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #6b7280; }
+.price { color: #2563eb; font-weight: 700; margin: 8px 0; }
+
+.specs { display: flex; gap: 16px; padding: 12px 0; border-top: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6; }
+.specs > div { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #374151; }
+.specs span { display: block; font-size: 10px; color: #6b7280; font-weight: 400; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.chips span {
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+.more { background: #f3f4f6 !important; color: #6b7280 !important; }
+
+.tipsHeader { display: flex; align-items: center; gap: 8px; font-weight: 600; margin-bottom: 12px; color: #111827; }
+.tip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4b5563; margin-bottom: 8px; }
+
+.helpItem { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4b5563; margin-bottom: 8px; }
+
+.secureCard {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: #1e40af;
+}
