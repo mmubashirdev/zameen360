@@ -19,9 +19,7 @@ const authRoutes = [
   {
     path: "/verify-email",
     element: (
-      <ProtectedRoute>
-        <VerifyEmailPage />
-      </ProtectedRoute>
+      <VerifyEmailPage />
     ),
   },
 
