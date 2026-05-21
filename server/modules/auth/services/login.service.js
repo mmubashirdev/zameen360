@@ -11,7 +11,7 @@ const loginUser = async (data, ip, userAgent) => {
 
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { profile: true, sellerDetail: true, trustScoreData: true },
+    include: { profile: true, sellerDetail: true },
   });
 
   if (!user) throw { status: 401, message: "Invalid credentials." };
