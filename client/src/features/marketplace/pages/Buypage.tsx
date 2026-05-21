@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Bed, Bath, Maximize, Heart } from 'lucide-react';
 import Navbar from '../components/PostProperty/PropertyNav';
-import styles from '../components/PostProperty/styles/Buy.module.css';
+import styles from '../../marketplace/components/media/styles/Buy.module.css';
 
 interface Property {
   id: number;
