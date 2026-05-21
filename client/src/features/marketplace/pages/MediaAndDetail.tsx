@@ -7,13 +7,23 @@ import LocationSection from '../components/media/LocationSection';
 import LivePreview from '../components/media/LivePreview';
 import type { UploadedImage } from '../components/media/types';
 import styles from '../components/media/styles/PostProperty.module.css';
+import { useNavigate } from 'react-router-dom';
+
+
+
+
 
 const MediaAndDetail: React.FC = () => {
+  const navigate = useNavigate();
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [coverId, setCoverId] = useState<string | null>(null);
 
   const coverImage = images.find((image) => image.id === coverId) || null;
   const canProceed = images.length >= 5;
+
+  const NavigateToReview = () => {
+    navigate("/review");
+  };
 
   return (
     <div className={styles.page}>
@@ -36,7 +46,7 @@ const MediaAndDetail: React.FC = () => {
             <button className={styles.backBtn} type="button">
               Back
             </button>
-            <button className={styles.nextBtn} type="button" disabled={!canProceed}>
+            <button className={styles.nextBtn} type="button" disabled={!canProceed} onClick={NavigateToReview}>
               Next: Review & Publish
             </button>
           </div>
