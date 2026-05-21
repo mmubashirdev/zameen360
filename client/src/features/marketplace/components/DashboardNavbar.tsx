@@ -1,6 +1,6 @@
 import Logostyles from "../../marketplace/components/media/styles/Navbar.module.css";
 import styles from "../styles/dashboardNavbar.module.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/context/useAuthContext";
 import { useEffect, useRef, useState } from "react";
 
@@ -54,14 +54,26 @@ function DashboardNavbar() {
 
         <ul className={styles.navLinks}>
           <li>
-            <Link to="/">Home</Link>
+            <NavLink to="/" className={({ isActive }) => isActive ? styles.activeLink : ""}>Home</NavLink>
           </li>
-          <li>Buy</li>
-          <li>Rent</li>
-          <li>Sell</li>
-          <li>Projects</li>
-          <li>About Us</li>
-          <li>Contact</li>
+          <li>
+            <NavLink to="/buy" className={({ isActive }) => isActive ? styles.activeLink : ""}>Buy</NavLink>
+          </li>
+          <li>
+            <NavLink to="/rent" className={({ isActive }) => isActive ? styles.activeLink : ""}>Rent</NavLink>
+          </li>
+          <li>
+            <NavLink to="/sell" className={({ isActive }) => isActive ? styles.activeLink : ""}>Sell</NavLink>
+          </li>
+          <li>
+            <NavLink to="/projects" className={({ isActive }) => isActive ? styles.activeLink : ""}>Projects</NavLink>
+          </li>
+          <li>
+            <NavLink to="/about" className={({ isActive }) => isActive ? styles.activeLink : ""}>About Us</NavLink>
+          </li>
+          <li>
+            <NavLink to="/contact" className={({ isActive }) => isActive ? styles.activeLink : ""}>Contact</NavLink>
+          </li>
         </ul>
 
         <div className={styles.navActions}>

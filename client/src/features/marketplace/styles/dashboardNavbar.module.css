@@ -90,6 +90,12 @@
   color: inherit;
   font-weight: inherit;
   font-size: inherit;
+  position: relative;
+  display: block;
+}
+
+.activeLink {
+  color: #0052cc !important;
 }
 
 /* Hover underline animation */
@@ -106,13 +112,24 @@
     left 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.navLinks li:hover {
+.navLinks li:not(:has(.activeLink)):hover a {
   color: #0052cc;
 }
 
-.navLinks li:hover::after {
+.navLinks li:not(:has(.activeLink)):hover::after {
   width: 70%;
   left: 15%;
+}
+
+.activeLink::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 15%;
+  width: 70%;
+  height: 2.5px;
+  background: linear-gradient(90deg, #0052cc, #2684ff);
+  border-radius: 2px;
 }
 
 .navLinks li:active {

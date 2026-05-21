@@ -1,13 +1,17 @@
-import PropertyDetails from "../pages/propertyDetails"; 
+import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
-import MediaAndDetail from "../pages/MediaAndDetail"
+import MediaAndDetail from "../pages/MediaAndDetail";
 // import ReiewSubmit from "../pages/ReviewSubmit"
 import ReviewSubmit from "../pages/ReviewSubmit";
 
 const marketplaceRoutes = [
   {
     path: "/",
+    element: <DashboardHome />,
+  },
+  {
+    path: "*",
     element: <DashboardHome />,
   },
 
@@ -24,14 +28,14 @@ const marketplaceRoutes = [
     element: <PropertyDetails />,
   },
 
-{
-  path: "/media-and-details",
-  element: <MediaAndDetail />,
-},
-{
-  path: "/review",
-  element: <ReviewSubmit />,
-}
+  {
+    path: "/media-and-details",
+    element: <MediaAndDetail />,
+  },
+  {
+    path: "/review",
+    element: <ReviewSubmit />,
+  },
 ];
 
 export default marketplaceRoutes;
