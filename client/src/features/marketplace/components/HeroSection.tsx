@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styles from '../styles/HeroSection.module.css';
-// import image from "../assets/Gemini_Generated_Image_89vsbk89vsbk89vs.png"
 import image1 from "../assets/Screenshot 2026-05-18 010903.png"
 import { useNavigate } from 'react-router-dom';
 
@@ -12,8 +11,7 @@ const HeroSection: React.FC = () => {
   }
   return (
     <section className={styles.hero}>
-      <div className={styles.heroInner}>
-        
+      <div className={`${styles.heroInner} py-10`}>
         <div className={styles.heroImageContainer}>
           <img
             src={image1}
@@ -23,18 +21,17 @@ const HeroSection: React.FC = () => {
           <div className={styles.heroImageFade} />
         </div>
 
-       
         <div className={styles.heroContent}>
           <h1 className={styles.headline}>
-            Find Your Dream{' '}
-            Property  with     {' '}
+            Find Your Dream Property with{" "}
             <span className={styles.brandName}>Zameen 360</span>
           </h1>
           <p className={styles.subHeadline}>
-            Buy, sell or rent properties in the best locations across Pakistan. Verified listings, trusted agents and seamless experience.
+            Buy, sell or rent properties in the best locations across Pakistan.
+            Verified listings, trusted properties.
           </p>
-          <div className={styles.ctaButtons}>
-            <button className={styles.btnPrimary}>
+          <div className={`${styles.ctaButtons} py-4 gap-4 flex`}>
+            <button className={`btn ${styles.btnPrimary} py-20`}>
               Explore Properties
               <svg
                 width="16"
@@ -53,7 +50,12 @@ const HeroSection: React.FC = () => {
                 />
               </svg>
             </button>
-            <button className={styles.btnSecondary} onClick={navigationToCreateProperty}>Post Property</button>
+            <button
+              className={styles.btnSecondary}
+              onClick={navigationToCreateProperty}
+            >
+              Post Property
+            </button>
           </div>
         </div>
 
@@ -61,14 +63,14 @@ const HeroSection: React.FC = () => {
         <div className={styles.searchBarWrapper}>
           <div className={styles.searchTabs}>
             <button
-              className={`${styles.searchTab} ${activeTab === 'buy' ? styles.searchTabActive : ''}`}
-              onClick={() => setActiveTab('buy')}
+              className={`${styles.searchTab} ${activeTab === "buy" ? styles.searchTabActive : ""}`}
+              onClick={() => setActiveTab("buy")}
             >
               Buy
             </button>
             <button
-              className={`${styles.searchTab} ${activeTab === 'rent' ? styles.searchTabActive : ''}`}
-              onClick={() => setActiveTab('rent')}
+              className={`${styles.searchTab} ${activeTab === "rent" ? styles.searchTabActive : ""}`}
+              onClick={() => setActiveTab("rent")}
             >
               Rent
             </button>

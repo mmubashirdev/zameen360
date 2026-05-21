@@ -1,8 +1,8 @@
-import logo from "../../../assets/chatgpt_image_may_12__2026__11_24_22_pm_720-removebg-preview.png";
+import Logostyles from "../../marketplace/components/media/styles/Navbar.module.css";
 import styles from "../styles/dashboardNavbar.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/context/useAuthContext";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function DashboardNavbar() {
   const navigate = useNavigate();
@@ -45,7 +45,11 @@ function DashboardNavbar() {
     <>
       <nav className={styles.navbar}>
         <Link to="/">
-          <img className={styles.logo} src={logo} alt="Zameen 360 logo" />
+          <div className={Logostyles.logo}>
+            <span>
+              Zameen<span className={Logostyles.logoAccent}>360</span>
+            </span>
+          </div>
         </Link>
 
         <ul className={styles.navLinks}>

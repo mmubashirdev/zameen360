@@ -1,15 +1,22 @@
 import styles from "../styles/footer.module.css";
+import { FaPhone } from "react-icons/fa";
 import { footerColumnsData, contactInfoData } from "../data/footerData";
+import { useState } from "react";
 
 function Footer() {
+  const [developer] = useState("Mubashir");
   return (
     <footer className={styles.footerWrapper}>
       {/* CTA Top Section */}
       <div className={styles.ctaSection}>
         <div className={styles.ctaContainer}>
           <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Ready to Find Your Perfect Property?</h2>
-            <p className={styles.ctaSubtitle}>Explore thousands of properties or list your own with ease.</p>
+            <h2 className={styles.ctaTitle}>
+              Ready to Find Your Perfect Property?
+            </h2>
+            <p className={styles.ctaSubtitle}>
+              Explore thousands of properties or list your own with ease.
+            </p>
             <div className={styles.ctaButtons}>
               <button className={styles.exploreBtn}>Explore Now</button>
               <button className={styles.getStartedBtn}>Get Started</button>
@@ -18,15 +25,11 @@ function Footer() {
 
           <div className={styles.mapContainer}>
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15250493.593922114!2d60.84640698189874!3d23.6397227788484!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38db52fcbd60a707%3A0xca5f178ec9460903!2sPakistan!5e0!3m2!1sen!2s!4v1700000000000!5m2!1sen!2s"
-              width="100%"
-              height="260"
-              style={{ border: 0 }}
-              allowFullScreen={true}
+              className={styles.mapIframe}
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d349889.79599362984!2d74.00471980621096!3d31.483103657492336!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39190483e58107d9%3A0xc23abe6ccc7e2462!2sLahore%2C%20Pakistan!5e1!3m2!1sen!2s!4v1779377606328!5m2!1sen!2s"
+              allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              title="Pakistan Real Estate Map"
-              className={styles.mapIframe}
             ></iframe>
           </div>
         </div>
@@ -35,23 +38,32 @@ function Footer() {
       {/* Main Footer Grid */}
       <div className={styles.mainFooter}>
         <div className={styles.container}>
-          
           {/* Brand & Contact Column */}
           <div className={styles.brandCol}>
-            <h2 className={styles.logo}>Zameen <span>360</span></h2>
+            <h2 className={styles.logo}>
+              Zameen <span>360</span>
+            </h2>
             <p className={styles.brandDesc}>
-              Pakistan's leading real estate platform to buy, rent, and sell properties seamlessly.
+              Pakistan's emerging real estate platform to buy, rent, and sell
+              properties seamlessly.
             </p>
-            
+
             <div className={styles.contactInfo}>
               <div className={styles.contactItem}>
-                <span className={styles.icon}>📞</span> {contactInfoData.phone}
+                <FaPhone style={{ marginRight: "8px" }} />{" "}
+                {contactInfoData.phone}
               </div>
               <div className={styles.contactItem}>
-                <span className={styles.icon}>✉️</span> {contactInfoData.email}
+                <span className={styles.icon}>
+                  <i className="fa-solid fa-envelope"></i>
+                </span>{" "}
+                {contactInfoData.email}
               </div>
               <div className={styles.contactItem}>
-                <span className={styles.icon}><i className="fa-solid fa-location-dot"></i></span> {contactInfoData.address}
+                <span className={styles.icon}>
+                  <i className="fa-solid fa-location-dot"></i>
+                </span>{" "}
+                {contactInfoData.address}
               </div>
             </div>
 
@@ -80,7 +92,9 @@ function Footer() {
               <ul className={styles.linkList}>
                 {column.links.map((link, i) => (
                   <li key={i}>
-                    <a href={link.path} className={styles.link}>{link.label}</a>
+                    <a href={link.path} className={styles.link}>
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>
@@ -92,7 +106,9 @@ function Footer() {
       {/* Bottom Bar */}
       <div className={styles.bottomBar}>
         <div className={styles.bottomContainer}>
-          <p className={styles.copyright}>© 2026 Zameen 360. All rights reserved.</p>
+          <p className={styles.copyright}>
+            {developer} © 2026 Zameen 360. All rights reserved.
+          </p>
           <div className={styles.socials}>
             <a href="#" className={styles.socialIcon} aria-label="Facebook">
               <i className="fa-brands fa-facebook-f"></i>

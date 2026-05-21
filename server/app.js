@@ -8,7 +8,7 @@ const path = require("path");
 const fs = require("fs");
 
 const index = require("./modules/auth/routes/index");
-const propertyRoutes = require("./modules/marketplace/routes/property.routes"); 
+const propertyRoutes = require("./modules/marketplace/routes/property.routes");
 
 const app = express();
 
@@ -28,7 +28,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 });
 
 app.use("/api/auth", index);
-app.use("/api/properties", propertyRoutes); 
+app.use("/api/properties", propertyRoutes);
 
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });

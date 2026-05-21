@@ -13,7 +13,7 @@ export interface Property {
 export const propertiesData: Property[] = [
   {
     id: 1,
-    title: "Luxury Modern House",
+    title: "Luxury House",
     location: "DHA Phase 6, Lahore",
     price: "PKR 4.85 Crore",
     status: "For Sale",
