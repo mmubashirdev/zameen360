@@ -3,6 +3,7 @@ import house2 from "../../marketplace/assets/image copy.png";
 import house3 from "../../marketplace/assets/image copy 2.png";
 import house4 from "../../marketplace/assets/image.png";
 
+
 const house1 =
   "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80";
 

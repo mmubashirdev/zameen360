@@ -1,5 +1,6 @@
 // FeaturedProperties.tsx
 import { useState } from "react";
+import { MdLocationOn } from "react-icons/md";
 import { propertiesData } from "../data/propertyData";
 import type { Property } from "../data/propertyData";
 import styles from "../styles/FeatureProperty.module.css";
@@ -27,32 +28,46 @@ function FeaturedProperties() {
     <section className={styles.section}>
       <div className={styles.container}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Featured <span>Properties</span></h2>
+          <h2 className={styles.title}>
+            Featured <span>Properties</span>
+          </h2>
           <p className={styles.subtitle}>Handpicked properties just for you</p>
         </div>
 
         <div className={styles.carouselWrapper}>
-          <button className={`${styles.arrow} ${styles.arrowLeft}`} onClick={prevSlide}>
+          <button
+            className={`${styles.arrow} ${styles.arrowLeft}`}
+            onClick={prevSlide}
+          >
             &#8249;
           </button>
 
           <div className={styles.carouselViewport}>
-            <div 
+            <div
               className={styles.cardContainer}
-              style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
+              style={{
+                transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)`,
+              }}
             >
               {propertiesData.map((property: Property) => (
                 <div className={styles.card} key={property.id}>
                   <div className={styles.imageWrapper}>
-                    <img src={property.image} alt={property.title} className={styles.cardImage} />
-                    <span className={`${styles.badge} ${property.status === "For Rent" ? styles.badgeRent : styles.badgeSale}`}>
+                    <img
+                      src={property.image}
+                      alt={property.title}
+                      className={styles.cardImage}
+                    />
+                    <span
+                      className={`${styles.badge} ${property.status === "For Rent" ? styles.badgeRent : styles.badgeSale}`}
+                    >
                       {property.status}
                     </span>
                   </div>
                   <div className={styles.cardContent}>
                     <h3 className={styles.cardTitle}>{property.title}</h3>
                     <p className={styles.cardLocation}>
-                      <span className={styles.pinIcon}>📍</span> {property.location}
+                        <MdLocationOn size={30} color="#ff4d4d" />
+                      {property.location}
                     </p>
                     <p className={styles.cardPrice}>{property.price}</p>
                     <div className={styles.features}>
@@ -62,14 +77,22 @@ function FeaturedProperties() {
                       <span className={styles.divider}></span>
                       <span>{property.area}</span>
                     </div>
-                    <button className={styles.detailsBtn} onClick={navigateToPropertyDetails}>View Details</button>
+                    <button
+                      className={styles.detailsBtn}
+                      onClick={navigateToPropertyDetails}
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <button className={`${styles.arrow} ${styles.arrowRight}`} onClick={nextSlide}>
+          <button
+            className={`${styles.arrow} ${styles.arrowRight}`}
+            onClick={nextSlide}
+          >
             &#8250;
           </button>
         </div>

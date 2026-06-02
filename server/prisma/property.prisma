@@ -1,0 +1,56 @@
+model Property {
+  id                    Int      @id @default(autoincrement())
+
+  // Basic Info
+  purpose               String?
+  propertyType          String?
+  title                 String?
+  description           String?
+
+  // Property Details
+  areaSize              String?
+  areaUnit              String?
+  bedrooms              String?
+  bathrooms             String?
+  floors                String?
+  parking               String?
+  yearBuilt             String?
+  furnishing            String?
+  possession            String?
+  facing                String?
+
+  // Pricing
+  price                 BigInt?
+  negotiable            Boolean  @default(false)
+  installmentAvailable  Boolean  @default(false)
+  downPayment           BigInt?
+  monthlyInstallment    BigInt?
+  duration              String?
+  monthlyRent           BigInt?
+  securityDeposit       BigInt?
+  advanceMonths         String?
+
+  // Amenities
+  amenities             String[] @default([])
+
+  // Location
+  city                  String?
+  locality              String?
+  address               String?
+
+  // Media
+  images                String[] @default([])
+  videoUrl              String?
+  floorPlan             String?
+
+  // Status
+  status                String   @default("published")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([city])
+  @@index([purpose])
+  @@index([propertyType])
+  @@index([price])
+}

@@ -1,3 +1,5 @@
+import luxuryHouseImage from "../../auth/assets/photo-1722421492323-eaf9c401befe.avif";
+
 export interface Property {
   id: number;
   title: string;
@@ -13,14 +15,14 @@ export interface Property {
 export const propertiesData: Property[] = [
   {
     id: 1,
-    title: "Luxury Modern House",
+    title: "Luxury House",
     location: "DHA Phase 6, Lahore",
     price: "PKR 4.85 Crore",
     status: "For Sale",
     beds: 5,
     baths: 6,
     area: "1 Kanal",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+    image: luxuryHouseImage
   },
   {
     id: 2,

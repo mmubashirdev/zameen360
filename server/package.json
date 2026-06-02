@@ -29,6 +29,7 @@
     "express": "^5.2.1",
     "generate": "^0.14.0",
     "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.17.0",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
     "nodemon": "^3.1.14",

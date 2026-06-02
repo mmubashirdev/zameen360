@@ -1,0 +1,17 @@
+model UserSession {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  sessionToken String    @map("session_token")
+  deviceType   String?   @map("device_type")
+  browser      String?
+  ipAddress    String?   @map("ip_address")
+  loginTime    DateTime  @default(now()) @map("login_time")
+  logoutTime   DateTime? @map("logout_time")
+  isActive     Boolean   @default(true) @map("is_active")
+  rememberMe   Boolean   @default(false) @map("remember_me")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}

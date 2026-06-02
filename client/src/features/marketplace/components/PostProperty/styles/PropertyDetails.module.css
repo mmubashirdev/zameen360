@@ -1,0 +1,39 @@
+.section { background: white; padding: 24px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 24px; }
+.title { font-size: 16px; font-weight: 600; color: #111827; margin: 0 0 20px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 20px; }
+.label { display: block; font-size: 13px; color: #374151; margin-bottom: 8px; font-weight: 500; }
+.req { color: #ef4444; }
+.row { display: flex; gap: 8px; }
+.input, .select {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  flex: 1;
+  font-family: inherit;
+  background: white;
+}
+.btnRow { display: flex; flex-wrap: wrap; gap: 4px; }
+.numBtn {
+  min-width: 36px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #4b5563;
+}
+.numActive { background: #2563eb; color: white; border-color: #2563eb; }
+.tabRow { display: flex; gap: 4px; }
+.tab {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #4b5563;
+}
+.tabActive { background: #eff6ff; color: #2563eb; border-color: #2563eb; }
