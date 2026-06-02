@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Map from './Map';
 import styles from './styles/LocationSection.module.css';
 
@@ -7,14 +7,33 @@ interface LatLng {
   lng: number;
 }
 
+interface LocationSectionProps {
+  onDataChange?: (data: Partial<{city: string; locality: string; address: string}>) => void;
+}
+
 const defaultCenter: LatLng = { lat: 31.4697, lng: 74.4111 };
 
-const LocationSection: React.FC = () => {
+const LocationSection: React.FC<LocationSectionProps> = ({ onDataChange }) => {
   const [position, setPosition] = useState<LatLng>(defaultCenter);
   const [city, setCity] = useState('Lahore');
   const [area, setArea] = useState('DHA Phase 6');
   const [address, setAddress] = useState('House 123, Street 5, Sector A, DHA Phase 6, Lahore, Punjab, Pakistan');
   const [searchValue, setSearchValue] = useState('');
+
+  const handleCityChange = useCallback((newCity: string) => {
+    setCity(newCity);
+    onDataChange?.({ city: newCity });
+  }, [onDataChange]);
+
+  const handleAreaChange = useCallback((newArea: string) => {
+    setArea(newArea);
+    onDataChange?.({ locality: newArea });
+  }, [onDataChange]);
+
+  const handleAddressChange = useCallback((newAddress: string) => {
+    setAddress(newAddress);
+    onDataChange?.({ address: newAddress });
+  }, [onDataChange]);
 
   const useMyLocation = (): void => {
     if (!navigator.geolocation) return;
@@ -36,7 +55,7 @@ const LocationSection: React.FC = () => {
           <label>
             City <span className={styles.req}>*</span>
           </label>
-          <select value={city} onChange={(event) => setCity(event.target.value)}>
+          <select value={city} onChange={(event) => handleCityChange(event.target.value)}>
             <option>Lahore</option>
             <option>Karachi</option>
             <option>Islamabad</option>
@@ -47,7 +66,7 @@ const LocationSection: React.FC = () => {
           <label>
             Area / Locality <span className={styles.req}>*</span>
           </label>
-          <select value={area} onChange={(event) => setArea(event.target.value)}>
+          <select value={area} onChange={(event) => handleAreaChange(event.target.value)}>
             <option>DHA Phase 6</option>
             <option>DHA Phase 5</option>
             <option>Bahria Town</option>
@@ -58,7 +77,7 @@ const LocationSection: React.FC = () => {
           <label>
             Full Address <span className={styles.req}>*</span>
           </label>
-          <textarea value={address} onChange={(event) => setAddress(event.target.value)} />
+          <textarea value={address} onChange={(event) => handleAddressChange(event.target.value)} />
         </div>
       </div>
 

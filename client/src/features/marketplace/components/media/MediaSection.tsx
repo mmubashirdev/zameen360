@@ -1,7 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import styles from './styles/MediaSection.module.css';
 
-const MediaSection: React.FC = () => {
+interface MediaSectionProps {
+  onDataChange?: (data: Partial<{videoUrl: string; floorPlan: string}>) => void;
+}
+
+const MediaSection: React.FC<MediaSectionProps> = ({ onDataChange }) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [tourLink, setTourLink] = useState('');
@@ -10,17 +14,24 @@ const MediaSection: React.FC = () => {
   const videoRef = useRef<HTMLInputElement>(null);
   const floorRef = useRef<HTMLInputElement>(null);
 
-  const getYouTubeEmbed = (url: string): string => {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?/]+)/);
-    return match ? `https://www.youtube.com/embed/${match[1]}` : '';
-  };
+  const handleYoutubeUrlChange = useCallback((url: string) => {
+    setYoutubeUrl(url);
+    onDataChange?.({ videoUrl: url });
+  }, [onDataChange]);
 
-  const handleFloorPlan = (file: File | undefined): void => {
+  const handleFloorPlanChange = useCallback((file: File | undefined): void => {
     if (!file) return;
     if (floorPlan) {
       URL.revokeObjectURL(floorPlan);
     }
-    setFloorPlan(URL.createObjectURL(file));
+    const url = URL.createObjectURL(file);
+    setFloorPlan(url);
+    onDataChange?.({ floorPlan: url });
+  }, [floorPlan, onDataChange]);
+
+  const getYouTubeEmbed = (url: string): string => {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?/]+)/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : '';
   };
 
   return (
@@ -50,7 +61,7 @@ const MediaSection: React.FC = () => {
           className={styles.input}
           placeholder="Paste YouTube URL here"
           value={youtubeUrl}
-          onChange={(event) => setYoutubeUrl(event.target.value)}
+          onChange={(event) => handleYoutubeUrlChange(event.target.value)}
         />
         <p className={styles.hint}>e.g. https://youtube.com/watch?v=abc123</p>
         {youtubeUrl && getYouTubeEmbed(youtubeUrl) && (
@@ -94,7 +105,7 @@ const MediaSection: React.FC = () => {
             type="file"
             accept="image/*"
             hidden
-            onChange={(event) => handleFloorPlan(event.target.files?.[0])}
+            onChange={(event) => handleFloorPlanChange(event.target.files?.[0])}
           />
         </div>
       </div>

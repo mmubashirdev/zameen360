@@ -1,12 +1,21 @@
 import React from 'react';
 import styles from './styles/LivePreview.module.css';
 import type { UploadedImage } from './types';
+import { useProperty } from '../context/useProperty';
 
 interface LivePreviewProps {
   coverImage: UploadedImage | null;
 }
 
-const LivePreview: React.FC<LivePreviewProps> = ({ coverImage }) => (
+const LivePreview: React.FC<LivePreviewProps> = ({ coverImage }) => {
+  const { data } = useProperty();
+
+  const formatPrice = (p?: string | number) => {
+    if (!p) return '0';
+    return new Intl.NumberFormat('en-IN').format(Number(p));
+  };
+
+  return (
   <aside className={styles.sidebar}>
     <h4 className={styles.title}>Live Preview</h4>
     <p className={styles.sub}>This is how your listing will appear</p>
@@ -15,22 +24,24 @@ const LivePreview: React.FC<LivePreviewProps> = ({ coverImage }) => (
       <div className={styles.imgWrap}>
         {coverImage ? <img src={coverImage.url} alt="Property cover" /> : <div className={styles.noImg}>No cover image</div>}
         <span className={styles.heart}>Save</span>
-        <span className={styles.forSale}>For Sale</span>
+        <span className={styles.forSale}>For {data.purpose || 'Sale'}</span>
       </div>
       <div className={styles.info}>
-        <h5>Beautiful 5 Marla House in DHA Phase 6</h5>
-        <p className={styles.addr}>DHA Phase 6, Lahore, Punjab</p>
-        <p className={styles.price}>PKR 2,50,00,000</p>
+        <h5>{data.title || 'Beautiful Property'}</h5>
+        <p className={styles.addr}>{data.locality || 'Location'}, {data.city || 'City'}</p>
+        <p className={styles.price}>PKR {formatPrice(data.price) || '0'}</p>
         <div className={styles.specs}>
-          <span>5 Beds</span>
-          <span>6 Baths</span>
-          <span>5 Marla</span>
+          <span>{data.bedrooms || '—'} Beds</span>
+          <span>{data.bathrooms || '—'} Baths</span>
+          <span>{data.areaSize || '—'} {data.areaUnit || ''}</span>
         </div>
         <div className={styles.amenities}>
-          <span>Central AC</span>
-          <span>Lawn/Garden</span>
-          <span>CCTV</span>
-          <span>+3 more</span>
+          {(data.amenities || []).slice(0, 3).map((a, i) => (
+            <span key={i}>{a}</span>
+          ))}
+          {(data.amenities || []).length > 3 && (
+            <span>+{(data.amenities || []).length - 3} more</span>
+          )}
         </div>
       </div>
     </div>
@@ -56,6 +67,7 @@ const LivePreview: React.FC<LivePreviewProps> = ({ coverImage }) => (
 
     <div className={styles.secure}>Your information is secure and will never be shared with anyone.</div>
   </aside>
-);
+  );
+};
 
 export default LivePreview;

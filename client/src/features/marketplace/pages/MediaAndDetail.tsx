@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from "../components/PostProperty/PropertyNav";
 import ProgressBar from '../components/media/ProgressBar';
 import ImageUpload from '../components/media/ImageUpload';
@@ -8,20 +8,41 @@ import LivePreview from '../components/media/LivePreview';
 import type { UploadedImage } from '../components/media/types';
 import styles from '../components/media/styles/PostProperty.module.css';
 import { useNavigate } from 'react-router-dom';
-
-
-
-
+import { useProperty } from '../components/context/useProperty';
+import type { UploadedImage as ContextUploadedImage } from '../components/context/type';
 
 const MediaAndDetail: React.FC = () => {
   const navigate = useNavigate();
+  const { data, updateData } = useProperty();
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [coverId, setCoverId] = useState<string | null>(null);
+
+  // Load saved images from context on mount
+  useEffect(() => {
+    if (data.imageFiles && data.imageFiles.length > 0) {
+      const contextImages: UploadedImage[] = data.imageFiles.map(img => ({
+        id: img.id,
+        file: img.file,
+        url: img.url
+      }));
+      setImages(contextImages);
+      if (contextImages.length > 0) {
+        setCoverId(contextImages[0].id);
+      }
+    }
+  }, []);
 
   const coverImage = images.find((image) => image.id === coverId) || null;
   const canProceed = images.length >= 5;
 
   const NavigateToReview = () => {
+    // Save images to context before navigating
+    const imageFilesToSave: ContextUploadedImage[] = images.map(img => ({
+      id: img.id,
+      file: img.file,
+      url: img.url
+    }));
+    updateData({ imageFiles: imageFilesToSave });
     navigate("/review");
   };
 
@@ -39,8 +60,8 @@ const MediaAndDetail: React.FC = () => {
 
           <ProgressBar />
           <ImageUpload images={images} setImages={setImages} coverId={coverId} setCoverId={setCoverId} />
-          <MediaSection />
-          <LocationSection />
+          <MediaSection onDataChange={updateData} />
+          <LocationSection onDataChange={updateData} />
 
           <div className={styles.actions}>
             <button className={styles.backBtn} type="button">

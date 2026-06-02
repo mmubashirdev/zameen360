@@ -1,3 +1,5 @@
+import luxuryHouseImage from "../../auth/assets/photo-1722421492323-eaf9c401befe.avif";
+
 export interface Property {
   id: number;
   title: string;
@@ -20,7 +22,7 @@ export const propertiesData: Property[] = [
     beds: 5,
     baths: 6,
     area: "1 Kanal",
-    image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80"
+    image: luxuryHouseImage
   },
   {
     id: 2,

@@ -243,14 +243,14 @@ const ReviewSubmit = () => {
             onEdit={() => navigate('/media-and-details')}
           >
             <p className={styles.muted}>
-              {(data.images || []).length} image
-              {(data.images || []).length !== 1 ? 's' : ''} uploaded
+              {(data.imageFiles || []).length} image
+              {(data.imageFiles || []).length !== 1 ? 's' : ''} uploaded
             </p>
             <div className={styles.imgGrid}>
-              {(data.images || []).slice(0, 8).map((src, i) => (
+              {(data.imageFiles || []).slice(0, 8).map((img, i) => (
                 <img
                   key={i}
-                  src={src}
+                  src={img.url}
                   alt={`prop-${i}`}
                   className={styles.thumb}
                 />

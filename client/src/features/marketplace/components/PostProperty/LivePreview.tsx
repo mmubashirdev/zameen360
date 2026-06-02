@@ -1,7 +1,15 @@
 import { Eye, MapPin, Bed, Bath, Maximize, Heart, Lightbulb, CheckCircle, Headphones, Phone, MessageCircle, Mail, Shield } from 'lucide-react';
 import styles from '../PostProperty/styles/LivePreview.module.css';
+import { useProperty } from '../context/useProperty';
 
 const LivePreview = () => {
+  const { data } = useProperty();
+
+  const formatPrice = (p?: string | number) => {
+    if (!p) return '0';
+    return new Intl.NumberFormat('en-IN').format(Number(p));
+  };
+
   const tips = [
     'Upload 10+ high-quality images',
     'Write detailed description (200+ words)',
@@ -21,19 +29,24 @@ const LivePreview = () => {
         <p className={styles.subtitle}>This is how your listing will appear</p>
         <div className={styles.imageWrap}>
           <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400" alt="house" />
-          <span className={styles.tag}>For Sale</span>
+          <span className={styles.tag}>For {data.purpose || 'Sale'}</span>
           <Heart className={styles.heart} size={20} />
         </div>
-        <h4 className={styles.propTitle}>Beautiful 5 Marla House in DHA Phase 6</h4>
-        <div className={styles.location}><MapPin size={14} /> DHA Phase 6, Lahore, Punjab</div>
-        <div className={styles.price}>PKR 2,50,00,000</div>
+        <h4 className={styles.propTitle}>{data.title || 'Beautiful Property'}</h4>
+        <div className={styles.location}><MapPin size={14} /> {data.locality || 'Location'}, {data.city || 'City'}</div>
+        <div className={styles.price}>PKR {formatPrice(data.price) || '0'}</div>
         <div className={styles.specs}>
-          <div><Bed size={16} /><div>5<span>Beds</span></div></div>
-          <div><Bath size={16} /><div>6<span>Baths</span></div></div>
-          <div><Maximize size={16} /><div>5 Marla<span>Area</span></div></div>
+          <div><Bed size={16} /><div>{data.bedrooms || '—'}<span>Beds</span></div></div>
+          <div><Bath size={16} /><div>{data.bathrooms || '—'}<span>Baths</span></div></div>
+          <div><Maximize size={16} /><div>{data.areaSize || '—'} {data.areaUnit || ''}<span>Area</span></div></div>
         </div>
         <div className={styles.chips}>
-          <span>Central AC</span><span>Lawn/Garden</span><span>CCTV</span><span className={styles.more}>+3 more</span>
+          {(data.amenities || []).slice(0, 3).map((a, i) => (
+            <span key={i}>{a}</span>
+          ))}
+          {(data.amenities || []).length > 3 && (
+            <span className={styles.more}>+{(data.amenities || []).length - 3} more</span>
+          )}
         </div>
       </div>
 

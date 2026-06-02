@@ -1,10 +1,30 @@
-import { useState } from 'react';
+import { useCallback } from 'react';
 import { Tag, Key, FileText, Home, Building, Store, Map, Castle, ShoppingBag, Briefcase, Warehouse, Sprout } from 'lucide-react';
 import styles from '../PostProperty/styles/BasicInformation.module.css';
+import { useProperty } from '../context/useProperty';
 
 const BasicInformation = () => {
-  const [purpose, setPurpose] = useState('Sell');
-  const [propType, setPropType] = useState('House');
+  const { data, updateData } = useProperty();
+  const purpose = data.purpose || 'Sell';
+  const propertyType = data.propertyType || 'House';
+  const title = data.title || '';
+  const description = data.description || '';
+
+  const handlePurposeChange = useCallback((newPurpose: string) => {
+    updateData({ purpose: newPurpose });
+  }, [updateData]);
+
+  const handlePropertyTypeChange = useCallback((newType: string) => {
+    updateData({ propertyType: newType });
+  }, [updateData]);
+
+  const handleTitleChange = useCallback((newTitle: string) => {
+    updateData({ title: newTitle });
+  }, [updateData]);
+
+  const handleDescriptionChange = useCallback((newDescription: string) => {
+    updateData({ description: newDescription });
+  }, [updateData]);
 
   const purposes = [
     { label: 'Sell', icon: <Tag size={20} /> },
@@ -34,7 +54,7 @@ const BasicInformation = () => {
               <div
                 key={p.label}
                 className={`${styles.option} ${purpose === p.label ? styles.active : ''}`}
-                onClick={() => setPurpose(p.label)}
+                onClick={() => handlePurposeChange(p.label)}
               >
                 <div className={styles.iconWrap}>{p.icon}</div>
                 <span>{p.label}</span>
@@ -42,8 +62,13 @@ const BasicInformation = () => {
             ))}
           </div>
           <label className={styles.label} style={{ marginTop: 16 }}>Property Title <span className={styles.req}>*</span></label>
-          <input className={styles.input} placeholder="e.g., Beautiful 5 Marla House in DHA" />
-          <span className={styles.counter}>0/100</span>
+          <input 
+            className={styles.input} 
+            placeholder="e.g., Beautiful 5 Marla House in DHA"
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+          />
+          <span className={styles.counter}>{title.length}/100</span>
         </div>
 
         <div>
@@ -52,8 +77,8 @@ const BasicInformation = () => {
             {types.map((t) => (
               <div
                 key={t.label}
-                className={`${styles.option} ${propType === t.label ? styles.active : ''}`}
-                onClick={() => setPropType(t.label)}
+                className={`${styles.option} ${propertyType === t.label ? styles.active : ''}`}
+                onClick={() => handlePropertyTypeChange(t.label)}
               >
                 <div className={styles.iconWrap}>{t.icon}</div>
                 <span className={styles.optionLabel}>{t.label}</span>
@@ -61,8 +86,14 @@ const BasicInformation = () => {
             ))}
           </div>
           <label className={styles.label} style={{ marginTop: 16 }}>Description <span className={styles.req}>*</span></label>
-          <textarea className={styles.textarea} placeholder="Describe your property in detail..." rows={4} />
-          <span className={styles.counter}>0/3000</span>
+          <textarea 
+            className={styles.textarea} 
+            placeholder="Describe your property in detail..."
+            rows={4}
+            value={description}
+            onChange={(e) => handleDescriptionChange(e.target.value)}
+          />
+          <span className={styles.counter}>{description.length}/3000</span>
         </div>
       </div>
     </div>

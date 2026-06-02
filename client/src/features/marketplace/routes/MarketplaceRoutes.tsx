@@ -5,6 +5,7 @@ import MediaAndDetail from "../pages/MediaAndDetail";
 // import ReiewSubmit from "../pages/ReviewSubmit"
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
+import AboutPage from "../pages/Aboutus";
 const marketplaceRoutes = [
   {
     path: "/",
@@ -39,6 +40,10 @@ const marketplaceRoutes = [
   {
     path: "/buy",
     element: <Buy />,
+  },
+  {
+    path: "/about-us",
+    element: <AboutPage />,
   },
 ];
 

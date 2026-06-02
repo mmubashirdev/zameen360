@@ -69,7 +69,7 @@ function DashboardNavbar() {
             <NavLink to="/projects" className={({ isActive }) => isActive ? styles.activeLink : ""}>Projects</NavLink>
           </li>
           <li>
-            <NavLink to="/about" className={({ isActive }) => isActive ? styles.activeLink : ""}>About Us</NavLink>
+            <NavLink to="/about-us" className={({ isActive }) => isActive ? styles.activeLink : ""}>About Us</NavLink>
           </li>
           <li>
             <NavLink to="/contact" className={({ isActive }) => isActive ? styles.activeLink : ""}>Contact</NavLink>
