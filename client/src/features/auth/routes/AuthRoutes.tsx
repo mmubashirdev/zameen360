@@ -3,7 +3,6 @@ import SignupPage from "../pages/SignupPage";
 import VerifyEmailPage from "../pages/VerifyEmailPage";
 import GoogleCallbackPage from "../pages/GoogleCallbackPage";
 import AuthFlow from "../components/AuthFlow";
-import ProtectedRoute from "../../../app/routes/protectedRoute";
 
 const authRoutes = [
   {
@@ -18,11 +17,7 @@ const authRoutes = [
 
   {
     path: "/verify-email",
-    element: (
-      <ProtectedRoute>
-        <VerifyEmailPage />
-      </ProtectedRoute>
-    ),
+    element: <VerifyEmailPage />,
   },
 
   {

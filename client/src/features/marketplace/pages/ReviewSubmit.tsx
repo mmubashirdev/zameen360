@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Edit, Save, Rocket, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
-import Navbar from '../components/PostProperty/PropertyNav';
+import DashboardNavbar from '../components/DashboardNavbar';
 import ProgressSteps from '../components/PostProperty/ProgressSteps';
 import { useProperty } from '../components/context/useProperty';
 import styles from '../components/media/styles/ReviewSubmit.module.css';
@@ -125,7 +125,7 @@ const ReviewSubmit = () => {
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <DashboardNavbar />
       <main className={styles.main}>
         <div className={styles.heading}>
           <h1>Post Your Property</h1>

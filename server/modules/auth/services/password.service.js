@@ -278,14 +278,6 @@ const resetPasswordService = async (data, ip) => {
         status: "SUCCESS",
       },
     }),
-    prisma.userNotification.create({
-      data: {
-        userId: user.id,
-        title: "Password Changed",
-        message: "Your password has been reset successfully.",
-        type: "SECURITY",
-      },
-    }),
   ]);
 
   return true;
