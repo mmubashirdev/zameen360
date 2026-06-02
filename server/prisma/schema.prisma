@@ -1,40 +1,30 @@
-generator client {
+﻿generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// ==================== ENUMS ====================
-
 enum Role {
   BUYER
   SELLER
   ADMIN
 }
-
 enum Gender {
   MALE
   FEMALE
   OTHER
 }
-
 enum OtpType {
   EMAIL
   PHONE
   PASSWORD_RESET
 }
-
 enum ActivityStatus {
   SUCCESS
   FAILED
   SUSPICIOUS
 }
-
-// ==================== MODELS ====================
-
 model User {
   id             Int      @id @default(autoincrement())
   fullName       String   @map("full_name")
@@ -50,17 +40,14 @@ model User {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
   googleId       String?  @unique
-
   profile        UserProfile?
   sellerDetail   SellerDetail?
   verifications  UserVerification[]
   sessions       UserSession[]
   passwordResets PasswordReset[]
   activityLogs   UserActivityLog[]
-
   @@map("users")
 }
-
 model UserProfile {
   id              Int       @id @default(autoincrement())
   userId          Int       @unique @map("user_id")
@@ -73,12 +60,9 @@ model UserProfile {
   lastLogin       DateTime? @map("last_login")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("user_profiles")
 }
-
 model SellerDetail {
   id             Int      @id @default(autoincrement())
   userId         Int      @unique @map("user_id")
@@ -89,12 +73,9 @@ model SellerDetail {
   isPremium      Boolean  @default(false) @map("is_premium")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("seller_details")
 }
-
 model UserVerification {
   id         Int       @id @default(autoincrement())
   userId     Int       @map("user_id")
@@ -106,12 +87,9 @@ model UserVerification {
   attempts   Int       @default(0)
   ipAddress  String?   @map("ip_address")
   createdAt  DateTime  @default(now()) @map("created_at")
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("user_verifications")
 }
-
 model UserSession {
   id           Int       @id @default(autoincrement())
   userId       Int       @map("user_id")
@@ -124,12 +102,9 @@ model UserSession {
   isActive     Boolean   @default(true) @map("is_active")
   rememberMe   Boolean   @default(false) @map("remember_me")
   createdAt    DateTime  @default(now()) @map("created_at")
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("user_sessions")
 }
-
 model PasswordReset {
   id          Int       @id @default(autoincrement())
   userId      Int       @map("user_id")
@@ -139,12 +114,9 @@ model PasswordReset {
   resetAt     DateTime? @map("reset_at")
   ipAddress   String?   @map("ip_address")
   createdAt   DateTime  @default(now()) @map("created_at")
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("password_resets")
 }
-
 model UserActivityLog {
   id          Int            @id @default(autoincrement())
   userId      Int            @map("user_id")
@@ -154,12 +126,9 @@ model UserActivityLog {
   device      String?
   status      ActivityStatus @default(SUCCESS)
   createdAt   DateTime       @default(now()) @map("created_at")
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("user_activity_logs")
 }
-
 model Property {
   id                   Int      @id @default(autoincrement())
   purpose              String?
@@ -192,10 +161,9 @@ model Property {
   images               String[] @default([])
   videoUrl             String?
   floorPlan            String?
-  status               String   @default("published")
+  status               String   @default("pending")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
-
   @@index([city])
   @@index([purpose])
   @@index([propertyType])
