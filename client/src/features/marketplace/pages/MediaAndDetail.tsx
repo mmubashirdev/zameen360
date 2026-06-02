@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from "../components/PostProperty/PropertyNav";
+import DashboardNavbar from "../components/DashboardNavbar";
 import ProgressBar from '../components/media/ProgressBar';
 import ImageUpload from '../components/media/ImageUpload';
 import MediaSection from '../components/media/MediaSection';
@@ -48,7 +48,7 @@ const MediaAndDetail: React.FC = () => {
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <DashboardNavbar />
 
       <div className={styles.container}>
         <div className={styles.main}>

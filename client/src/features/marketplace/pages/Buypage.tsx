@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Bed, Bath, Maximize, Heart } from 'lucide-react';
-import Navbar from '../components/PostProperty/PropertyNav';
+import DashboardNavbar from '../components/DashboardNavbar';
 import styles from '../../marketplace/components/media/styles/Buy.module.css';
 
 interface Property {
@@ -90,7 +90,7 @@ const Buy = () => {
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <DashboardNavbar />
       <main className={styles.main}>
         <div className={styles.header}>
           <h1>Find Your Dream Property</h1>

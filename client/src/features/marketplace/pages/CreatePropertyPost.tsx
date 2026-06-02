@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import Navbar from "../components/PostProperty/PropertyNav";
+import DashboardNavbar from "../components/DashboardNavbar";
 import ProgressSteps from "../components/PostProperty/ProgressSteps";
 import BasicInformation from "../components/PostProperty/BasicInformation";
 import PropertyDetails from "../components/PostProperty/PropertyDetails";
@@ -18,7 +18,7 @@ const PostProperty = () => {
 
   return (
     <div className={styles.page}>
-      <Navbar />
+      <DashboardNavbar />
 
       <main className={styles.main}>
         <div className={styles.heading}>
