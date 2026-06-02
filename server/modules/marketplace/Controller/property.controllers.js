@@ -40,20 +40,16 @@ exports.createProperty = async (req, res) => {
     const d = req.body;
     const files = req.files || [];
 
-    // ⭐ Multer se aayi files ke URLs banao
     const imageUrls = files.map(
       (file) => `${BASE_URL}/uploads/properties/${file.filename}`
     );
 
     const property = await prisma.property.create({
       data: {
-        // Basic Info
         purpose: d.purpose || null,
         propertyType: d.propertyType || null,
         title: d.title || null,
         description: d.description || null,
-
-        // Property Details
         areaSize: d.areaSize || null,
         areaUnit: d.areaUnit || null,
         bedrooms: d.bedrooms || null,
@@ -64,8 +60,6 @@ exports.createProperty = async (req, res) => {
         furnishing: d.furnishing || null,
         possession: d.possession || null,
         facing: d.facing || null,
-
-        // Pricing
         price: toBigInt(d.price),
         negotiable: toBool(d.negotiable),
         installmentAvailable: toBool(d.installmentAvailable),
@@ -75,28 +69,22 @@ exports.createProperty = async (req, res) => {
         monthlyRent: toBigInt(d.monthlyRent),
         securityDeposit: toBigInt(d.securityDeposit),
         advanceMonths: d.advanceMonths || null,
-
-        // Amenities
         amenities: parseAmenities(d.amenities),
-
-        // Location
         city: d.city || null,
         locality: d.locality || null,
         address: d.address || null,
-
-        // ⭐ Media — actual uploaded image URLs
         images: imageUrls,
         videoUrl: d.videoUrl || null,
         floorPlan: d.floorPlan || null,
 
-        // Status
-        status: d.status || "published",
+        // ⭐ CHANGE: Default status "pending" (admin approve karega)
+        status: "pending",
       },
     });
 
     res.status(201).json({
       success: true,
-      message: "Property created successfully",
+      message: "Property submitted successfully. Waiting for admin approval.",
       data: property,
     });
   } catch (err) {
@@ -109,7 +97,7 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-// ==================== GET ALL ====================
+
 exports.getProperties = async (req, res) => {
   try {
     const {
@@ -125,7 +113,9 @@ exports.getProperties = async (req, res) => {
     } = req.query;
 
     const where = {};
-    where.status = status || "published";
+
+    // ⭐ CHANGE: Default "approved" (pehle "published" tha)
+    where.status = status || "approved";
 
     if (purpose) where.purpose = purpose;
     if (propertyType) where.propertyType = propertyType;
@@ -169,6 +159,142 @@ exports.getProperties = async (req, res) => {
     });
   }
 };
+
+
+// ==================== ⭐ NEW: ADMIN - Get all properties (sab status) ====================
+exports.getAdminProperties = async (req, res) => {
+  try {
+    const { status, search, page } = req.query;
+
+    const where = {};
+
+    // Admin sab status dekh sakta hai
+    if (status && status !== "all") {
+      where.status = status;
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: "insensitive" } },
+        { city: { contains: search, mode: "insensitive" } },
+        { address: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    // Pagination
+    const pageNumber = parseInt(page) || 1;
+    const pageSize = 10;
+    const skip = (pageNumber - 1) * pageSize;
+
+    const total = await prisma.property.count({ where });
+
+    const properties = await prisma.property.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: skip,
+      take: pageSize,
+    });
+
+    res.json({
+      success: true,
+      data: properties,
+      total: total,
+      page: pageNumber,
+      totalPages: Math.ceil(total / pageSize),
+    });
+  } catch (err) {
+    console.error("GET ADMIN PROPERTIES ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch properties",
+      error: err.message,
+    });
+  }
+};
+
+
+// ==================== ⭐ NEW: ADMIN - Update Status (Approve/Reject) ====================
+exports.updatePropertyStatus = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+
+    if (isNaN(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
+    }
+
+    // Sirf ye 3 status allow karo
+    const allowedStatus = ["pending", "approved", "rejected"];
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be: pending, approved, or rejected",
+      });
+    }
+
+    const existing = await prisma.property.findUnique({ where: { id } });
+    if (!existing) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+    }
+
+    const property = await prisma.property.update({
+      where: { id },
+      data: { status: status },
+    });
+
+    res.json({
+      success: true,
+      message: `Property ${status} successfully`,
+      data: property,
+    });
+  } catch (err) {
+    console.error("UPDATE STATUS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update status",
+      error: err.message,
+    });
+  }
+};
+
+
+// ==================== ⭐ NEW: ADMIN - Dashboard Stats ====================
+exports.getDashboardStats = async (req, res) => {
+  try {
+    const total = await prisma.property.count();
+    const pending = await prisma.property.count({
+      where: { status: "pending" },
+    });
+    const approved = await prisma.property.count({
+      where: { status: "approved" },
+    });
+    const rejected = await prisma.property.count({
+      where: { status: "rejected" },
+    });
+
+    res.json({
+      success: true,
+      data: {
+        total,
+        pending,
+        approved,
+        rejected,
+      },
+    });
+  } catch (err) {
+    console.error("STATS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch stats",
+      error: err.message,
+    });
+  }
+};
+
 
 // ==================== GET BY ID ====================
 exports.getPropertyById = async (req, res) => {
