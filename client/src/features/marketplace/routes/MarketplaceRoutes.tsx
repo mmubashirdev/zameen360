@@ -2,11 +2,12 @@ import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 import MediaAndDetail from "../pages/MediaAndDetail";
-// import ReiewSubmit from "../pages/ReviewSubmit"
+
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
 import ContactUs from "../pages/ContactUs";
+import Rent from "../rent/pages/Rent";
 const marketplaceRoutes = [
   {
     path: "/",
@@ -41,6 +42,10 @@ const marketplaceRoutes = [
   {
     path: "/buy",
     element: <Buy />,
+  },
+  {
+    path: "/rent",
+    element: <Rent />,
   },
   {
     path: "/about-us",
