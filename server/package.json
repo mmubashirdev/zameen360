@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "^5.22.0",
     "@reduxjs/toolkit": "^2.11.2",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -36,7 +36,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.20.0",
-    "prisma": "^6.19.3",
+    "prisma": "^5.22.0",
     "react-hook-form": "^7.75.0",
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",

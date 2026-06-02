@@ -3,20 +3,35 @@ const router = express.Router();
 const { uploadProperty } = require("../middleware/upload");
 const propertyController = require("../Controller/property.controllers");
 
-// ⭐ Create with image upload (max 30 files, field name "images")
+// ==================== PUBLIC ROUTES ====================
+
+// Create property (user submit karta hai - status pending)
 router.post(
   "/",
   uploadProperty.array("images", 30),
   propertyController.createProperty
 );
 
-// Get all
+// Get all approved properties (public)
 router.get("/", propertyController.getProperties);
+
+// ==================== ⭐ ADMIN ROUTES (upar rakho warna :id ma fas jayenge) ====================
+
+// Admin - Dashboard stats
+router.get("/admin/stats", propertyController.getDashboardStats);
+
+// Admin - Get all properties (with filter by status)
+router.get("/admin/all", propertyController.getAdminProperties);
+
+// Admin - Update property status (approve/reject)
+router.put("/admin/:id/status", propertyController.updatePropertyStatus);
+
+// ==================== ID ROUTES (niche rakho) ====================
 
 // Get by ID
 router.get("/:id", propertyController.getPropertyById);
 
-// Update
+// Update full property
 router.put(
   "/:id",
   uploadProperty.array("images", 30),

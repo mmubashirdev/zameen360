@@ -3,14 +3,28 @@ import styles from "../styles/dashboardNavbar.module.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/context/useAuthContext";
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Search, Bell, ChevronDown, Home, X, User, Settings, LogOut } from "lucide-react";
+import {
+  Search,
+  Bell,
+  ChevronDown,
+  Home,
+  X,
+  User,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
 // ==================== AUTHENTICATED NAVBAR ====================
 const AuthenticatedNavbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthContext();
   const currentUser = user as
-    | { firstName?: string; fullName?: string; profileImage?: string; email?: string }
+    | {
+        firstName?: string;
+        fullName?: string;
+        profileImage?: string;
+        email?: string;
+      }
     | undefined;
   const profileImage = currentUser?.profileImage;
 
@@ -100,7 +114,9 @@ const AuthenticatedNavbar = () => {
         </div>
 
         {/* CENTER — Nav Links */}
-        <ul className={`${styles.authNavLinks} ${searchOpen ? styles.authNavLinksHidden : ""}`}>
+        <ul
+          className={`${styles.authNavLinks} ${searchOpen ? styles.authNavLinksHidden : ""}`}
+        >
           {[
             { to: "/", label: "Home" },
             { to: "/buy", label: "Buy" },
@@ -108,7 +124,7 @@ const AuthenticatedNavbar = () => {
             { to: "/sell", label: "Sell" },
             { to: "/projects", label: "Projects" },
             { to: "/about-us", label: "About Us" },
-            { to: "/contact", label: "Contact" },
+            { to: "/contact-us", label: "Contact" },
           ].map(({ to, label }) => (
             <li key={to}>
               <NavLink
@@ -138,9 +154,14 @@ const AuthenticatedNavbar = () => {
 
           {/* Search */}
           <div className={styles.searchContainer} ref={searchRef}>
-            <div className={`${styles.searchWrapper} ${searchOpen ? styles.searchWrapperOpen : ""}`}>
+            <div
+              className={`${styles.searchWrapper} ${searchOpen ? styles.searchWrapperOpen : ""}`}
+            >
               {searchOpen && (
-                <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className={styles.searchForm}
+                >
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -205,7 +226,11 @@ const AuthenticatedNavbar = () => {
               title={userName}
             >
               {profileImage ? (
-                <img src={profileImage} alt="profile" className={styles.authAvatar} />
+                <img
+                  src={profileImage}
+                  alt="profile"
+                  className={styles.authAvatar}
+                />
               ) : (
                 <div className={styles.authAvatarFallback}>
                   {userName.charAt(0).toUpperCase()}
@@ -218,17 +243,26 @@ const AuthenticatedNavbar = () => {
                 size={14}
                 strokeWidth={2.5}
                 className={styles.chevron}
-                style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                style={{
+                  transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
               />
             </button>
 
             {menuOpen && (
               <>
-                <div className={styles.dropdownBackdrop} onClick={() => setMenuOpen(false)} />
+                <div
+                  className={styles.dropdownBackdrop}
+                  onClick={() => setMenuOpen(false)}
+                />
                 <div className={styles.authDropdownMenu} role="menu">
                   <div className={styles.dropdownUserInfo}>
                     {profileImage ? (
-                      <img src={profileImage} alt="profile" className={styles.dropdownAvatar} />
+                      <img
+                        src={profileImage}
+                        alt="profile"
+                        className={styles.dropdownAvatar}
+                      />
                     ) : (
                       <div className={styles.dropdownAvatarFallback}>
                         {userName.charAt(0).toUpperCase()}
@@ -248,7 +282,11 @@ const AuthenticatedNavbar = () => {
                       setMenuOpen(false);
                     }}
                   >
-                    <User size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                    <User
+                      size={16}
+                      strokeWidth={2}
+                      className={styles.dropdownItemIcon}
+                    />
                     <span>My Profile</span>
                   </button>
                   <button
@@ -259,7 +297,11 @@ const AuthenticatedNavbar = () => {
                       setMenuOpen(false);
                     }}
                   >
-                    <Settings size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                    <Settings
+                      size={16}
+                      strokeWidth={2}
+                      className={styles.dropdownItemIcon}
+                    />
                     <span>Settings</span>
                   </button>
                   <div className={styles.dropdownDivider} />
@@ -271,7 +313,11 @@ const AuthenticatedNavbar = () => {
                       setMenuOpen(false);
                     }}
                   >
-                    <LogOut size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                    <LogOut
+                      size={16}
+                      strokeWidth={2}
+                      className={styles.dropdownItemIcon}
+                    />
                     <span>Logout</span>
                   </button>
                 </div>
@@ -282,7 +328,12 @@ const AuthenticatedNavbar = () => {
       </nav>
 
       {/* Search overlay for mobile */}
-      {searchOpen && <div className={styles.searchOverlay} onClick={() => setSearchOpen(false)} />}
+      {searchOpen && (
+        <div
+          className={styles.searchOverlay}
+          onClick={() => setSearchOpen(false)}
+        />
+      )}
     </>
   );
 };
@@ -307,47 +358,74 @@ const UnauthenticatedNavbar = () => {
 
       <ul className={styles.navLinks}>
         <li>
-          <NavLink to="/" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+          <NavLink
+            to="/"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
             Home
           </NavLink>
         </li>
         <li>
-          <NavLink to="/buy" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+          <NavLink
+            to="/buy"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
             Buy
           </NavLink>
         </li>
         <li>
-          <NavLink to="/rent" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+          <NavLink
+            to="/rent"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
             Rent
           </NavLink>
         </li>
         <li>
-          <NavLink to="/sell" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+          <NavLink
+            to="/sell"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
             Sell
           </NavLink>
         </li>
         <li>
-          <NavLink to="/projects" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+          <NavLink
+            to="/projects"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
             Projects
           </NavLink>
         </li>
         <li>
-          <NavLink to="/about-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
+          <NavLink
+            to="/about-us"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
             About Us
           </NavLink>
         </li>
         <li>
-          <NavLink to="/contact" className={({ isActive }) => (isActive ? styles.activeLink : "")}>
-            Contact
+          <NavLink
+            to="/contact-us"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Contact Us
           </NavLink>
         </li>
       </ul>
 
       <div className={styles.navActions}>
-        <button className={styles.loginButton} onClick={() => navigate("/login")}>
+        <button
+          className={styles.loginButton}
+          onClick={() => navigate("/login")}
+        >
           Login
         </button>
-        <button className={styles.postPropertyButton} onClick={navigateToCreatePost}>
+        <button
+          className={styles.postPropertyButton}
+          onClick={navigateToCreatePost}
+        >
           Post Property
         </button>
       </div>
