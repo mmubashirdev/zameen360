@@ -47,7 +47,7 @@ enum ActivityStatus {
 model User {
   id              Int       @id @default(autoincrement())
   fullName        String    @map("full_name")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
   email           String    @unique
   phone           String?
   passwordHash    String    @map("password_hash")
