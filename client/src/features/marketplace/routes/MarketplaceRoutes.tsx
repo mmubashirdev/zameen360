@@ -2,33 +2,25 @@ import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 import MediaAndDetail from "../pages/MediaAndDetail";
-
+import ProfileDashboard from '../pages/ProfileDashboard';
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
-<<<<<<< HEAD
-import ContactUsPage from "../pages/contactus";
-=======
-import ContactUs from "../pages/ContactUs";
+import ContactUs from "../pages/contactus";
 import Rent from "../rent/pages/Rent";
->>>>>>> 3680745716ae3071bd316f2d0d3a67d38429088b
+
 const marketplaceRoutes = [
   {
     path: "/",
     element: <DashboardHome />,
   },
   {
-    path: "*",
-    element: <DashboardHome />,
-  },
-
-  {
     path: "/marketplace",
     element: <DashboardHome />,
   },
   {
     path: "/profile",
-    element: <ProfilePage />,
+    element: <ProfileDashboard />,
   },
   {
     path: "/post-property",
@@ -38,7 +30,6 @@ const marketplaceRoutes = [
     path: "/property",
     element: <PropertyDetails />,
   },
-
   {
     path: "/media-and-details",
     element: <MediaAndDetail />,
@@ -60,15 +51,14 @@ const marketplaceRoutes = [
     element: <AboutPage />,
   },
   {
-<<<<<<< HEAD
-    path: "/contact",
-    element: <ContactUsPage />,
-  },
-=======
     path: "/contact-us",
-    element: <ContactUs />
-  }
->>>>>>> 3680745716ae3071bd316f2d0d3a67d38429088b
+    element: <ContactUs />,
+  },
+  {
+    path: "*",
+    element: <DashboardHome />,
+  },
 ];
 
+export { marketplaceRoutes };
 export default marketplaceRoutes;

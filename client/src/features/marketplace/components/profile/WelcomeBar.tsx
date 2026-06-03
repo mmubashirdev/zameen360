@@ -1,17 +1,20 @@
 import React from 'react';
+import { useUser } from './UserContext';
 
 interface WelcomeBarProps {
-  name: string;
   date: string;
   newInquiries?: number;
 }
 
-const WelcomeBar: React.FC<WelcomeBarProps> = ({ name, date, newInquiries = 5 }) => {
+const WelcomeBar: React.FC<WelcomeBarProps> = ({ date, newInquiries = 5 }) => {
+  const { user } = useUser();
+  const firstName = user.name.split(' ')[0];
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <h2 className="text-[17px] font-bold text-gray-900 flex items-center gap-2">
-          Welcome back, {name}! <span className="text-xl">👋</span>
+          Welcome back, {firstName}! <span className="text-xl">👋</span>
         </h2>
         <p className="text-[12.5px] text-gray-500 mt-0.5">Here's your business overview</p>
         <p className="text-[11px] text-gray-400 mt-0.5">{date}</p>
