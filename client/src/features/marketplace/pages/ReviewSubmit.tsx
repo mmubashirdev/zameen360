@@ -1,13 +1,12 @@
-import { useState } from 'react';
-import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Edit, Save, Rocket, MapPin } from 'lucide-react';
-import toast from 'react-hot-toast';
-import DashboardNavbar from '../components/DashboardNavbar';
-import ProgressSteps from '../components/PostProperty/ProgressSteps';
-import { useProperty } from '../components/context/useProperty';
-import styles from '../components/media/styles/ReviewSubmit.module.css';
-
+import { useState } from "react";
+import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
+import { Edit, Save, Rocket, MapPin } from "lucide-react";
+import toast from "react-hot-toast";
+import DashboardNavbar from "../components/DashboardNavbar";
+import ProgressSteps from "../components/PostProperty/ProgressSteps";
+import { useProperty } from "../components/context/useProperty";
+import styles from "../components/media/styles/ReviewSubmit.module.css";
 
 interface SectionProps {
   title: string;
@@ -35,9 +34,111 @@ interface RowProps {
 const Row = ({ label, value }: RowProps) => (
   <div className={styles.row}>
     <span className={styles.rowLabel}>{label}</span>
-    <span className={styles.rowValue}>{value || '—'}</span>
+    <span className={styles.rowValue}>{value || "—"}</span>
   </div>
 );
+
+const propertyConfig = {
+  House: {
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
+    hide: [],
+  },
+  Apartment: {
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
+    hide: [],
+  },
+  Villa: {
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
+    hide: [],
+  },
+  "Plot / Land": {
+    show: ["facingDirection", "possession"],
+    hide: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "yearBuilt",
+      "furnishing",
+    ],
+  },
+  Agricultural: {
+    show: [],
+    hide: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "yearBuilt",
+      "furnishing",
+    ],
+  },
+  Commercial: {
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
+    hide: ["bedrooms", "bathrooms"],
+  },
+  Shop: {
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
+    hide: ["bedrooms", "bathrooms"],
+  },
+  Office: {
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
+    hide: ["bedrooms", "bathrooms"],
+  },
+  Warehouse: {
+    show: ["parking", "facingDirection", "possession", "yearBuilt"],
+    hide: ["bedrooms", "bathrooms", "floors", "furnishing"],
+  },
+};
 
 const ReviewSubmit = () => {
   const navigate = useNavigate();
@@ -48,79 +149,110 @@ const ReviewSubmit = () => {
   const [loading, setLoading] = useState(false);
 
   const formatPrice = (p?: string) => {
-    if (!p) return 'N/A';
-    return new Intl.NumberFormat('en-IN').format(Number(p));
+    if (!p) return "N/A";
+    return new Intl.NumberFormat("en-IN").format(Number(p));
   };
 
+  const propertyType = data.propertyType || "House";
+  const config =
+    propertyConfig[propertyType as keyof typeof propertyConfig] ||
+    propertyConfig.House;
+
+  const isFieldVisible = (param: string) => !config.hide.includes(param);
+
   const handlePublish = async () => {
-  if (!agree1 || !agree2) {
-    toast.error('Please accept the required terms');
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const formData = new FormData();
-
-    // Text/number fields
-    const textFields: (keyof typeof data)[] = [
-      'purpose', 'propertyType', 'title', 'description',
-      'areaSize', 'areaUnit', 'bedrooms', 'bathrooms',
-      'floors', 'parking', 'yearBuilt', 'furnishing',
-      'possession', 'facing', 'price', 'downPayment',
-      'monthlyInstallment', 'duration', 'monthlyRent',
-      'securityDeposit', 'advanceMonths', 'city', 'locality',
-      'address', 'videoUrl', 'floorPlan'
-    ];
-
-    textFields.forEach((key) => {
-      const value = data[key];
-      if (value !== undefined && value !== null && value !== '') {
-        formData.append(key, String(value));
-      }
-    });
-
-    // Booleans
-    formData.append('negotiable', String(data.negotiable ?? false));
-    formData.append('installmentAvailable', String(data.installmentAvailable ?? false));
-
-    // Amenities → JSON string
-    formData.append('amenities', JSON.stringify(data.amenities || []));
-
-    // Status
-    formData.append('status', 'published');
-
-    
-    (data.imageFiles || []).forEach((img) => {
-      if (img.file instanceof File && img.file.size > 0) {
-        formData.append('images', img.file);
-      }
-    });
-
-    const res = await fetch('http://localhost:5000/api/properties', {
-      method: 'POST',
-      body: formData, 
-    });
-
-    const result = await res.json();
-
-    if (!res.ok || result.success === false) {
-      throw new Error(result.message || result.error || 'Failed to publish property');
+    if (!agree1 || !agree2) {
+      toast.error("Please accept the required terms");
+      return;
     }
 
-    toast.success('Property published successfully!');
-    navigate('/buy');
-  } catch (err: unknown) {
-    console.error('Publish error:', err);
-    const message = err instanceof Error ? err.message : 'Error publishing property';
-    toast.error(message);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const formData = new FormData();
+
+      // Text/number fields
+      const textFields: (keyof typeof data)[] = [
+        "purpose",
+        "propertyType",
+        "title",
+        "description",
+        "areaSize",
+        "areaUnit",
+        "bedrooms",
+        "bathrooms",
+        "floors",
+        "parking",
+        "yearBuilt",
+        "furnishing",
+        "possession",
+        "facing",
+        "price",
+        "downPayment",
+        "monthlyInstallment",
+        "duration",
+        "monthlyRent",
+        "securityDeposit",
+        "advanceMonths",
+        "city",
+        "locality",
+        "address",
+        "videoUrl",
+        "floorPlan",
+      ];
+
+      textFields.forEach((key) => {
+        const value = data[key];
+        if (value !== undefined && value !== null && value !== "") {
+          formData.append(key, String(value));
+        }
+      });
+
+      // Booleans
+      formData.append("negotiable", String(data.negotiable ?? false));
+      formData.append(
+        "installmentAvailable",
+        String(data.installmentAvailable ?? false),
+      );
+
+      // Amenities → JSON string
+      formData.append("amenities", JSON.stringify(data.amenities || []));
+
+      // Status
+      formData.append("status", "published");
+
+      (data.imageFiles || []).forEach((img) => {
+        if (img.file instanceof File && img.file.size > 0) {
+          formData.append("images", img.file);
+        }
+      });
+
+      const res = await fetch("http://localhost:5000/api/properties", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || result.success === false) {
+        throw new Error(
+          result.message || result.error || "Failed to publish property",
+        );
+      }
+
+      toast.success("Property published successfully!");
+      navigate("/buy");
+    } catch (err: unknown) {
+      console.error("Publish error:", err);
+      const message =
+        err instanceof Error ? err.message : "Error publishing property";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBack = () => {
-    navigate('/media-and-details');
+    navigate("/media-and-details");
   };
 
   return (
@@ -129,9 +261,12 @@ const ReviewSubmit = () => {
       <main className={styles.main}>
         <div className={styles.heading}>
           <h1>Post Your Property</h1>
-          <p>List your property in 3 easy steps and reach thousands of buyers</p>
+          <p>
+            List your property in 3 easy steps and reach thousands of buyers
+          </p>
           <span className={styles.required}>
-            Fields marked with <span className={styles.req}>*</span> are required
+            Fields marked with <span className={styles.req}>*</span> are
+            required
           </span>
         </div>
 
@@ -141,10 +276,13 @@ const ReviewSubmit = () => {
           {/* A. Basic Information */}
           <Section
             title="A. Basic Information"
-            onEdit={() => navigate('/post-property')}
+            onEdit={() => navigate("/post-property")}
           >
             <div className={styles.grid2}>
-              <Row label="Purpose" value={data.purpose ? `For ${data.purpose}` : undefined} />
+              <Row
+                label="Purpose"
+                value={data.purpose ? `For ${data.purpose}` : undefined}
+              />
               <Row label="Property Type" value={data.propertyType} />
               <Row label="Title" value={data.title} />
             </div>
@@ -154,45 +292,78 @@ const ReviewSubmit = () => {
           {/* B. Property Details */}
           <Section
             title="B. Property Details"
-            onEdit={() => navigate('/post-property')}
+            onEdit={() => navigate("/post-property")}
           >
             <div className={styles.grid2}>
               <Row
                 label="Area Size"
-                value={data.areaSize ? `${data.areaSize} ${data.areaUnit || ''}` : undefined}
+                value={
+                  data.areaSize
+                    ? `${data.areaSize} ${data.areaUnit || ""}`
+                    : undefined
+                }
               />
-              <Row label="Year Built" value={data.yearBuilt} />
-              <Row label="Bedrooms" value={data.bedrooms} />
-              <Row label="Furnishing" value={data.furnishing} />
-              <Row label="Bathrooms" value={data.bathrooms} />
-              <Row label="Possession" value={data.possession} />
-              <Row label="Floors" value={data.floors} />
-              <Row label="Facing Direction" value={data.facing} />
-              <Row label="Parking" value={data.parking} />
+              {isFieldVisible("yearBuilt") && (
+                <Row label="Year Built" value={data.yearBuilt} />
+              )}
+              {isFieldVisible("bedrooms") && (
+                <Row label="Bedrooms" value={data.bedrooms} />
+              )}
+              {isFieldVisible("furnishing") && (
+                <Row label="Furnishing" value={data.furnishing} />
+              )}
+              {isFieldVisible("bathrooms") && (
+                <Row label="Bathrooms" value={data.bathrooms} />
+              )}
+              {isFieldVisible("floors") && (
+                <Row label="Floors" value={data.floors} />
+              )}
+              {isFieldVisible("parking") && (
+                <Row label="Parking" value={data.parking} />
+              )}
+              {isFieldVisible("possession") && (
+                <Row label="Possession" value={data.possession} />
+              )}
+              {isFieldVisible("facingDirection") && (
+                <Row label="Facing Direction" value={data.facing} />
+              )}
             </div>
           </Section>
 
           {/* C. Pricing Details */}
           <Section
             title="C. Pricing Details"
-            onEdit={() => navigate('/post-property')}
+            onEdit={() => navigate("/post-property")}
           >
             <div className={styles.grid2}>
               <Row
                 label="Price (PKR)"
-                value={data.price ? `PKR ${formatPrice(data.price)}` : undefined}
+                value={
+                  data.price ? `PKR ${formatPrice(data.price)}` : undefined
+                }
               />
-              <Row label="Price Negotiable" value={data.negotiable ? 'Yes' : 'No'} />
+              <Row
+                label="Price Negotiable"
+                value={data.negotiable ? "Yes" : "No"}
+              />
 
               {data.installmentAvailable && (
                 <>
                   <Row
                     label="Down Payment"
-                    value={data.downPayment ? `PKR ${formatPrice(data.downPayment)}` : undefined}
+                    value={
+                      data.downPayment
+                        ? `PKR ${formatPrice(data.downPayment)}`
+                        : undefined
+                    }
                   />
                   <Row
                     label="Monthly Installment"
-                    value={data.monthlyInstallment ? `PKR ${formatPrice(data.monthlyInstallment)}` : undefined}
+                    value={
+                      data.monthlyInstallment
+                        ? `PKR ${formatPrice(data.monthlyInstallment)}`
+                        : undefined
+                    }
                   />
                   <Row label="Duration" value={data.duration} />
                 </>
@@ -200,7 +371,7 @@ const ReviewSubmit = () => {
 
               <Row
                 label="Installment Available"
-                value={data.installmentAvailable ? 'Yes' : 'No'}
+                value={data.installmentAvailable ? "Yes" : "No"}
               />
 
               {data.monthlyRent && (
@@ -211,7 +382,11 @@ const ReviewSubmit = () => {
                   />
                   <Row
                     label="Security Deposit"
-                    value={data.securityDeposit ? `PKR ${formatPrice(data.securityDeposit)}` : undefined}
+                    value={
+                      data.securityDeposit
+                        ? `PKR ${formatPrice(data.securityDeposit)}`
+                        : undefined
+                    }
                   />
                   <Row label="Advance Months" value={data.advanceMonths} />
                 </>
@@ -222,7 +397,7 @@ const ReviewSubmit = () => {
           {/* D. Amenities */}
           <Section
             title="D. Amenities & Features"
-            onEdit={() => navigate('/post-property')}
+            onEdit={() => navigate("/post-property")}
           >
             <div className={styles.chips}>
               {(data.amenities || []).length > 0 ? (
@@ -240,11 +415,11 @@ const ReviewSubmit = () => {
           {/* E. Media */}
           <Section
             title="E. Media"
-            onEdit={() => navigate('/media-and-details')}
+            onEdit={() => navigate("/media-and-details")}
           >
             <p className={styles.muted}>
               {(data.imageFiles || []).length} image
-              {(data.imageFiles || []).length !== 1 ? 's' : ''} uploaded
+              {(data.imageFiles || []).length !== 1 ? "s" : ""} uploaded
             </p>
             <div className={styles.imgGrid}>
               {(data.imageFiles || []).slice(0, 8).map((img, i) => (
@@ -266,7 +441,7 @@ const ReviewSubmit = () => {
           {/* F. Location */}
           <Section
             title="F. Location"
-            onEdit={() => navigate('/media-and-details')}
+            onEdit={() => navigate("/media-and-details")}
           >
             <div className={styles.grid2}>
               <Row label="City" value={data.city} />
@@ -287,7 +462,8 @@ const ReviewSubmit = () => {
                 checked={agree1}
                 onChange={() => setAgree1(!agree1)}
               />
-              I confirm all information is accurate and I am authorized to list this property *
+              I confirm all information is accurate and I am authorized to list
+              this property *
             </label>
             <label>
               <input
@@ -295,7 +471,7 @@ const ReviewSubmit = () => {
                 checked={agree2}
                 onChange={() => setAgree2(!agree2)}
               />
-              I agree to Zameen 360's <a href="#">Terms of Service</a> and{' '}
+              I agree to Zameen 360's <a href="#">Terms of Service</a> and{" "}
               <a href="#">Privacy Policy</a> *
             </label>
             <label>
@@ -322,8 +498,8 @@ const ReviewSubmit = () => {
               onClick={handlePublish}
               disabled={loading}
             >
-              <Rocket size={16} />{' '}
-              {loading ? 'Publishing...' : 'Publish Property'}
+              <Rocket size={16} />{" "}
+              {loading ? "Publishing..." : "Publish Property"}
             </button>
           </div>
         </div>
