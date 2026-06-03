@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import DashboardNavbar from '../components/DashboardNavbar';
+import Footer from '../components/Footer';
 
 // Icon components
 const BuildingIcon = () => (
@@ -114,100 +116,6 @@ const useCounter = (end: number, duration: number = 2000) => {
   return { count, setIsVisible };
 };
 
-// Navbar Component
-const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleNavClick = (item: string) => {
-    const routes: { [key: string]: string } = {
-      'Home': '/',
-      'About Us': '/about-us',
-      'Properties': '/buy',
-      'Services': '/about-us',
-      'Projects': '/about-us',
-      'Contact': '/about-us',
-    };
-    const route = routes[item];
-    if (route) navigate(route);
-  };
-
-  return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex items-center space-x-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2b6aff 0%, #60a5fa 100%)' }}>
-              <span className="text-white font-bold text-lg">Z</span>
-            </div>
-            <div>
-              <h1 className={`text-xl font-bold ${scrolled ? 'text-black' : 'text-white'}`}>
-                Zameen <span style={{ color: '#2b6aff' }}>360</span>
-              </h1>
-              <p className={`text-xs ${scrolled ? 'text-gray-600' : 'text-gray-300'}`}>Real Estate Solutions</p>
-            </div>
-          </div>
-
-          <div className="hidden md:flex items-center space-x-8">
-            {['Home', 'About Us', 'Properties', 'Services', 'Projects', 'Contact'].map((item) => (
-              <button
-                key={item}
-                onClick={() => handleNavClick(item)}
-                className={`text-sm font-medium transition-colors ${
-                  item === 'About Us' ? '' : scrolled ? 'text-black hover:text-[#2b6aff]' : 'text-white hover:text-[#60a5fa]'
-                }`}
-                style={item === 'About Us' ? { color: '#2b6aff' } : {}}
-              >
-                {item}
-              </button>
-            ))}
-            <button 
-              className="text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all hover:shadow-lg"
-              style={{ backgroundColor: '#2b6aff', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.45)' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4fd6'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
-            >
-              Get Started
-            </button>
-          </div>
-
-          <button onClick={() => setIsOpen(!isOpen)} className="md:hidden">
-            <div className="space-y-1.5">
-              <span className={`block w-6 h-0.5 transition-all ${scrolled ? 'bg-black' : 'bg-white'} ${isOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-              <span className={`block w-6 h-0.5 transition-all ${scrolled ? 'bg-black' : 'bg-white'} ${isOpen ? 'opacity-0' : ''}`}></span>
-              <span className={`block w-6 h-0.5 transition-all ${scrolled ? 'bg-black' : 'bg-white'} ${isOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-            </div>
-          </button>
-        </div>
-
-        {isOpen && (
-          <div className="md:hidden bg-white rounded-b-2xl shadow-xl p-4 space-y-2">
-            {['Home', 'About Us', 'Properties', 'Services', 'Projects', 'Contact'].map((item) => (
-              <button 
-                key={item} 
-                onClick={() => {
-                  handleNavClick(item);
-                  setIsOpen(false);
-                }}
-                className={`block w-full text-left px-4 py-2 rounded-lg text-sm font-medium ${item === 'About Us' ? 'bg-blue-50' : 'text-black hover:bg-gray-50'}`}
-                style={item === 'About Us' ? { color: '#2b6aff' } : {}}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </nav>
-  );
-};
 
 // Hero Section
 const HeroSection: React.FC = () => {
@@ -1178,135 +1086,13 @@ const CTASection: React.FC = () => {
   );
 };
 
-// Footer
-const Footer: React.FC = () => {
-  const navigate = useNavigate();
 
-  return (
-    <footer className="text-gray-400" style={{ backgroundColor: '#000000' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
-          <div>
-            <div className="flex items-center space-x-2 mb-6 cursor-pointer" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #2b6aff 0%, #60a5fa 100%)' }}>
-                <span className="text-white font-bold text-lg">Z</span>
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Zameen <span style={{ color: '#60a5fa' }}>360</span></h3>
-                <p className="text-xs text-gray-500">Real Estate Solutions</p>
-              </div>
-            </div>
-            <p className="text-sm leading-relaxed mb-6">
-              Pakistan's trusted real estate partner providing 360° property solutions. Buy, sell, 
-              invest — we make it simple, transparent, and reliable.
-            </p>
-            <div className="flex space-x-3">
-              {['F', 'I', 'T', 'Y', 'L'].map((initial, i) => (
-                <button 
-                  key={i} 
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors text-xs font-bold"
-                  style={{ backgroundColor: '#1f2937' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1f2937'}
-                >
-                  {initial}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-6">Quick Links</h4>
-            <ul className="space-y-3">
-              {['About Us', 'Properties', 'Services', 'Projects', 'Blog', 'Careers', 'Contact Us'].map((link) => (
-                <li key={link}>
-                  <button 
-                    onClick={() => {
-                      if (link === 'About Us') navigate('/about-us');
-                      else if (link === 'Properties') navigate('/buy');
-                    }}
-                    className="text-sm transition-colors flex items-center space-x-2 hover:text-[#60a5fa]"
-                  >
-                    <span>›</span>
-                    <span>{link}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-6">Property Types</h4>
-            <ul className="space-y-3">
-              {['Residential Plots', 'Commercial Plots', 'Houses', 'Apartments', 'Farmhouses', 'Office Spaces', 'Shops & Showrooms'].map((type) => (
-                <li key={type}>
-                  <button 
-                    onClick={() => navigate('/buy')}
-                    className="text-sm transition-colors flex items-center space-x-2 hover:text-[#60a5fa]"
-                  >
-                    <span>›</span>
-                    <span>{type}</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-white font-bold mb-6">Newsletter</h4>
-            <p className="text-sm mb-4">Subscribe for latest property updates and market insights.</p>
-            <div className="flex flex-col space-y-3">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="border rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none transition-colors"
-                style={{ backgroundColor: '#1f2937', borderColor: '#374151' }}
-                onFocus={(e) => e.currentTarget.style.borderColor = '#2b6aff'}
-                onBlur={(e) => e.currentTarget.style.borderColor = '#374151'}
-              />
-              <button 
-                className="text-white px-4 py-3 rounded-lg text-sm font-semibold transition-colors"
-                style={{ backgroundColor: '#2b6aff' }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4fd6'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
-              >
-                Subscribe Now
-              </button>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center space-x-3">
-                <PhoneIcon />
-                <span className="text-sm">+92 300 1234567</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <MailIcon />
-                <span className="text-sm">info@zameen360.pk</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t" style={{ borderColor: '#1f2937' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm">© 2024 Zameen 360. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <button className="text-sm transition-colors hover:text-[#60a5fa]">Privacy Policy</button>
-            <button className="text-sm transition-colors hover:text-[#60a5fa]">Terms of Service</button>
-            <button className="text-sm transition-colors hover:text-[#60a5fa]">Sitemap</button>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-};
 
 // Main About Page Component
 const AboutPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
+      <DashboardNavbar />
       <HeroSection />
       <CompanyStory />
       <StatsSection />

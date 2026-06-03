@@ -1,10 +1,11 @@
-require("dotenv").config();
+const path = require("path");
+const dotenvPath = path.resolve(__dirname, "../.env");
+require("dotenv").config({ path: dotenvPath });
 
 const express = require("express");
 const prisma = require("../server/configs/prisma");
 const passport = require("./configs/passport");
 const cors = require("cors");
-const path = require("path");
 const fs = require("fs");
 
 const index = require("./modules/auth/routes/index");

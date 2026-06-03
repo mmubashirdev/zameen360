@@ -2,11 +2,11 @@ import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 import MediaAndDetail from "../pages/MediaAndDetail";
-
+import ProfilePage from "../pages/profile";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
-import ContactUs from "../pages/ContactUs";
+import ContactUsPage from "../pages/ContactUs";
 import Rent from "../rent/pages/Rent";
 const marketplaceRoutes = [
   {
@@ -21,6 +21,10 @@ const marketplaceRoutes = [
   {
     path: "/marketplace",
     element: <DashboardHome />,
+  },
+  {
+    path: "/profile",
+    element: <ProfilePage />,
   },
   {
     path: "/post-property",
@@ -52,9 +56,9 @@ const marketplaceRoutes = [
     element: <AboutPage />,
   },
   {
-    path: "/contact-us",
-    element: <ContactUs />
-  }
+    path: "/contact",
+    element: <ContactUsPage />,
+  },
 ];
 
 export default marketplaceRoutes;
