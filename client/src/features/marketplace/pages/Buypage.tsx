@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Bed, Bath, Maximize, Heart } from 'lucide-react';
 import DashboardNavbar from '../components/DashboardNavbar';
@@ -33,8 +33,8 @@ const Buy = () => {
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
-  const fetchProperties = async () => {
-    setLoading(true);
+  const fetchProperties = useCallback(async () => {
+    // only set loading true if it's the first load to prevent flash on socket refresh
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
@@ -47,11 +47,9 @@ const Buy = () => {
       const res = await fetch(`http://localhost:5000/api/properties?${params}`);
       const result = await res.json();
 
-      // ✅ Backend returns { success, count, data }
       if (result.success && Array.isArray(result.data)) {
         setProperties(result.data);
       } else if (Array.isArray(result)) {
-        // fallback in case backend returns plain array
         setProperties(result);
       } else {
         setProperties([]);
@@ -59,15 +57,13 @@ const Buy = () => {
     } catch (err) {
       console.error('Fetch error:', err);
       setProperties([]);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [search, purpose, propertyType, city, minPrice, maxPrice]);
 
   useEffect(() => {
-    fetchProperties();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setLoading(true);
+    fetchProperties().finally(() => setLoading(false));
+  }, [fetchProperties]);
 
   const handleReset = () => {
     setSearch('');
