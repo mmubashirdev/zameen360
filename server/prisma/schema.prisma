@@ -46,6 +46,7 @@ model User {
   sessions       UserSession[]
   passwordResets PasswordReset[]
   activityLogs   UserActivityLog[]
+  properties     Property[]
   @@map("users")
 }
 model UserProfile {
@@ -162,10 +163,17 @@ model Property {
   videoUrl             String?
   floorPlan            String?
   status               String   @default("pending")
+  userId               Int?
+  approvedAt           DateTime?
+  rejectedAt           DateTime?
+  approvedBy           Int?
+  rejectionReason      String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   @@index([city])
   @@index([purpose])
   @@index([propertyType])
   @@index([price])
+  @@map("properties")
 }
