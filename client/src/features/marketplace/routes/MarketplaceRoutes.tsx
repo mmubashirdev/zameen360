@@ -2,7 +2,7 @@ import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 import MediaAndDetail from "../pages/MediaAndDetail";
-
+import ProfilePage from "../pages/profile";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
@@ -21,6 +21,10 @@ const marketplaceRoutes = [
   {
     path: "/marketplace",
     element: <DashboardHome />,
+  },
+  {
+    path: "/profile",
+    element: <ProfilePage />,
   },
   {
     path: "/post-property",

@@ -27,3 +27,4 @@ coverage/
 .idea/
 
 *.yaml
+/generated/prisma

@@ -5,6 +5,7 @@ const BASE_URL = "http://localhost:5000/api/properties";
 // Property type (jaisa backend se aata hai)
 export interface AdminProperty {
   id: number;
+  userId: number;
   title: string | null;
   purpose: string | null;
   propertyType: string | null;
@@ -20,6 +21,9 @@ export interface AdminProperty {
   amenities: string[];
   images: string[];
   status: string;
+  approvedAt?: string | null;
+  rejectedAt?: string | null;
+  rejectionReason?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -51,12 +55,17 @@ export const getAdminProperties = async (
   return res.data;
 };
 
-// Approve/Reject
+// Approve/Reject with optional rejection reason
 export const updatePropertyStatus = async (
   id: number,
-  status: "approved" | "rejected" | "pending"
+  status: "approved" | "rejected" | "pending",
+  rejectionReason?: string
 ) => {
-  const res = await axios.put(`${BASE_URL}/admin/${id}/status`, { status });
+  const payload: { status: string; rejectionReason?: string } = { status };
+  if (rejectionReason) {
+    payload.rejectionReason = rejectionReason;
+  }
+  const res = await axios.put(`${BASE_URL}/admin/${id}/status`, payload);
   return res.data;
 };
 
