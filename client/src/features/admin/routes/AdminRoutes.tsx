@@ -1,9 +1,9 @@
-import AdminLayout from "../components/AdminLayout";
-import AdminDashboard from "../adminDashboard";
-import AllListings from "../AllListing";
-import PendingApproval from "../PendingApproval";
-import Approved from "../Approved";
-import Rejected from "../Rejected";
+import AdminLayout from "../components/AdminLayout.tsx";
+import AdminDashboard from "../adminDashboard.tsx";
+import AllListings from "../AllListing.tsx";
+import PendingApproval from "../PendingApproval.tsx";
+import Approved from "../Approved.tsx";
+import Rejected from "../Rejected.tsx";
 
 const AdminRoutes = [
   {

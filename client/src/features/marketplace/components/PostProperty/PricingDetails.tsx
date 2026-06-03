@@ -5,12 +5,15 @@ import { useProperty } from '../context/useProperty';
 const amenities = [
   'Central AC','Generator Backup','Solar Panels','Servant Quarter','Lawn/Garden','Boundary Wall',
   'Swimming Pool','Gym Area','CCTV Security','Security System','Gated Community','Water Boring',
-  'Gas Supply','Internet Ready','Parking/Garage','Modular Kitchen','Water Boring'
+  'Gas Supply','Internet Ready','Parking/Garage','Modular Kitchen'
 ];
 
 const PricingDetails = () => {
   const { data, updateData } = useProperty();
   
+  const propertyType = data.propertyType || 'House';
+  const isPlotOrLand = propertyType === 'Plot / Land' || propertyType === 'Agricultural';
+
   const negotiable = data.negotiable ?? false;
   const installment = data.installmentAvailable ?? false;
   const price = data.price || '';
@@ -140,7 +143,9 @@ const PricingDetails = () => {
 
       <h3 className={styles.title} style={{ marginTop: 24 }}>D. Amenities & Features</h3>
       <div className={styles.amenities}>
-        {amenities.map((a, i) => (
+        {amenities
+          .filter(a => isPlotOrLand ? !['Central AC','Solar Panels','Servant Quarter','Swimming Pool','Gym Area','Modular Kitchen'].includes(a) : true)
+          .map((a, i) => (
           <label key={i} className={styles.amenity}>
             <input type="checkbox" checked={selected.includes(a)} onChange={() => toggle(a)} />
             <span>{a}</span>
