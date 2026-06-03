@@ -1,8 +1,17 @@
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient({
-  log: ["info", "warn", "error"],
-  errorFormat: "pretty"
+  log: [
+    {
+      emit: "stdout",
+      level: "error",
+    },
+    {
+      emit: "stdout",
+      level: "warn",
+    },
+  ],
+  errorFormat: "pretty",
 });
 
 prisma.$connect()

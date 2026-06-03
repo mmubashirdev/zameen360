@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api/property";
+const BASE_URL = "http://localhost:5000/api/properties";
 
 // Property type (jaisa backend se aata hai)
 export interface AdminProperty {

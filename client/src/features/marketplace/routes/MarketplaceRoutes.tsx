@@ -6,7 +6,7 @@ import ProfilePage from "../pages/profile";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
-import ContactUs from "../pages/contactus";
+import ContactUsPage from "../pages/ContactUs";
 import Rent from "../rent/pages/Rent";
 const marketplaceRoutes = [
   {
@@ -56,9 +56,9 @@ const marketplaceRoutes = [
     element: <AboutPage />,
   },
   {
-    path: "/contact-us",
-    element: <ContactUs />
-  }
+    path: "/contact",
+    element: <ContactUsPage />,
+  },
 ];
 
 export default marketplaceRoutes;
