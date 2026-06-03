@@ -60,7 +60,7 @@ const marketplaceRoutes = [
     element: <AboutPage />,
   },
   {
-    path: "/contact",
+    path: "/contact-us",
     element: <ContactUsPage />,
   },
 ];
