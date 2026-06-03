@@ -48,7 +48,7 @@ const ContactBar: React.FC<ContactBarProps> = ({ contacts }) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {contacts.map((contact, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center -shrink-0">
               {getIcon(contact.type)}
             </div>
             <div className="min-w-0">
