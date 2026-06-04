@@ -1,13 +1,13 @@
-import AppRouter from "./routes/Router";
-import { Toaster } from "react-hot-toast";
-import { AuthProvider } from "@features/auth/context/AuthContext";
-function App() {
+import React from 'react';
+import { UserProvider } from '../features/marketplace/components/profile/UserContext';
+import AppRouter from './routes/Router';
+
+const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Toaster position="top-right" />
+    <UserProvider>
       <AppRouter />
-    </AuthProvider>
+    </UserProvider>
   );
-}
+};
 
 export default App;

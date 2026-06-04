@@ -11,22 +11,18 @@ interface Props {
 
 const ListingPerformanceChart: React.FC<Props> = ({ data }) => {
   const [range, setRange] = useState('Last 30 Days');
-
   const W = 460;
   const H = 200;
   const PAD = { t: 15, r: 15, b: 28, l: 35 };
   const innerW = W - PAD.l - PAD.r;
   const innerH = H - PAD.t - PAD.b;
-
   const max = 2000;
   const points = data.map((d, i) => ({
     x: PAD.l + (i / (data.length - 1)) * innerW,
     y: PAD.t + innerH - (d.value / max) * innerH,
   }));
-
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
   const areaPath = `${linePath} L${points[points.length - 1].x},${PAD.t + innerH} L${points[0].x},${PAD.t + innerH} Z`;
-
   const yLabels = [0, 500, 1000, 1500, 2000];
 
   return (
@@ -54,7 +50,6 @@ const ListingPerformanceChart: React.FC<Props> = ({ data }) => {
             <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
           </linearGradient>
         </defs>
-
         {yLabels.map((label, i) => {
           const y = PAD.t + innerH - (label / max) * innerH;
           return (
@@ -66,14 +61,11 @@ const ListingPerformanceChart: React.FC<Props> = ({ data }) => {
             </g>
           );
         })}
-
         <path d={areaPath} fill="url(#lpGrad)" />
         <path d={linePath} fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-
         {points.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r="3" fill="#3B82F6" stroke="#fff" strokeWidth="1.5" />
         ))}
-
         {data.map((d, i) => {
           const x = PAD.l + (i / (data.length - 1)) * innerW;
           return (

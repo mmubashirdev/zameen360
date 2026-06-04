@@ -14,11 +14,6 @@ const marketplaceRoutes = [
     element: <DashboardHome />,
   },
   {
-    path: "*",
-    element: <DashboardHome />,
-  },
-
-  {
     path: "/marketplace",
     element: <DashboardHome />,
   },
@@ -34,7 +29,6 @@ const marketplaceRoutes = [
     path: "/property",
     element: <PropertyDetails />,
   },
-
   {
     path: "/media-and-details",
     element: <MediaAndDetail />,
@@ -61,4 +55,5 @@ const marketplaceRoutes = [
   },
 ];
 
+export { marketplaceRoutes };
 export default marketplaceRoutes;
