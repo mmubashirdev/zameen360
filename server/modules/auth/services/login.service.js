@@ -88,7 +88,19 @@ const loginUser = async (data, ip, userAgent) => {
 };
 
 const adminLoginService = async (data, ip) => {
-  // ... same as before
+    const adminDetails = prisma.admin.findUnique({
+      where: {
+        email,
+        role:"ADMIN"
+      },
+    });
+    if (!admin) {
+      throw new Error("Admin not found");
+    }
+    if (admin.password !== password) {
+      throw new Error("Invalid Password");
+    }
+    return admin;
 };
 
 module.exports = { loginUser, adminLoginService };

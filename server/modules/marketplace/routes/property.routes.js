@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { uploadProperty } = require("../middleware/upload");
+const  authenticate  = require("../../auth/middlewares/auth.middleware");
 const propertyController = require("../Controller/property.controllers");
 
 // ==================== PUBLIC ROUTES ====================
@@ -8,6 +9,7 @@ const propertyController = require("../Controller/property.controllers");
 // Create property (user submit karta hai - status pending)
 router.post(
   "/",
+   authenticate,
   uploadProperty.array("images", 30),
   propertyController.createProperty
 );
