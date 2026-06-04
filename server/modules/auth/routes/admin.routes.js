@@ -3,7 +3,6 @@ const c = require("../controllers/admin.controller");
 const auth = require("../middlewares/auth.middleware");
 const role = require("../middlewares/role.middleware");
 router.get("/admin/users", auth, role("ADMIN"), c.getAllUsers);
-router.post("/admin/login", c.adminLogin);
 router.get("/admin/users/stats", auth, role("ADMIN"), c.getStats);
 router.get("/admin/users/:user_id", auth, role("ADMIN"), c.getUserById);
 router.put("/admin/users/:user_id/block", auth, role("ADMIN"), c.blockUser);

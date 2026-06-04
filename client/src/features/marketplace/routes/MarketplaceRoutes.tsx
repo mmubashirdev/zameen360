@@ -9,6 +9,7 @@ import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/Contactus";
 import Rent from "../rent/pages/Rent";
 const marketplaceRoutes = [
+  
   {
     path: "/",
     element: <DashboardHome />,

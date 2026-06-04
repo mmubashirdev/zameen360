@@ -88,19 +88,35 @@ const loginUser = async (data, ip, userAgent) => {
 };
 
 const adminLoginService = async (data, ip) => {
-    const adminDetails = prisma.admin.findUnique({
-      where: {
-        email,
-        role:"ADMIN"
-      },
-    });
-    if (!admin) {
-      throw new Error("Admin not found");
-    }
-    if (admin.password !== password) {
-      throw new Error("Invalid Password");
-    }
-    return admin;
+  const { email, password } = data;
+
+  const adminDetails = await prisma.user.findFirst({
+    where: { email, role: "ADMIN" },
+  });
+
+  if (!adminDetails) {
+    throw { status: 401, message: "Admin not found" };
+  }
+
+  const isValid = await bcrypt.compare(password, adminDetails.passwordHash);
+  if (!isValid) {
+    throw { status: 401, message: "Invalid password" };
+  }
+
+  if (!adminDetails.isActive) {
+    throw { status: 403, message: "Account deactivated." };
+  }
+
+  // ✅ Return only safe fields — no passwordHash, no token needed
+  return {
+    id: adminDetails.id,
+    fullName: adminDetails.fullName,
+    email: adminDetails.email,
+    role: adminDetails.role, // "ADMIN" ← this is what we check
+    isActive: adminDetails.isActive,
+    createdAt: adminDetails.createdAt,
+  };
 };
+
 
 module.exports = { loginUser, adminLoginService };

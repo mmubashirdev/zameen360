@@ -1,5 +1,20 @@
 const prisma = require("../../../configs/prisma");
 
+// const AdminLogin = async (email, password) => {
+//   const adminDetails = prisma.admin.findUnique({
+//     where: {
+//       email,
+//       role:"ADMIN"
+//     },
+//   });
+//   if (!admin) {
+//     throw new Error("Admin not found");
+//   }
+//   if (admin.password !== password) {
+//     throw new Error("Invalid Password");
+//   }
+//   return admin;
+// };
 
 const getAllUsersService = async (query) => {
   const { role, status, search, page = 1, limit = 10 } = query;

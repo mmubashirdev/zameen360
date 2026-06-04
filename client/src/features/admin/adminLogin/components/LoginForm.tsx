@@ -1,60 +1,53 @@
 // client/src/features/admin/adminLogin/components/LoginForm.tsx
+import { loginZodSchema } from "../utility/loginZodSchema";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { adminLogin } from "../../services/adminApi";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import type { FormEvent } from "react";
-import EmailInput from "./EmailInput";
-import PasswordInput from "./PasswordInput"; // ✅ FIXED PATH
-import LoginButton from "./LoginButton";
+
+type LoginFormData = z.infer<typeof loginZodSchema>;
 
 const LoginForm = () => {
-
-  // ========================================
-  // STATE MANAGEMENT
-  // ========================================
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginZodSchema),
+  });
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({ email: "", password: "" });
+  const [error, setError] = useState<string | null>(null);
 
-  // ========================================
-  // FORM SUBMISSION HANDLER
-  // Developer: Implement your login logic here
-  // ========================================
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault();
-    setErrors({ email: "", password: "" });
+  const handleLogin = async (data: LoginFormData) => {
+    try {
+      setError(null);
+      setIsLoading(true);
 
-    // Basic validation
-    if (!email) {
-      setErrors((prev) => ({ ...prev, email: "Email is required" }));
-      return;
+      const result = await adminLogin(data);
+      console.log("Login Result:", result);
+
+      // ✅ Just store the admin data — no token check needed
+      if (!result.success || !result.data) {
+        setError("Login failed. Please try again.");
+        return;
+      }
+
+      localStorage.setItem("admin", JSON.stringify(result.data));
+      navigate("/admin");
+    } catch (err) {
+      console.error("Login Error:", err);
+      setError("Invalid email or password.");
+    } finally {
+      setIsLoading(false);
     }
-    if (!password) {
-      setErrors((prev) => ({ ...prev, password: "Password is required" }));
-      return;
-    }
-
-    // TODO: Implement actual login logic (API call)
-    // Example:
-    // setIsLoading(true);
-    // try {
-    //   const response = await adminAuthService.login(email, password);
-    //   
-    //   navigate('/admin');
-    // } catch (error) {
-    //   setErrors({ email: 'Invalid credentials', password: '' });
-    // } finally {
-    //   setIsLoading(false);
-    // }
   };
-
-
   return (
     <div className="w-full lg:w-1/2 flex flex-col min-h-screen lg:min-h-0">
-
-      {/* Form Content */}
       <div className="flex-1 flex items-center justify-center px-6 pb-8 lg:px-12 xl:px-20">
         <div className="w-full max-w-md">
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl lg:text-4xl font-bold text-blue-600 leading-tight pt-15">
               Welcome Back
@@ -64,22 +57,50 @@ const LoginForm = () => {
             <p className="text-gray-500 mt-2 text-sm">Sign in your account</p>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-5 pb-5">
-            <EmailInput
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={errors.email}
-            />
+          {/* ✅ Show error if login fails */}
+          {error && (
+            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
-            <PasswordInput
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={errors.password}
-            />
+          <form onSubmit={handleSubmit(handleLogin)} className="space-y-5 pb-5">
+            <div>
+              <input
+                {...register("email")}
+                type="email"
+                placeholder="Email"
+                className="w-full border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <input
+                {...register("password")}
+                type="password"
+                placeholder="Password"
+                className="w-full border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
 
             <div className="pt-2">
-              <LoginButton isLoading={isLoading} />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              >
+                {isLoading ? "Signing In..." : "Sign In"}
+              </button>
             </div>
           </form>
         </div>

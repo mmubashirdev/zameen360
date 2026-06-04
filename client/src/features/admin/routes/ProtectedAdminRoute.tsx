@@ -1,27 +1,28 @@
 // client/src/features/admin/routes/ProtectedAdminRoute.tsx
-import { Navigate } from "react-router-dom";
-import type { ReactNode } from "react";
+import { Navigate, Outlet } from "react-router-dom";
 
-interface ProtectedAdminRouteProps {
-  children: ReactNode;
-}
+const ProtectedAdminRoute = () => {
+  const isValidAdmin = (): boolean => {
+    try {
+      const raw = localStorage.getItem("admin");
+      if (!raw) return false;
 
-const ProtectedAdminRoute = ({ children }: ProtectedAdminRouteProps) => {
-  // TODO: Replace with your actual auth check
-  // Example checks:
-  // const token = localStorage.getItem("adminToken");
-  // const user = useSelector((state) => state.auth.user);
-  // const isAdmin = user?.role === "admin";
+      const data = JSON.parse(raw);
 
-  const token = localStorage.getItem("adminToken");
-  const isAuthenticated = Boolean(token);
+      // ✅ Check role instead of token
+      if (data?.role !== "ADMIN") return false;
 
-  if (!isAuthenticated) {
-    // Redirect to admin login if not authenticated
-    return <Navigate to="/admin/login" replace />;
-  }
+      // ✅ Check email exists (basic sanity check)
+      if (!data?.email) return false;
 
-  return <>{children}</>;
+      return true;
+    } catch {
+      localStorage.removeItem("admin");
+      return false;
+    }
+  };
+
+  return isValidAdmin() ? <Outlet /> : <Navigate to="/admin/login" replace />;
 };
 
 export default ProtectedAdminRoute;

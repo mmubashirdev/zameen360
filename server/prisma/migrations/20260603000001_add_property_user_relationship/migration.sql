@@ -5,7 +5,6 @@ ALTER TABLE "Property" RENAME TO "properties";
 ALTER TABLE "properties" ADD COLUMN "user_id" INTEGER;
 
 -- Add approval tracking columns
-ALTER TABLE "properties" ADD COLUMN "status" TEXT DEFAULT 'pending';
 ALTER TABLE "properties" ADD COLUMN "approved_at" TIMESTAMP(3);
 ALTER TABLE "properties" ADD COLUMN "rejected_at" TIMESTAMP(3);
 ALTER TABLE "properties" ADD COLUMN "approved_by" INTEGER;
