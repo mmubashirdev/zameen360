@@ -72,10 +72,7 @@ const PricingDetails = () => {
           />
           {/* ✅ Validation error for price */}
           {errors?.price && <p className={styles.error}>{errors.price}</p>}
-          <span className={styles.note}>
-            In Words:{" "}
-            {new Intl.NumberFormat("en-IN").format(Number(price) || 0)}
-          </span>
+         
         </div>
 
         {/* Negotiable toggle */}

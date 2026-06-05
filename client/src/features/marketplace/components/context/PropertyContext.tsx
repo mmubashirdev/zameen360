@@ -84,6 +84,7 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
               title: data.title ?? "",
               description: data.description ?? "",
               areaSize: data.areaSize ?? "",
+              price: data.price ?? "",
             }
           : {
               price: data.price ?? "",

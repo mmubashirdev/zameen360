@@ -27,10 +27,6 @@ export const step1Schema = z.object({
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
       message: "Area must be a positive number",
     }),
-});
-
-// ─── Step 2: Pricing ──────────────────────────────────────────────────────────
-export const step2Schema = z.object({
   price: z
     .string({ error: "Price is required" })
     .min(1, "Price is required")
@@ -40,6 +36,11 @@ export const step2Schema = z.object({
     .refine((val) => Number(val) >= 500000, {
       message: "Price must be at least PKR 5,00,000",
     }),
+});
+
+// ─── Step 2: Pricing ──────────────────────────────────────────────────────────
+export const step2Schema = z.object({
+  city: z.string().min(1, "City is required"),
 });
 
 // ─── Combined type for error keys ─────────────────────────────────────────────

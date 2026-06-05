@@ -6,8 +6,13 @@ import ProfilePage from "../pages/profile";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
-import ContactUsPage from "../pages/Contactus";
+import ContactUsPage from "../pages/contactus";
 import Rent from "../rent/pages/Rent";
+import PropertySubmitted from "../pages/PropertySubmitted";
+
+
+// Inside your routes
+
 const marketplaceRoutes = [
   
   {
@@ -37,6 +42,10 @@ const marketplaceRoutes = [
   {
     path: "/review",
     element: <ReviewSubmit />,
+  },
+  {
+    path: "/property-submitted",
+    element: <PropertySubmitted />,
   },
   {
     path: "/buy",

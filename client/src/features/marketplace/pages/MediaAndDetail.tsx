@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import DashboardNavbar from "../components/DashboardNavbar";
-import ProgressBar from '../components/media/ProgressBar';
+
+
 import ImageUpload from '../components/media/ImageUpload';
 import MediaSection from '../components/media/MediaSection';
 import LocationSection from '../components/media/LocationSection';
@@ -48,8 +48,6 @@ const MediaAndDetail: React.FC = () => {
 
   return (
     <div className={styles.page}>
-      <DashboardNavbar />
-
       <div className={styles.container}>
         <div className={styles.main}>
           <h2 className={styles.title}>Post Your Property</h2>
@@ -61,7 +59,6 @@ const MediaAndDetail: React.FC = () => {
             required
           </p>
 
-          <ProgressBar />
           <ImageUpload
             images={images}
             setImages={setImages}
