@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { uploadProperty } = require("../middleware/upload");
+const  authenticate  = require("../../auth/middlewares/auth.middleware");
 const propertyController = require("../Controller/property.controllers");
 const authMiddleware = require("../../auth/middlewares/auth.middleware");
 
@@ -14,7 +15,7 @@ router.get("/", propertyController.getProperties);
 // Create property (user submit karta hai - status pending) - PROTECTED
 router.post(
   "/",
-  authMiddleware,
+   authenticate,
   uploadProperty.array("images", 30),
   propertyController.createProperty
 );

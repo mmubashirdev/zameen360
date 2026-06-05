@@ -40,7 +40,6 @@ const SupportCenterCard: React.FC<Props> = ({ managerName, managerRole, phone, e
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
       <h3 className="text-[13.5px] font-bold text-gray-900 mb-3">Support Center</h3>
-
       <div className="flex items-start gap-3 mb-3">
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
           {managerName.charAt(0)}

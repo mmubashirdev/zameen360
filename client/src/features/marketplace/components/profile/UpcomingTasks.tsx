@@ -32,9 +32,7 @@ const UpcomingTasks: React.FC<Props> = ({ tasks }) => {
           );
         })}
       </div>
-      <a href="#" className="text-[11.5px] text-blue-600 font-medium mt-4 inline-block hover:underline">
-        View all tasks
-      </a>
+      <a href="#" className="text-[11.5px] text-blue-600 font-medium mt-4 inline-block hover:underline">View all tasks</a>
     </div>
   );
 };

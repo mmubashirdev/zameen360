@@ -6,8 +6,8 @@ const {
   generateRefreshToken,
 } = require("../../../utils/generateToken");
 
-const EMAIL_OTP_EXPIRY_MS = 60 * 1000;
-const RESEND_OTP_COOLDOWN_MS = 60 * 1000;
+const EMAIL_OTP_EXPIRY_MS = 5 * 60 * 1000;
+const RESEND_OTP_COOLDOWN_MS = 5 * 60 * 1000;
 
 const sendOTPService = async (email, ip) => {
   if (!email) throw { status: 400, message: "Email required." };

@@ -161,91 +161,103 @@ const ReviewSubmit = () => {
 
   const isFieldVisible = (param: string) => !config.hide.includes(param);
 
-  const handlePublish = async () => {
-    if (!agree1 || !agree2) {
-      toast.error("Please accept the required terms");
+const handlePublish = async () => {
+  if (!agree1 || !agree2) {
+    toast.error("Please accept the required terms");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const formData = new FormData();
+
+    const textFields: (keyof typeof data)[] = [
+      "purpose",
+      "propertyType",
+      "title",
+      "description",
+      "areaSize",
+      "areaUnit",
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "yearBuilt",
+      "furnishing",
+      "possession",
+      "facing",
+      "price",
+      "downPayment",
+      "monthlyInstallment",
+      "duration",
+      "monthlyRent",
+      "securityDeposit",
+      "advanceMonths",
+      "city",
+      "locality",
+      "address",
+      "videoUrl",
+      "floorPlan",
+    ];
+
+    textFields.forEach((key) => {
+      const value = data[key];
+      if (value !== undefined && value !== null && value !== "") {
+        formData.append(key, String(value));
+      }
+    });
+
+    formData.append("negotiable", String(data.negotiable ?? false));
+    formData.append(
+      "installmentAvailable",
+      String(data.installmentAvailable ?? false),
+    );
+    formData.append("amenities", JSON.stringify(data.amenities || []));
+    formData.append("status", "published");
+
+    (data.imageFiles || []).forEach((img) => {
+      if (img.file instanceof File && img.file.size > 0) {
+        formData.append("images", img.file);
+      }
+    });
+
+    // ✅ Read token from localStorage
+    const token =
+      localStorage.getItem("accessToken") || localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("You must be logged in to post a property.");
+      navigate("/login");
       return;
     }
 
-    setLoading(true);
-    try {
-      const formData = new FormData();
+    const res = await fetch("http://localhost:5000/api/properties", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`, // ✅ Send token
+      },
+      body: formData,
+    });
 
-      // Text/number fields
-      const textFields: (keyof typeof data)[] = [
-        "purpose",
-        "propertyType",
-        "title",
-        "description",
-        "areaSize",
-        "areaUnit",
-        "bedrooms",
-        "bathrooms",
-        "floors",
-        "parking",
-        "yearBuilt",
-        "furnishing",
-        "possession",
-        "facing",
-        "price",
-        "downPayment",
-        "monthlyInstallment",
-        "duration",
-        "monthlyRent",
-        "securityDeposit",
-        "advanceMonths",
-        "city",
-        "locality",
-        "address",
-        "videoUrl",
-        "floorPlan",
-      ];
+      const result = await res.json();
 
-      textFields.forEach((key) => {
-        const value = data[key];
-        if (value !== undefined && value !== null && value !== "") {
-          formData.append(key, String(value));
-        }
-      });
-
-      // Booleans
-      formData.append("negotiable", String(data.negotiable ?? false));
-      formData.append(
-        "installmentAvailable",
-        String(data.installmentAvailable ?? false),
-      );
-
-      // Amenities → JSON string
-      formData.append("amenities", JSON.stringify(data.amenities || []));
-
-      // Status
-      formData.append("status", "published");
-
-      (data.imageFiles || []).forEach((img) => {
-        if (img.file instanceof File && img.file.size > 0) {
-          formData.append("images", img.file);
-        }
-      });
-
-      const result = await axiosInstance.post("/properties", formData);
-
-      if (!result || result.success === false) {
+      if (!res.ok || result.success === false) {
         throw new Error(
-          result?.message || result?.error || "Failed to publish property",
+          result.message || result.error || "Failed to publish property",
         );
       }
 
-      toast.success("Property published successfully!");
-      navigate("/buy");
-    } catch (err: unknown) {
-      console.error("Publish error:", err);
-      const message =
-        err instanceof Error ? err.message : "Error publishing property";
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success("Property submitted! Waiting for admin approval.");
+    navigate("/buy");
+  } catch (err: unknown) {
+    console.error("Publish error:", err);
+    const message =
+      err instanceof Error ? err.message : "Error publishing property";
+    toast.error(message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleBack = () => {
     navigate("/media-and-details");
