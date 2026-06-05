@@ -1,9 +1,22 @@
-@tailwind utilities;
 @import "tailwindcss";
 
-/* You can add global styles below */
 html,
 body,
 #root {
   height: 100%;
 }
+
+html,
+body,
+body * {
+  font-family: "poppins",;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+

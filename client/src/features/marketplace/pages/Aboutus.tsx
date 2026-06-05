@@ -241,7 +241,7 @@ const CompanyStory: React.FC = () => (
 
         <div className="relative">
           <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-            <div className="aspect-[4/5] flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)' }}>
+            <div className="flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)' }}>
               <div className="text-center p-8">
                 <div className="w-32 h-32 mx-auto rounded-2xl flex items-center justify-center mb-6 shadow-xl" style={{ background: 'linear-gradient(135deg, #2b6aff 0%, #60a5fa 100%)', boxShadow: '0 20px 50px rgba(37, 99, 235, 0.45)' }}>
                   <span className="text-white text-5xl font-bold">Z</span>
@@ -1052,7 +1052,7 @@ const CTASection: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Email Us</p>
-                    <p className="font-semibold text-white">info@zameen360.pk</p>
+                    <p className="font-semibold text-white">info@zameen360.com</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4 text-gray-300">
@@ -1061,22 +1061,73 @@ const CTASection: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-400">Visit Us</p>
-                    <p className="font-semibold text-white">DHA Phase 6, Lahore</p>
+                    <p className="font-semibold text-white">123 Main Boulevard, DHA Lahore, Pakistan</p>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 flex space-x-3">
-                {['facebook', 'instagram', 'twitter', 'youtube'].map((social) => (
-                  <button 
-                    key={social} 
-                    className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white transition-colors"
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
-                  >
-                    <span className="text-xs font-bold uppercase">{social[0]}</span>
-                  </button>
-                ))}
+                <a 
+                  href="https://www.facebook.com/zameen360" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                  aria-label="Facebook"
+                >
+                  <i className="fa-brands fa-facebook-f"></i>
+                </a>
+                <a 
+                  href="https://www.instagram.com/zameen360" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                  aria-label="Instagram"
+                >
+                  <i className="fa-brands fa-instagram"></i>
+                </a>
+                <a 
+                  href="https://www.twitter.com/zameen360" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                  aria-label="Twitter"
+                >
+                  <i className="fa-brands fa-x-twitter"></i>
+                </a>
+                <a 
+                  href="https://www.youtube.com/zameen360" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white transition-colors"
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2b6aff'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'}
+                  aria-label="YouTube"
+                >
+                  <i className="fa-brands fa-youtube"></i>
+                </a>
+              </div>
+
+              <div className="mt-6 pt-6 border-t border-white/20 flex flex-col gap-3">
+                <a href="https://apps.apple.com/pk/app/zameen360" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+                  <i className="fa-brands fa-apple text-lg"></i>
+                  <div className="text-left text-xs">
+                    <div className="text-gray-400">Download on the</div>
+                    <div className="text-white font-semibold">App Store</div>
+                  </div>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.zameen360" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+                  <i className="fa-brands fa-google-play text-lg"></i>
+                  <div className="text-left text-xs">
+                    <div className="text-gray-400">GET IT ON</div>
+                    <div className="text-white font-semibold">Google Play</div>
+                  </div>
+                </a>
               </div>
             </div>
           </div>
