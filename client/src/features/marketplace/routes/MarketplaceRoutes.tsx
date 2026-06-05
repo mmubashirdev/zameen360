@@ -1,4 +1,4 @@
-import PropertyDetails from "../pages/propertyDetails";
+import PropertyDetails from "../pages/propertyDetail";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 import MediaAndDetail from "../pages/MediaAndDetail";
@@ -8,13 +8,10 @@ import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/contactus";
 import Rent from "../rent/pages/Rent";
-import PropertySubmitted from "../pages/PropertySubmitted";
-
-
-// Inside your routes
+import TermsOfService from "../pages/TermsOfService";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
 
 const marketplaceRoutes = [
-  
   {
     path: "/",
     element: <DashboardHome />,
@@ -32,7 +29,7 @@ const marketplaceRoutes = [
     element: <CreatePropertyPost />,
   },
   {
-    path: "/property",
+    path: "/property/:id",
     element: <PropertyDetails />,
   },
   {
@@ -42,10 +39,6 @@ const marketplaceRoutes = [
   {
     path: "/review",
     element: <ReviewSubmit />,
-  },
-  {
-    path: "/property-submitted",
-    element: <PropertySubmitted />,
   },
   {
     path: "/buy",
@@ -62,6 +55,14 @@ const marketplaceRoutes = [
   {
     path: "/contact",
     element: <ContactUsPage />,
+  },
+  {
+    path: "/terms",
+    element: <TermsOfService />,
+  },
+  {
+    path: "/privacy",
+    element: <PrivacyPolicy />,
   },
 ];
 
