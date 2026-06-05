@@ -1,7 +1,10 @@
+// client/src/features/marketplace/components/PostProperty/PropertyDetails.tsx
 import { useCallback } from "react";
 import styles from "../PostProperty/styles/PropertyDetails.module.css";
 import { useProperty } from "../context/useProperty";
 
+// ✅ Fix: Explicit readonly tuple types so TypeScript
+//    infers string literals, not just `string[]`
 type PropertyField =
   | "bedrooms"
   | "bathrooms"
@@ -11,7 +14,14 @@ type PropertyField =
   | "possession"
   | "yearBuilt"
   | "furnishing";
-const propertyConfig = {
+
+// ✅ Fix: Use `PropertyField[]` explicitly so .includes() accepts PropertyField
+interface FieldConfig {
+  show: PropertyField[];
+  hide: PropertyField[];
+}
+
+const propertyConfig: Record<string, FieldConfig> = {
   House: {
     show: [
       "bedrooms",
@@ -114,16 +124,15 @@ const propertyConfig = {
 };
 
 const PropertyDetails = () => {
-  const { data, updateData } = useProperty();
+  const { data, updateData, errors } = useProperty(); // ✅ errors from context
 
   const propertyType = data.propertyType || "House";
-  const config =
-    propertyConfig[propertyType as keyof typeof propertyConfig] ||
-    propertyConfig.House;
+  const config: FieldConfig =
+    propertyConfig[propertyType] ?? propertyConfig.House;
 
-  
-
-  const isFieldVisible = (field: PropertyField) => !config.hide.includes(field);
+  // ✅ Fix: Now .includes() works because config.hide is PropertyField[]
+  const isFieldVisible = (field: PropertyField): boolean =>
+    !config.hide.includes(field);
 
   const beds = data.bedrooms || "5";
   const baths = data.bathrooms || "6";
@@ -133,19 +142,17 @@ const PropertyDetails = () => {
   const possession = data.possession || "Ready to Move";
   const areaSize = data.areaSize || "";
   const areaUnit = data.areaUnit || "Marla";
-  const yearBuilt = data.yearBuilt || "2023";
+  const yearBuilt = data.yearBuilt || "2026";
   const facing = data.facing || "North";
 
+  // ✅ Fix: Removed unused `trigger` — validation handled at page level
   const handleUpdate = useCallback(
-    (updates: Partial<typeof data>) => {
-      updateData(updates);
-    },
+    (updates: Partial<typeof data>) => updateData(updates),
     [updateData],
   );
 
   const handleAreaSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow empty, or only values >= 1
     if (value === "" || (Number(value) > 0 && !isNaN(Number(value)))) {
       handleUpdate({ areaSize: value });
     }
@@ -159,14 +166,16 @@ const PropertyDetails = () => {
   return (
     <div className={styles.section}>
       <h3 className={styles.title}>B. Property Details</h3>
+
       <div className={styles.grid3}>
+        {/* Area Size */}
         <div>
           <label className={styles.label}>
             Area Size <span className={styles.req}>*</span>
           </label>
           <div className={styles.row}>
             <input
-              className={styles.input}
+              className={`${styles.input} ${errors?.areaSize ? styles.inputError : ""}`}
               type="number"
               min="1"
               placeholder="Min 1"
@@ -184,7 +193,12 @@ const PropertyDetails = () => {
               <option>Sqm</option>
             </select>
           </div>
+          {/* ✅ Validation error for areaSize */}
+          {errors?.areaSize && (
+            <p className={styles.error}>{errors.areaSize}</p>
+          )}
         </div>
+
         {isFieldVisible("bedrooms") && (
           <div>
             <label className={styles.label}>
@@ -194,6 +208,7 @@ const PropertyDetails = () => {
               {bedOptions.map((b) => (
                 <button
                   key={b}
+                  type="button"
                   className={`${styles.numBtn} ${beds === b ? styles.numActive : ""}`}
                   onClick={() => handleUpdate({ bedrooms: b })}
                 >
@@ -203,6 +218,7 @@ const PropertyDetails = () => {
             </div>
           </div>
         )}
+
         {isFieldVisible("bathrooms") && (
           <div>
             <label className={styles.label}>
@@ -212,6 +228,7 @@ const PropertyDetails = () => {
               {bathOptions.map((b) => (
                 <button
                   key={b}
+                  type="button"
                   className={`${styles.numBtn} ${baths === b ? styles.numActive : ""}`}
                   onClick={() => handleUpdate({ bathrooms: b })}
                 >
@@ -231,6 +248,7 @@ const PropertyDetails = () => {
               {floorOptions.map((f) => (
                 <button
                   key={f}
+                  type="button"
                   className={`${styles.numBtn} ${floors === f ? styles.numActive : ""}`}
                   onClick={() => handleUpdate({ floors: f })}
                 >
@@ -240,6 +258,7 @@ const PropertyDetails = () => {
             </div>
           </div>
         )}
+
         {isFieldVisible("parking") && (
           <div>
             <label className={styles.label}>Parking</label>
@@ -247,6 +266,7 @@ const PropertyDetails = () => {
               {parkOptions.map((p) => (
                 <button
                   key={p}
+                  type="button"
                   className={`${styles.numBtn} ${parking === p ? styles.numActive : ""}`}
                   onClick={() => handleUpdate({ parking: p })}
                 >
@@ -256,6 +276,7 @@ const PropertyDetails = () => {
             </div>
           </div>
         )}
+
         {isFieldVisible("yearBuilt") && (
           <div>
             <label className={styles.label}>Year Built</label>
@@ -264,8 +285,13 @@ const PropertyDetails = () => {
               value={yearBuilt}
               onChange={(e) => handleUpdate({ yearBuilt: e.target.value })}
             >
-              {Array.from({ length: 30 }, (_, i) => 2024 - i).map((year) => (
-                <option key={year}>{year}</option>
+              {Array.from(
+                { length: 47 },
+                (_, i) => new Date().getFullYear() - i,
+              ).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
               ))}
             </select>
           </div>
@@ -282,6 +308,7 @@ const PropertyDetails = () => {
               {["Unfurnished", "Semi-Furnished", "Fully Furnished"].map((f) => (
                 <button
                   key={f}
+                  type="button"
                   className={`${styles.tab} ${furnishing === f ? styles.tabActive : ""}`}
                   onClick={() => handleUpdate({ furnishing: f })}
                 >
@@ -291,6 +318,7 @@ const PropertyDetails = () => {
             </div>
           </div>
         )}
+
         {isFieldVisible("possession") && (
           <div>
             <label className={styles.label}>
@@ -307,6 +335,7 @@ const PropertyDetails = () => {
               ].map((p) => (
                 <button
                   key={p}
+                  type="button"
                   className={`${styles.tab} ${possession === p ? styles.tabActive : ""}`}
                   onClick={() => handleUpdate({ possession: p })}
                 >
@@ -316,6 +345,7 @@ const PropertyDetails = () => {
             </div>
           </div>
         )}
+
         {isFieldVisible("facingDirection") && (
           <div>
             <label className={styles.label}>Facing Direction</label>

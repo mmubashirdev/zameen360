@@ -1,56 +1,89 @@
-import { ArrowRight } from "lucide-react";
-import DashboardNavbar from "../components/DashboardNavbar";
+// client/src/features/marketplace/pages/CreatePropertyPost.tsx
+import { useState } from "react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
+import { PropertyProvider } from "../components/context/PropertyContext";
+import { useProperty } from "../components/context/useProperty";
 import ProgressSteps from "../components/PostProperty/ProgressSteps";
 import BasicInformation from "../components/PostProperty/BasicInformation";
 import PropertyDetails from "../components/PostProperty/PropertyDetails";
 import PricingDetails from "../components/PostProperty/PricingDetails";
 import LivePreview from "../components/PostProperty/LivePreview";
+import PropertyNav from "../components/PostProperty/PropertyNav";
 import styles from "../components/PostProperty/styles/PostProperty.module.css";
-import { useNavigate } from "react-router-dom";
 
+// ─── Inner form (inside Provider so it can use context) ───────────────────────
+const PostPropertyForm = () => {
+  const [step, setStep] = useState(1);
+  const { validate } = useProperty();
 
-const PostProperty = () => {
-  const navigate = useNavigate();
+  const handleNext = () => {
+    // ✅ Pass current step — validates only relevant fields
+    const isValid = validate(step);
 
-  const NavigatetoMedia = () => {
-    navigate("/media-and-details");
+    // ✅ Explicit guard — do NOT advance if invalid
+    if (!isValid) {
+      // Scroll to first error so user sees it
+      const firstError = document.querySelector('[data-error="true"]');
+      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    setStep((s) => Math.min(s + 1, 3));
+  };
+
+  const handleBack = () => {
+    setStep((s) => Math.max(s - 1, 1));
   };
 
   return (
     <div className={styles.page}>
-      <DashboardNavbar />
-
+      <PropertyNav />
       <main className={styles.main}>
         <div className={styles.heading}>
           <h1>Post Your Property</h1>
-
-          <p>
-            List your property in 3 easy steps and reach thousands of buyers
-          </p>
-
-          <span className={styles.required}>
-            Fields marked with <span className={styles.req}>*</span> are required
-          </span>
+          <p>Fill in the details below to list your property</p>
         </div>
 
-        <ProgressSteps />
+        <ProgressSteps currentStep={step} />
 
         <div className={styles.layout}>
           <div className={styles.form}>
-            <BasicInformation />
-            <PropertyDetails />
-            <PricingDetails />
+            {step === 1 && (
+              <>
+                <BasicInformation />
+                <PropertyDetails />
+              </>
+            )}
 
+            {step === 2 && <PricingDetails />}
+
+            {step === 3 && <div>Review & Submit</div>}
+
+            {/* ── Navigation ── */}
             <div className={styles.actions}>
+              {step > 1 && (
+                <button
+                  type="button"
+                  className={styles.backBtn}
+                  onClick={handleBack}
+                >
+                  <ArrowLeft size={16} /> Back
+                </button>
+              )}
+
               <button
-                onClick={NavigatetoMedia}
+                type="button"
                 className={styles.nextBtn}
+                onClick={handleNext}
               >
-                Next: Media & Location <ArrowRight size={16} />
+                {step === 3
+                  ? "Submit Listing"
+                  : "Next: " +
+                    ["", "Media & Location", "Review & Submit"][step]}
+                {step < 3 && <ArrowRight size={16} />}
               </button>
             </div>
           </div>
-
           <LivePreview />
         </div>
       </main>
@@ -58,4 +91,11 @@ const PostProperty = () => {
   );
 };
 
-export default PostProperty;
+// ─── Wrap with Provider ───────────────────────────────────────────────────────
+const CreatePropertyPost = () => (
+  <PropertyProvider>
+    <PostPropertyForm />
+  </PropertyProvider>
+);
+
+export default CreatePropertyPost;
