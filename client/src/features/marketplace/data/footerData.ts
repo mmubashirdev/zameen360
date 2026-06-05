@@ -13,8 +13,9 @@ export const footerColumnsData: FooterColumn[] = [
     title: "Quick Links",
     links: [
       { label: "Home", path: "/" },
-      { label: "About Us", path: "/about" },
-      { label: "Contact", path: "/contact" },
+      { label: "About Us", path: "/about-us" },
+      { label: "Contact", path: "/contact-us" },
+      { label: "Support", path: "/support" },
       { label: "Blog", path: "/blog" },
       { label: "FAQ", path: "/faq" }
     ]

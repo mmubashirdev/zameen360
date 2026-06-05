@@ -7,7 +7,7 @@ function Footer() {
   const [developer] = useState("Mubashir");
   return (
     <footer className={styles.footerWrapper}>
-      {/* CTA Top Section */}
+    
       <div className={styles.ctaSection}>
         <div className={styles.ctaContainer}>
           <div className={styles.ctaContent}>
@@ -35,7 +35,7 @@ function Footer() {
         </div>
       </div>
 
-      {/* Main Footer Grid */}
+      
       <div className={styles.mainFooter}>
         <div className={styles.container}>
           {/* Brand & Contact Column */}
@@ -85,7 +85,7 @@ function Footer() {
             </div>
           </div>
 
-          {/* Dynamic Link Columns */}
+          
           {footerColumnsData.map((column, index) => (
             <div className={styles.linkCol} key={index}>
               <h3 className={styles.colTitle}>{column.title}</h3>

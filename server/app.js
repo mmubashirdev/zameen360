@@ -10,6 +10,8 @@ const fs = require("fs");
 
 const index = require("./modules/auth/routes/index");
 const propertyRoutes = require("./modules/marketplace/routes/property.routes");
+const supportRoutes = require("./modules/support/routes/support.routes");
+const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
 
 const app = express();
 
@@ -23,13 +25,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ⭐ Property uploads folder bhi create karo
+
 ["uploads/profiles", "uploads/properties"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
 app.use("/api/auth", index);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/support", supportRoutes);
+app.use("/api/contactus", contactusRoutes);
 
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
