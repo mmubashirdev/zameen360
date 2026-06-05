@@ -9,16 +9,17 @@ import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/Contactus";
 import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
+import PropertySubmitted from "../pages/PropertySubmitted";
+
+
+// Inside your routes
+
 const marketplaceRoutes = [
+  
   {
     path: "/",
     element: <DashboardHome />,
   },
-  {
-    path: "*",
-    element: <DashboardHome />,
-  },
-
   {
     path: "/marketplace",
     element: <DashboardHome />,
@@ -35,7 +36,6 @@ const marketplaceRoutes = [
     path: "/property",
     element: <PropertyDetails />,
   },
-
   {
     path: "/media-and-details",
     element: <MediaAndDetail />,
@@ -43,6 +43,10 @@ const marketplaceRoutes = [
   {
     path: "/review",
     element: <ReviewSubmit />,
+  },
+  {
+    path: "/property-submitted",
+    element: <PropertySubmitted />,
   },
   {
     path: "/buy",
@@ -66,4 +70,5 @@ const marketplaceRoutes = [
   },
 ];
 
+export { marketplaceRoutes };
 export default marketplaceRoutes;

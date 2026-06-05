@@ -9,6 +9,16 @@ exports.getAllUsers = async (req, res) => {
 }
 };
 
+
+// exports.adminLogin = async (req,res) => {
+//   try {
+//     const data = await service.AdminLogin(req.email,req.password);
+//     res.status(200).json({ data , message:"Admin Login Success"})
+//   } catch (e) {
+//     res.status(500).json({message:e.message})
+//   }
+// };
+
 exports.getUserById = async (req, res) => {
   try {
      const data = await service.getUserByIdService(req.params.user_id);

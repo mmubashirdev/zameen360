@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import DashboardNavbar from "../components/DashboardNavbar";
-import ProgressBar from '../components/media/ProgressBar';
+
+
 import ImageUpload from '../components/media/ImageUpload';
 import MediaSection from '../components/media/MediaSection';
 import LocationSection from '../components/media/LocationSection';
@@ -48,26 +48,40 @@ const MediaAndDetail: React.FC = () => {
 
   return (
     <div className={styles.page}>
-      <DashboardNavbar />
-
       <div className={styles.container}>
         <div className={styles.main}>
           <h2 className={styles.title}>Post Your Property</h2>
-          <p className={styles.sub}>List your property in 3 easy steps and reach thousands of buyers</p>
+          <p className={styles.sub}>
+            List your property in 3 easy steps and reach thousands of buyers
+          </p>
           <p className={styles.note}>
-            Fields marked with <span className={styles.req}>*</span> are required
+            Fields marked with <span className={styles.req}>*</span> are
+            required
           </p>
 
-          <ProgressBar />
-          <ImageUpload images={images} setImages={setImages} coverId={coverId} setCoverId={setCoverId} />
+          <ImageUpload
+            images={images}
+            setImages={setImages}
+            coverId={coverId}
+            setCoverId={setCoverId}
+          />
           <MediaSection onDataChange={updateData} />
           <LocationSection onDataChange={updateData} />
 
           <div className={styles.actions}>
-            <button className={styles.backBtn} type="button">
+            <button
+              className={styles.backBtn}
+              type="button"
+              onClick={() => navigate("/post-property")}
+            >
               Back
             </button>
-            <button className={styles.nextBtn} type="button" disabled={!canProceed} onClick={NavigateToReview}>
+            <button
+              className={styles.nextBtn}
+              type="button"
+              disabled={!canProceed}
+              onClick={NavigateToReview}
+            >
               Next: Review & Publish
             </button>
           </div>

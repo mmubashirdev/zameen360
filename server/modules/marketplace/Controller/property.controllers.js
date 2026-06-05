@@ -39,6 +39,14 @@ exports.createProperty = async (req, res) => {
   try {
     const d = req.body;
     const files = req.files || [];
+    const userId = req.user?.id ?? req.user?.userId ?? req.user?._id ?? d.userId;
+
+    if (userId === null || userId === undefined || userId === "") {
+      return res.status(400).json({
+        success: false,
+        message: "User ID is required. Please login to post a property.",
+      });
+    }
 
     const imageUrls = files.map(
       (file) => `${BASE_URL}/uploads/properties/${file.filename}`
@@ -46,6 +54,7 @@ exports.createProperty = async (req, res) => {
 
     const property = await prisma.property.create({
       data: {
+        userId: userId,
         purpose: d.purpose || null,
         propertyType: d.propertyType || null,
         title: d.title || null,
@@ -217,7 +226,8 @@ exports.getAdminProperties = async (req, res) => {
 exports.updatePropertyStatus = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { status } = req.body;
+    const { status, rejectionReason } = req.body;
+    const adminId = req.user?.id;
 
     if (isNaN(id)) {
       return res
@@ -241,9 +251,23 @@ exports.updatePropertyStatus = async (req, res) => {
         .json({ success: false, message: "Property not found" });
     }
 
+    const updateData = {
+      status: status,
+    };
+
+    if (status === "approved") {
+      updateData.approvedAt = new Date();
+      updateData.approvedBy = adminId || 0;
+      updateData.rejectionReason = null;
+    } else if (status === "rejected") {
+      updateData.rejectedAt = new Date();
+      updateData.approvedBy = adminId || 0;
+      updateData.rejectionReason = rejectionReason || "No reason provided";
+    }
+
     const property = await prisma.property.update({
       where: { id },
-      data: { status: status },
+      data: updateData,
     });
 
     res.json({

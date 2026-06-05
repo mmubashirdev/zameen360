@@ -1,16 +1,16 @@
 import React from 'react';
+import { useUser } from './UserContext';
 
-interface ContactItem {
-  type: 'phone' | 'whatsapp' | 'email' | 'website';
-  label: string;
-  value: string;
-}
+const ContactBar: React.FC = () => {
+  const { user } = useUser();
 
-interface ContactBarProps {
-  contacts: ContactItem[];
-}
+  const contacts = [
+    { type: 'phone', label: 'Phone', value: user.phone },
+    { type: 'whatsapp', label: 'WhatsApp', value: user.whatsapp },
+    { type: 'email', label: 'Email', value: user.email },
+    { type: 'website', label: 'Website', value: user.website },
+  ];
 
-const ContactBar: React.FC<ContactBarProps> = ({ contacts }) => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'phone':
@@ -46,14 +46,14 @@ const ContactBar: React.FC<ContactBarProps> = ({ contacts }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {contacts.map((contact, i) => (
+        {contacts.map((c, i) => (
           <div key={i} className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gray-50 flex items-center justify-center -shrink-0">
               {getIcon(contact.type)}
             </div>
             <div className="min-w-0">
-              <p className="text-[11.5px] text-gray-500 font-medium">{contact.label}</p>
-              <p className="text-[13px] font-semibold text-gray-800 truncate">{contact.value}</p>
+              <p className="text-[11.5px] text-gray-500 font-medium">{c.label}</p>
+              <p className="text-[13px] font-semibold text-gray-800 truncate">{c.value}</p>
             </div>
           </div>
         ))}

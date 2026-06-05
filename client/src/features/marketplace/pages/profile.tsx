@@ -63,7 +63,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar activeItem={activeMenu} onItemClick={setActiveMenu} />
-      <TopHeader userName="Ahmed Malik" notificationCount={5} />
+      <TopHeader userName="Ahmed Malik" notificationCount={0} />
 
       {/* Right Sidebar */}
       <aside className="w-[290px] fixed right-0 top-[64px] bottom-0 overflow-y-auto bg-gray-50 p-4 space-y-3 z-10">

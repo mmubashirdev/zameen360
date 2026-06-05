@@ -5,11 +5,12 @@ import AdminRoutes from "@features/admin/routes/AdminRoutes";
 import { PropertyProvider } from "../../features/marketplace/components/context/PropertyContext";
 
 export default function AppRouter() {
-  const routes = useRoutes([...AuthRoutes, ...AdminRoutes, ...marketplaceRoutes]);
+  const routes = useRoutes([
+    ...AuthRoutes,
+    ...AdminRoutes,
+    ...marketplaceRoutes,
+  ]);
 
-  return (
-    <PropertyProvider>
-      {routes}
-    </PropertyProvider>
-  );
+  // PropertyProvider wraps routes so marketplace pages have property context
+  return <PropertyProvider>{routes}</PropertyProvider>;
 }

@@ -58,3 +58,39 @@
   cursor: pointer;
 }
 .amenity input { accent-color: #2563eb; }
+
+.error {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 4px 0 0 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: shakeIn 0.3s ease-out;
+}
+
+.inputError {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.inputError:focus {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+@keyframes shakeIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

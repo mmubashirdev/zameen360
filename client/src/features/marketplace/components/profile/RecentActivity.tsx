@@ -66,9 +66,7 @@ const RecentActivity: React.FC<Props> = ({ activities }) => {
           </div>
         ))}
       </div>
-      <a href="#" className="text-[11.5px] text-blue-600 font-medium mt-4 inline-block hover:underline">
-        View all activity
-      </a>
+      <a href="#" className="text-[11.5px] text-blue-600 font-medium mt-4 inline-block hover:underline">View all activity</a>
     </div>
   );
 };

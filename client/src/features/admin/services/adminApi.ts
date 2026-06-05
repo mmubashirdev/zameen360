@@ -74,3 +74,14 @@ export const deletePropertyAdmin = async (id: number) => {
   const res = await axios.delete(`${BASE_URL}/${id}`);
   return res.data;
 };
+
+export interface AdminLoginPayload {
+  email: string;
+  password: string;
+}
+
+const AUTH_BASE = "http://localhost:5000/api/auth";
+export const adminLogin = async (payload: AdminLoginPayload) => {
+  const res = await axios.post(`${AUTH_BASE}/admin/login`, payload);
+  return res.data;
+}
