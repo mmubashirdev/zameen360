@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit, Save, Rocket, MapPin } from "lucide-react";
 import toast from "react-hot-toast";
+import axiosInstance from "@shared/lib/axios";
 import DashboardNavbar from "../components/DashboardNavbar";
 import ProgressSteps from "../components/PostProperty/ProgressSteps";
 import { useProperty } from "../components/context/useProperty";
@@ -226,16 +227,11 @@ const ReviewSubmit = () => {
         }
       });
 
-      const res = await fetch("http://localhost:5000/api/properties", {
-        method: "POST",
-        body: formData,
-      });
+      const result = await axiosInstance.post("/properties", formData);
 
-      const result = await res.json();
-
-      if (!res.ok || result.success === false) {
+      if (!result || result.success === false) {
         throw new Error(
-          result.message || result.error || "Failed to publish property",
+          result?.message || result?.error || "Failed to publish property",
         );
       }
 
