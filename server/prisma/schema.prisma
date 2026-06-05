@@ -26,6 +26,15 @@ enum ActivityStatus {
   FAILED
   SUSPICIOUS
 }
+model Admin {
+  id        Int      @id @default(autoincrement())
+  // fullName  String   @map("")
+  email     String   @default("ismalumair912@gmail.com")
+  passwordHash String @default("12345678Aa@")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("admins")
+}
 model User {
   id             Int      @id @default(autoincrement())
   fullName       String   @map("full_name")
@@ -134,43 +143,43 @@ model UserActivityLog {
 model Property {
   id                   Int      @id @default(autoincrement())
   purpose              String?
-  propertyType         String?
+  propertyType         String?  @map("property_type")
   title                String?
   description          String?
-  areaSize             String?
-  areaUnit             String?
+  areaSize             String?  @map("area_size")
+  areaUnit             String?  @map("area_unit")
   bedrooms             String?
   bathrooms            String?
   floors               String?
   parking              String?
-  yearBuilt            String?
+  yearBuilt            String?  @map("year_built")
   furnishing           String?
   possession           String?
   facing               String?
   price                BigInt?
   negotiable           Boolean  @default(false)
-  installmentAvailable Boolean  @default(false)
-  downPayment          BigInt?
-  monthlyInstallment   BigInt?
+  installmentAvailable Boolean  @default(false) @map("installment_available")
+  downPayment          BigInt?  @map("down_payment")
+  monthlyInstallment   BigInt?  @map("monthly_installment")
   duration             String?
-  monthlyRent          BigInt?
-  securityDeposit      BigInt?
-  advanceMonths        String?
+  monthlyRent          BigInt?  @map("monthly_rent")
+  securityDeposit      BigInt?  @map("security_deposit")
+  advanceMonths        String?  @map("advance_months")
   amenities            String[] @default([])
   city                 String?
   locality             String?
   address              String?
   images               String[] @default([])
-  videoUrl             String?
-  floorPlan            String?
+  videoUrl             String?  @map("video_url")
+  floorPlan            String?  @map("floor_plan")
   status               String   @default("pending")
-  userId               Int?
-  approvedAt           DateTime?
-  rejectedAt           DateTime?
-  approvedBy           Int?
-  rejectionReason      String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  userId               Int?     @map("user_id")
+  approvedAt           DateTime? @map("approved_at")
+  rejectedAt           DateTime? @map("rejected_at")
+  approvedBy           Int?     @map("approved_by")
+  rejectionReason      String?  @map("rejection_reason")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
   user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   @@index([city])
   @@index([purpose])

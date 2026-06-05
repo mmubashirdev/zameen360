@@ -39,10 +39,11 @@ exports.createProperty = async (req, res) => {
   try {
     const d = req.body;
     const files = req.files || [];
-    const userId = req.user?.id || parseInt(d.userId);
+    // ⭐ User is set by auth middleware
+    const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "User ID is required. Please login to post a property.",
       });
