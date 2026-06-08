@@ -1,138 +1,55 @@
 // client/src/features/marketplace/components/PostProperty/PropertyDetails.tsx
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";  // ⭐ useEffect add
 import styles from "../PostProperty/styles/PropertyDetails.module.css";
 import { useProperty } from "../context/useProperty";
 
-// ✅ Fix: Explicit readonly tuple types so TypeScript
-//    infers string literals, not just `string[]`
 type PropertyField =
-  | "bedrooms"
-  | "bathrooms"
-  | "floors"
-  | "parking"
-  | "facingDirection"
-  | "possession"
-  | "yearBuilt"
-  | "furnishing";
+  | "bedrooms" | "bathrooms" | "floors" | "parking"
+  | "facingDirection" | "possession" | "yearBuilt" | "furnishing";
 
-// ✅ Fix: Use `PropertyField[]` explicitly so .includes() accepts PropertyField
 interface FieldConfig {
   show: PropertyField[];
   hide: PropertyField[];
 }
 
 const propertyConfig: Record<string, FieldConfig> = {
-  House: {
-    show: [
-      "bedrooms",
-      "bathrooms",
-      "floors",
-      "parking",
-      "facingDirection",
-      "possession",
-      "yearBuilt",
-      "furnishing",
-    ],
-    hide: [],
-  },
-  Apartment: {
-    show: [
-      "bedrooms",
-      "bathrooms",
-      "floors",
-      "parking",
-      "facingDirection",
-      "possession",
-      "yearBuilt",
-      "furnishing",
-    ],
-    hide: [],
-  },
-  Villa: {
-    show: [
-      "bedrooms",
-      "bathrooms",
-      "floors",
-      "parking",
-      "facingDirection",
-      "possession",
-      "yearBuilt",
-      "furnishing",
-    ],
-    hide: [],
-  },
-  "Plot / Land": {
-    show: ["facingDirection", "possession"],
-    hide: [
-      "bedrooms",
-      "bathrooms",
-      "floors",
-      "parking",
-      "yearBuilt",
-      "furnishing",
-    ],
-  },
-  Agricultural: {
-    show: [],
-    hide: [
-      "bedrooms",
-      "bathrooms",
-      "floors",
-      "parking",
-      "facingDirection",
-      "yearBuilt",
-      "furnishing",
-    ],
-  },
-  Commercial: {
-    show: [
-      "floors",
-      "parking",
-      "facingDirection",
-      "possession",
-      "yearBuilt",
-      "furnishing",
-    ],
-    hide: ["bedrooms", "bathrooms"],
-  },
-  Shop: {
-    show: [
-      "floors",
-      "parking",
-      "facingDirection",
-      "possession",
-      "yearBuilt",
-      "furnishing",
-    ],
-    hide: ["bedrooms", "bathrooms"],
-  },
-  Office: {
-    show: [
-      "floors",
-      "parking",
-      "facingDirection",
-      "possession",
-      "yearBuilt",
-      "furnishing",
-    ],
-    hide: ["bedrooms", "bathrooms"],
-  },
-  Warehouse: {
-    show: ["parking", "facingDirection", "possession", "yearBuilt"],
-    hide: ["bedrooms", "bathrooms", "floors", "furnishing"],
-  },
+  House: { show: ["bedrooms","bathrooms","floors","parking","facingDirection","possession","yearBuilt","furnishing"], hide: [] },
+  Apartment: { show: ["bedrooms","bathrooms","floors","parking","facingDirection","possession","yearBuilt","furnishing"], hide: [] },
+  Villa: { show: ["bedrooms","bathrooms","floors","parking","facingDirection","possession","yearBuilt","furnishing"], hide: [] },
+  "Plot / Land": { show: ["facingDirection","possession"], hide: ["bedrooms","bathrooms","floors","parking","yearBuilt","furnishing"] },
+  Agricultural: { show: [], hide: ["bedrooms","bathrooms","floors","parking","facingDirection","yearBuilt","furnishing"] },
+  Commercial: { show: ["floors","parking","facingDirection","possession","yearBuilt","furnishing"], hide: ["bedrooms","bathrooms"] },
+  Shop: { show: ["floors","parking","facingDirection","possession","yearBuilt","furnishing"], hide: ["bedrooms","bathrooms"] },
+  Office: { show: ["floors","parking","facingDirection","possession","yearBuilt","furnishing"], hide: ["bedrooms","bathrooms"] },
+  Warehouse: { show: ["parking","facingDirection","possession","yearBuilt"], hide: ["bedrooms","bathrooms","floors","furnishing"] },
 };
 
 const PropertyDetails = () => {
-  const { data, updateData, errors } = useProperty(); // ✅ errors from context
+  const { data, updateData, errors } = useProperty();
 
   const propertyType = data.propertyType || "House";
-  const config: FieldConfig =
-    propertyConfig[propertyType] ?? propertyConfig.House;
+  const config: FieldConfig = propertyConfig[propertyType] ?? propertyConfig.House;
+  const isFieldVisible = (field: PropertyField): boolean => !config.hide.includes(field);
 
-  // ✅ Fix: Now .includes() works because config.hide is PropertyField[]
-  const isFieldVisible = (field: PropertyField): boolean =>
-    !config.hide.includes(field);
+  // ⭐ CRITICAL FIX: Save default values to context on mount
+  useEffect(() => {
+    const defaults: Record<string, string> = {};
+    
+    if (!data.bedrooms) defaults.bedrooms = "5";
+    if (!data.bathrooms) defaults.bathrooms = "6";
+    if (!data.floors) defaults.floors = "2";
+    if (!data.parking) defaults.parking = "2";
+    if (!data.furnishing) defaults.furnishing = "Semi-Furnished";
+    if (!data.possession) defaults.possession = "Ready to Move";
+    if (!data.areaUnit) defaults.areaUnit = "Marla";
+    if (!data.yearBuilt) defaults.yearBuilt = String(new Date().getFullYear());
+    if (!data.facing) defaults.facing = "North";
+
+    if (Object.keys(defaults).length > 0) {
+      updateData(defaults);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const beds = data.bedrooms || "5";
   const baths = data.bathrooms || "6";
@@ -142,13 +59,12 @@ const PropertyDetails = () => {
   const possession = data.possession || "Ready to Move";
   const areaSize = data.areaSize || "";
   const areaUnit = data.areaUnit || "Marla";
-  const yearBuilt = data.yearBuilt || "2026";
+  const yearBuilt = data.yearBuilt || String(new Date().getFullYear());
   const facing = data.facing || "North";
 
-  // ✅ Fix: Removed unused `trigger` — validation handled at page level
   const handleUpdate = useCallback(
     (updates: Partial<typeof data>) => updateData(updates),
-    [updateData],
+    [updateData]
   );
 
   const handleAreaSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,17 +74,16 @@ const PropertyDetails = () => {
     }
   };
 
-  const bedOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"];
-  const bathOptions = ["1", "2", "3", "4", "5", "6", "7", "8+"];
-  const floorOptions = ["1", "2", "3", "4", "5+"];
-  const parkOptions = ["0", "1", "2", "3", "4+"];
+  const bedOptions = ["1","2","3","4","5","6","7","8","9","10+"];
+  const bathOptions = ["1","2","3","4","5","6","7","8+"];
+  const floorOptions = ["1","2","3","4","5+"];
+  const parkOptions = ["0","1","2","3","4+"];
 
   return (
     <div className={styles.section}>
       <h3 className={styles.title}>B. Property Details</h3>
 
       <div className={styles.grid3}>
-        {/* Area Size */}
         <div>
           <label className={styles.label}>
             Area Size <span className={styles.req}>*</span>
@@ -193,10 +108,7 @@ const PropertyDetails = () => {
               <option>Sqm</option>
             </select>
           </div>
-          {/* ✅ Validation error for areaSize */}
-          {errors?.areaSize && (
-            <p className={styles.error}>{errors.areaSize}</p>
-          )}
+          {errors?.areaSize && <p className={styles.error}>{errors.areaSize}</p>}
         </div>
 
         {isFieldVisible("bedrooms") && (
@@ -285,13 +197,8 @@ const PropertyDetails = () => {
               value={yearBuilt}
               onChange={(e) => handleUpdate({ yearBuilt: e.target.value })}
             >
-              {Array.from(
-                { length: 47 },
-                (_, i) => new Date().getFullYear() - i,
-              ).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
+              {Array.from({ length: 47 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                <option key={year} value={year}>{year}</option>
               ))}
             </select>
           </div>
@@ -305,7 +212,7 @@ const PropertyDetails = () => {
               Furnishing <span className={styles.req}>*</span>
             </label>
             <div className={styles.tabRow}>
-              {["Unfurnished", "Semi-Furnished", "Fully Furnished"].map((f) => (
+              {["Unfurnished","Semi-Furnished","Fully Furnished"].map((f) => (
                 <button
                   key={f}
                   type="button"
@@ -326,12 +233,8 @@ const PropertyDetails = () => {
             </label>
             <div className={styles.tabRow}>
               {[
-                propertyType === "Agricultural"
-                  ? "Ready to Cultivate"
-                  : "Ready to Move",
-                propertyType === "Agricultural"
-                  ? "Under Preparation"
-                  : "Under Construction",
+                propertyType === "Agricultural" ? "Ready to Cultivate" : "Ready to Move",
+                propertyType === "Agricultural" ? "Under Preparation" : "Under Construction",
               ].map((p) => (
                 <button
                   key={p}

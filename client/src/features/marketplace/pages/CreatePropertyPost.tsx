@@ -1,7 +1,7 @@
 // client/src/features/marketplace/pages/CreatePropertyPost.tsx
 import { useState } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { PropertyProvider } from "../components/context/PropertyContext";
+import toast from "react-hot-toast";
 import { useProperty } from "../components/context/useProperty";
 import ProgressSteps from "../components/PostProperty/ProgressSteps";
 import BasicInformation from "../components/PostProperty/BasicInformation";
@@ -13,19 +13,16 @@ import LivePreview from "../components/PostProperty/LivePreview";
 import PropertyNav from "../components/PostProperty/PropertyNav";
 import styles from "../components/PostProperty/styles/PostProperty.module.css";
 
-// ✅ Extracted OUTSIDE — not inside any component function
 interface NavButtonsProps {
   step: number;
   onBack: () => void;
   onNext: () => void;
-  onSubmit: () => void;
 }
 
-const NavButtons = ({ step, onBack, onNext, onSubmit }: NavButtonsProps) => {
+const NavButtons = ({ step, onBack, onNext }: NavButtonsProps) => {
   const nextLabels: Record<number, string> = {
     1: "Next: Media & Location",
     2: "Next: Review & Submit",
-    3: "Submit Listing",
   };
 
   return (
@@ -36,30 +33,37 @@ const NavButtons = ({ step, onBack, onNext, onSubmit }: NavButtonsProps) => {
           Back
         </button>
       )}
-      <button
-        type="button"
-        className={styles.nextBtn}
-        onClick={step === 3 ? onSubmit : onNext}
-      >
+      <button type="button" className={styles.nextBtn} onClick={onNext}>
         {nextLabels[step]}
-        {step < 3 && <ArrowRight size={16} />}
+        <ArrowRight size={16} />
       </button>
     </div>
   );
 };
 
-// ─── Inner form ───────────────────────────────────────────────────────────────
-const PostPropertyForm = () => {
+const CreatePropertyPost = () => {
   const [step, setStep] = useState(1);
-  const { validate } = useProperty();
+  const { validate, errors } = useProperty();
 
   const handleNext = () => {
     const isValid = validate(step);
+
     if (!isValid) {
-      const firstError = document.querySelector('[data-error="true"]');
-      firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const firstErrorKey = Object.keys(errors)[0];
+      const firstErrorMsg = firstErrorKey
+        ? errors[firstErrorKey as keyof typeof errors]
+        : "Please fill all required fields";
+
+      toast.error(firstErrorMsg || "Please fill all required fields");
+
+      setTimeout(() => {
+        const firstError = document.querySelector('[data-error="true"]');
+        firstError?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+
       return;
     }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
     setStep((s) => Math.min(s + 1, 3));
   };
@@ -69,8 +73,11 @@ const PostPropertyForm = () => {
     setStep((s) => Math.max(s - 1, 1));
   };
 
-  const handleSubmit = () => {
-    console.log("Submitting listing...");
+  // ⭐ Direct step jump - for Edit buttons
+  const goToStep = (targetStep: number) => {
+    console.log("🔄 goToStep called with:", targetStep);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setStep(targetStep);
   };
 
   return (
@@ -84,44 +91,34 @@ const PostPropertyForm = () => {
 
         <ProgressSteps currentStep={step} />
 
-        {/* ✅ Step 1: Two-column layout with LivePreview */}
+        {/* ============ STEP 1 ============ */}
         {step === 1 && (
           <div className={styles.layout}>
             <div className={styles.form}>
               <BasicInformation />
               <PropertyDetails />
               <PricingDetails />
-              <NavButtons
-                step={step}
-                onBack={handleBack}
-                onNext={handleNext}
-                onSubmit={handleSubmit}
-              />
+              <NavButtons step={step} onBack={handleBack} onNext={handleNext} />
             </div>
             <LivePreview />
           </div>
         )}
 
-        {/* ✅ Step 2: Full width */}
+        {/* ============ STEP 2 ============ */}
         {step === 2 && (
           <div className={styles.layoutFull}>
             <div className={styles.form}>
-              <MediaAndDetailStep />
+              <MediaAndDetailStep onNext={handleNext} onBack={handleBack} />
             </div>
           </div>
         )}
 
-        {/* ✅ Step 3: Full width */}
+        {/* ============ STEP 3 ============ */}
         {step === 3 && (
           <div className={styles.layoutFull}>
             <div className={styles.form}>
-              <ReviewSubmitStep />
-              <NavButtons
-                step={step}
-                onBack={handleBack}
-                onNext={handleNext}
-                onSubmit={handleSubmit}
-              />
+              {/* ⭐ NO NavButtons here - ReviewSubmit has its own buttons */}
+              <ReviewSubmitStep onBack={handleBack} onEditStep={goToStep} />
             </div>
           </div>
         )}
@@ -129,12 +126,5 @@ const PostPropertyForm = () => {
     </div>
   );
 };
-
-// ─── Wrap with Provider ───────────────────────────────────────────────────────
-const CreatePropertyPost = () => (
-  <PropertyProvider>
-    <PostPropertyForm />
-  </PropertyProvider>
-);
 
 export default CreatePropertyPost;

@@ -89,6 +89,11 @@ const AdminListingsTable: React.FC<Props> = ({ status }) => {
     }
   };
 
+  // ⭐ View Details handler - open in new tab
+  const handleViewDetails = (id: number) => {
+    window.open(`/property/${id}`, '_blank', 'noopener,noreferrer');
+  };
+
   const handleSearch = () => {
     setSearch(searchInput);
     setPage(1);
@@ -242,9 +247,13 @@ const AdminListingsTable: React.FC<Props> = ({ status }) => {
                           )}
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-gray-800 max-w-[180px] truncate">
+                          {/* ⭐ Made title clickable too */}
+                          <button
+                            onClick={() => handleViewDetails(prop.id)}
+                            className="text-sm font-semibold text-gray-800 max-w-[180px] truncate hover:text-blue-600 transition-colors text-left"
+                          >
                             {prop.title || 'Untitled Property'}
-                          </p>
+                          </button>
                           <p className="text-xs text-gray-400 mt-0.5">ID #{prop.id}</p>
                         </div>
                       </div>
@@ -285,6 +294,19 @@ const AdminListingsTable: React.FC<Props> = ({ status }) => {
                     {/* Actions */}
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
+                        {/* ⭐ NEW: View Details Button */}
+                        <button
+                          onClick={() => handleViewDetails(prop.id)}
+                          title="View Full Details (opens in new tab)"
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 text-xs font-medium hover:bg-blue-100 border border-blue-200 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          View
+                        </button>
+
                         {prop.status !== 'approved' && (
                           <button
                             onClick={() => handleStatus(prop.id, 'approved')}

@@ -1,31 +1,29 @@
-// client/src/features/marketplace/components/context/PropertyContext.tsx
-import { createContext, useState, useCallback, type ReactNode } from "react";
-import {
-  step1Schema,
-  step2Schema,
-  type FieldErrors,
-  type PropertyFormData,
-} from "../PostProperty/schema/propertySchema";
+// src/features/marketplace/components/context/PropertyContext.tsx
+import { createContext, useState } from 'react';
+import type { ReactNode } from 'react';
 
-// ─── PropertyData shape ───────────────────────────────────────────────────────
+export interface UploadedImage {
+  file: File;
+  url: string;
+  name?: string;
+  size?: number;
+}
+
 export interface PropertyData {
-  // Basic
   purpose?: string;
   propertyType?: string;
   title?: string;
   description?: string;
-  // Details
   areaSize?: string;
   areaUnit?: string;
   bedrooms?: string;
   bathrooms?: string;
   floors?: string;
   parking?: string;
+  yearBuilt?: string;
   furnishing?: string;
   possession?: string;
   facing?: string;
-  yearBuilt?: string;
-  // Pricing
   price?: string;
   negotiable?: boolean;
   installmentAvailable?: boolean;
@@ -36,87 +34,110 @@ export interface PropertyData {
   securityDeposit?: string;
   advanceMonths?: string;
   amenities?: string[];
-  // Location
   city?: string;
   locality?: string;
+  address?: string;
+  images?: string[];
+  imageFiles?: UploadedImage[];
+  videoUrl?: string;
+  floorPlan?: string;
 }
 
-// ─── Context shape ────────────────────────────────────────────────────────────
-interface PropertyContextValue {
+// ⭐ Errors type
+export type PropertyErrors = Partial<Record<keyof PropertyData, string>>;
+
+export interface PropertyContextType {
   data: PropertyData;
-  updateData: (updates: Partial<PropertyData>) => void;
-  errors: FieldErrors;
-  validate: (step: number) => boolean; // ✅ accepts step number
-  clearErrors: () => void;
+  updateData: (newData: Partial<PropertyData>) => void;
+  resetData: () => void;
+  errors: PropertyErrors;                  // ⭐ Add
+  validate: (step: number) => boolean;     // ⭐ Add
+  clearError: (field: keyof PropertyData) => void; // ⭐ Add
 }
 
-export const PropertyContext = createContext<PropertyContextValue | null>(null);
+export const PropertyContext = createContext<PropertyContextType | undefined>(undefined);
 
+const defaultData: PropertyData = {
+  purpose: 'Sell',
+  propertyType: 'House',
+  areaUnit: 'Marla',
+  amenities: [],
+  images: [],
+  imageFiles: [],
+  negotiable: false,
+  installmentAvailable: false,
+};
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
 export const PropertyProvider = ({ children }: { children: ReactNode }) => {
-  const [data, setData] = useState<PropertyData>({});
-  const [errors, setErrors] = useState<FieldErrors>({});
+  const [data, setData] = useState<PropertyData>(defaultData);
+  const [errors, setErrors] = useState<PropertyErrors>({});
 
-  const updateData = useCallback((updates: Partial<PropertyData>) => {
-    setData((prev) => ({ ...prev, ...updates }));
-    // Clear errors for touched fields immediately
+  const updateData = (newData: Partial<PropertyData>) =>
+    setData((prev) => ({ ...prev, ...newData }));
+
+  const resetData = () => {
+    setData(defaultData);
+    setErrors({});
+  };
+
+  const clearError = (field: keyof PropertyData) => {
     setErrors((prev) => {
-      const next = { ...prev };
-      (Object.keys(updates) as Array<keyof PropertyData>).forEach((key) => {
-        delete next[key as keyof FieldErrors];
-      });
-      return next;
+      const updated = { ...prev };
+      delete updated[field];
+      return updated;
     });
-  }, []);
+  };
 
-  const validate = useCallback(
-    (step: number): boolean => {
-      // ✅ Pick the right schema for the current step
-      const schema = step === 1 ? step1Schema : step2Schema;
+  // ⭐ Step-wise validation
+  const validate = (step: number): boolean => {
+    const newErrors: PropertyErrors = {};
 
-      // ✅ Build the payload matching the schema fields
-      const payload =
-        step === 1
-          ? {
-              purpose: data.purpose ?? "",
-              propertyType: data.propertyType ?? "",
-              title: data.title ?? "",
-              description: data.description ?? "",
-              areaSize: data.areaSize ?? "",
-              price: data.price ?? "",
-            }
-          : {
-              price: data.price ?? "",
-            };
+    if (step === 1) {
+      // Basic Information
+      if (!data.purpose) newErrors.purpose = "Purpose is required";
+      if (!data.propertyType) newErrors.propertyType = "Property type is required";
+      if (!data.title || data.title.trim().length < 5)
+        newErrors.title = "Title must be at least 5 characters";
+      if (!data.description || data.description.trim().length < 20)
+        newErrors.description = "Description must be at least 20 characters";
 
-      const result = schema.safeParse(payload);
+      // Property Details
+      if (!data.areaSize) newErrors.areaSize = "Area size is required";
+      if (!data.areaUnit) newErrors.areaUnit = "Area unit is required";
 
-      if (result.success) {
-        setErrors({});
-        return true;
+      // Pricing
+      if (data.purpose === "Sell" && !data.price) {
+        newErrors.price = "Price is required";
       }
-
-      // ✅ Flatten errors: {fieldName: "first error message"}
-      const flat: FieldErrors = {};
-      for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof PropertyFormData;
-        if (field && !flat[field]) {
-          flat[field] = issue.message;
-        }
+      if (data.purpose === "Rent" && !data.monthlyRent) {
+        newErrors.monthlyRent = "Monthly rent is required";
       }
+    }
 
-      setErrors(flat);
-      return false; // ✅ Caller will block navigation
-    },
-    [data],
-  );
+    if (step === 2) {
+      // Media & Location
+      if (!data.city) newErrors.city = "City is required";
+      if (!data.locality) newErrors.locality = "Locality is required";
+      if (!data.address) newErrors.address = "Address is required";
+      if (!data.imageFiles || data.imageFiles.length === 0) {
+        newErrors.imageFiles = "At least 1 image is required";
+      }
+    }
 
-  const clearErrors = useCallback(() => setErrors({}), []);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   return (
     <PropertyContext.Provider
-      value={{ data, updateData, errors, validate, clearErrors }}
+      value={{
+        data,
+        updateData,
+        resetData,
+        errors,
+        validate,
+        clearError,
+      }}
     >
       {children}
     </PropertyContext.Provider>

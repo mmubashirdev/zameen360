@@ -1,6 +1,23 @@
-import { Eye, MapPin, Bed, Bath, Maximize, Heart, Lightbulb, CheckCircle, Headphones, Phone, MessageCircle, Mail, Shield } from 'lucide-react';
+import { 
+  Eye, MapPin, Bed, Bath, Maximize, Heart, Lightbulb, 
+  CheckCircle, Headphones, Phone, MessageCircle, Mail, Shield 
+} from 'lucide-react';
 import styles from '../PostProperty/styles/LivePreview.module.css';
 import { useProperty } from '../context/useProperty';
+
+// ⭐ Property type config - which fields to hide per type
+const propertyConfig: Record<string, { hide: string[] }> = {
+  House: { hide: [] },
+  Apartment: { hide: [] },
+  Villa: { hide: [] },
+  Hotel: { hide: [] },
+  "Plot / Land": { hide: ["bedrooms", "bathrooms"] },
+  Agricultural: { hide: ["bedrooms", "bathrooms"] },
+  Commercial: { hide: ["bedrooms", "bathrooms"] },
+  Shop: { hide: ["bedrooms", "bathrooms"] },
+  Office: { hide: ["bedrooms", "bathrooms"] },
+  Warehouse: { hide: ["bedrooms", "bathrooms"] },
+};
 
 const LivePreview = () => {
   const { data } = useProperty();
@@ -9,6 +26,18 @@ const LivePreview = () => {
     if (!p) return '0';
     return new Intl.NumberFormat('en-IN').format(Number(p));
   };
+
+  // ⭐ Determine which fields to show
+  const propertyType = data.propertyType || "House";
+  const config = propertyConfig[propertyType] || { hide: [] };
+  
+  const showBedrooms = !config.hide.includes("bedrooms");
+  const showBathrooms = !config.hide.includes("bathrooms");
+
+  // ⭐ Get cover image from uploaded files (if any)
+  const coverImage = data.imageFiles && data.imageFiles.length > 0 
+    ? data.imageFiles[0].url 
+    : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400";
 
   const tips = [
     'Upload 10+ high-quality images',
@@ -27,19 +56,46 @@ const LivePreview = () => {
           <span className={styles.headerTitle}>Live Preview</span>
         </div>
         <p className={styles.subtitle}>This is how your listing will appear</p>
+        
         <div className={styles.imageWrap}>
-          <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400" alt="house" />
+          <img src={coverImage} alt="property cover" />
           <span className={styles.tag}>For {data.purpose || 'Sale'}</span>
           <Heart className={styles.heart} size={20} />
         </div>
+        
         <h4 className={styles.propTitle}>{data.title || 'Beautiful Property'}</h4>
-        <div className={styles.location}><MapPin size={14} /> {data.locality || 'Location'}, {data.city || 'City'}</div>
-        <div className={styles.price}>PKR {formatPrice(data.price) || '0'}</div>
-        <div className={styles.specs}>
-          <div><Bed size={16} /><div>{data.bedrooms || '—'}<span>Beds</span></div></div>
-          <div><Bath size={16} /><div>{data.bathrooms || '—'}<span>Baths</span></div></div>
-          <div><Maximize size={16} /><div>{data.areaSize || '—'} {data.areaUnit || ''}<span>Area</span></div></div>
+        <div className={styles.location}>
+          <MapPin size={14} /> {data.locality || 'Location'}, {data.city || 'City'}
         </div>
+        <div className={styles.price}>PKR {formatPrice(data.price) || '0'}</div>
+        
+        {/* ⭐ Conditional Specs - Beds/Baths only for relevant types */}
+        <div className={styles.specs}>
+          {showBedrooms && (
+            <div>
+              <Bed size={16} />
+              <div>
+                {data.bedrooms || '—'}<span>Beds</span>
+              </div>
+            </div>
+          )}
+          {showBathrooms && (
+            <div>
+              <Bath size={16} />
+              <div>
+                {data.bathrooms || '—'}<span>Baths</span>
+              </div>
+            </div>
+          )}
+          {/* Area always shows */}
+          <div>
+            <Maximize size={16} />
+            <div>
+              {data.areaSize || '—'} {data.areaUnit || ''}<span>Area</span>
+            </div>
+          </div>
+        </div>
+        
         <div className={styles.chips}>
           {(data.amenities || []).slice(0, 3).map((a, i) => (
             <span key={i}>{a}</span>
@@ -51,17 +107,29 @@ const LivePreview = () => {
       </div>
 
       <div className={styles.card}>
-        <div className={styles.tipsHeader}><Lightbulb size={16} color="#2563eb"/> Listing Tips</div>
-        {tips.map((t,i) => (
-          <div key={i} className={styles.tip}><CheckCircle size={14} color="#2563eb"/> {t}</div>
+        <div className={styles.tipsHeader}>
+          <Lightbulb size={16} color="#2563eb"/> Listing Tips
+        </div>
+        {tips.map((t, i) => (
+          <div key={i} className={styles.tip}>
+            <CheckCircle size={14} color="#2563eb"/> {t}
+          </div>
         ))}
       </div>
 
       <div className={styles.card}>
-        <div className={styles.tipsHeader}><Headphones size={16}/> Need Help?</div>
-        <div className={styles.helpItem}><Phone size={14}/> Call: 0300-1234567</div>
-        <div className={styles.helpItem}><MessageCircle size={14}/> WhatsApp Support</div>
-        <div className={styles.helpItem}><Mail size={14}/> Email: help@zameen360.com</div>
+        <div className={styles.tipsHeader}>
+          <Headphones size={16}/> Need Help?
+        </div>
+        <div className={styles.helpItem}>
+          <Phone size={14}/> Call: 0300-1234567
+        </div>
+        <div className={styles.helpItem}>
+          <MessageCircle size={14}/> WhatsApp Support
+        </div>
+        <div className={styles.helpItem}>
+          <Mail size={14}/> Email: help@zameen360.com
+        </div>
       </div>
 
       <div className={styles.secureCard}>

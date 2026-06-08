@@ -109,8 +109,6 @@ const PropertySubmitted: React.FC = () => {
     },
   ];
 
-  // ✅ Generate ref ID once — stable across re-renders
-  const refId = useMemo(() => `ZM-${Date.now().toString().slice(-8)}`, []);
 
   return (
     <div className={styles.page}>
@@ -151,11 +149,7 @@ const PropertySubmitted: React.FC = () => {
             documents and property details before publishing.
           </p>
 
-          {/* Reference ID */}
-          <div className={styles.refBox}>
-            <span className={styles.refLabel}>Reference ID</span>
-            <span className={styles.refId}>{refId}</span>
-          </div>
+          
         </div>
 
         {/* ── Timeline / Progress ── */}

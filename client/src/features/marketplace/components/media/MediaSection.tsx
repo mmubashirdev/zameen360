@@ -2,6 +2,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import styles from './styles/MediaSection.module.css';
 
 interface MediaSectionProps {
+  
   onDataChange?: (data: Partial<{videoUrl: string; floorPlan: string}>) => void;
 }
 

@@ -14,7 +14,7 @@ import Footer from "../components/Footer";
 import Breadcrumbs from "../components/shared/BreadCrumbs";
 import MortgageCalculator from "../components/shared/LoanCalculator";
 import ActionsCard from "../components/shared/ActionCards";
-import SafetyTips from "../components/shared/SafetyTIps";
+import SafetyTips from "../components/shared/SafetyTips.tsx";
 import VirtualTour from "../components/shared/VirtualTour.tsx";
 import RecentlyViewed from "../components/shared/RecentlyViewed";
 

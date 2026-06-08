@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+// client/src/features/marketplace/components/media/LocationSection.tsx
+import React, { useState, useCallback, useEffect } from 'react';
 import Map from './Map';
 import styles from './styles/LocationSection.module.css';
 
@@ -8,32 +9,66 @@ interface LatLng {
 }
 
 interface LocationSectionProps {
-  onDataChange?: (data: Partial<{city: string; locality: string; address: string}>) => void;
+  onDataChange?: (
+    data: Partial<{ city: string; locality: string; address: string }>
+  ) => void;
+  // ⭐ Add initial values from context
+  initialCity?: string;
+  initialLocality?: string;
+  initialAddress?: string;
 }
 
 const defaultCenter: LatLng = { lat: 31.4697, lng: 74.4111 };
 
-const LocationSection: React.FC<LocationSectionProps> = ({ onDataChange }) => {
+const LocationSection: React.FC<LocationSectionProps> = ({ 
+  onDataChange,
+  initialCity,
+  initialLocality,
+  initialAddress,
+}) => {
   const [position, setPosition] = useState<LatLng>(defaultCenter);
-  const [city, setCity] = useState('Lahore');
-  const [area, setArea] = useState('DHA Phase 6');
-  const [address, setAddress] = useState('House 123, Street 5, Sector A, DHA Phase 6, Lahore, Punjab, Pakistan');
+  
+  // ⭐ Use initial values or defaults
+  const [city, setCity] = useState(initialCity || 'Lahore');
+  const [area, setArea] = useState(initialLocality || 'DHA Phase 6');
+  const [address, setAddress] = useState(
+    initialAddress || 'House 123, Street 5, Sector A, DHA Phase 6, Lahore, Punjab, Pakistan'
+  );
   const [searchValue, setSearchValue] = useState('');
 
-  const handleCityChange = useCallback((newCity: string) => {
-    setCity(newCity);
-    onDataChange?.({ city: newCity });
-  }, [onDataChange]);
+  // ⭐ CRITICAL FIX: Sync default values to context on mount
+  useEffect(() => {
+    onDataChange?.({
+      city: city,
+      locality: area,
+      address: address,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleAreaChange = useCallback((newArea: string) => {
-    setArea(newArea);
-    onDataChange?.({ locality: newArea });
-  }, [onDataChange]);
+  const handleCityChange = useCallback(
+    (newCity: string) => {
+      setCity(newCity);
+      onDataChange?.({ city: newCity });
+    },
+    [onDataChange]
+  );
 
-  const handleAddressChange = useCallback((newAddress: string) => {
-    setAddress(newAddress);
-    onDataChange?.({ address: newAddress });
-  }, [onDataChange]);
+  const handleAreaChange = useCallback(
+    (newArea: string) => {
+      setArea(newArea);
+      onDataChange?.({ locality: newArea });
+    },
+    [onDataChange]
+  );
+
+  const handleAddressChange = useCallback(
+    (newAddress: string) => {
+      setAddress(newAddress);
+      onDataChange?.({ address: newAddress });
+    },
+    [onDataChange]
+  );
 
   const useMyLocation = (): void => {
     if (!navigator.geolocation) return;
@@ -55,7 +90,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({ onDataChange }) => {
           <label>
             City <span className={styles.req}>*</span>
           </label>
-          <select value={city} onChange={(event) => handleCityChange(event.target.value)}>
+          <select
+            value={city}
+            onChange={(event) => handleCityChange(event.target.value)}
+          >
             <option>Lahore</option>
             <option>Karachi</option>
             <option>Islamabad</option>
@@ -66,7 +104,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({ onDataChange }) => {
           <label>
             Area / Locality <span className={styles.req}>*</span>
           </label>
-          <select value={area} onChange={(event) => handleAreaChange(event.target.value)}>
+          <select
+            value={area}
+            onChange={(event) => handleAreaChange(event.target.value)}
+          >
             <option>DHA Phase 6</option>
             <option>DHA Phase 5</option>
             <option>Bahria Town</option>
@@ -77,7 +118,10 @@ const LocationSection: React.FC<LocationSectionProps> = ({ onDataChange }) => {
           <label>
             Full Address <span className={styles.req}>*</span>
           </label>
-          <textarea value={address} onChange={(event) => handleAddressChange(event.target.value)} />
+          <textarea
+            value={address}
+            onChange={(event) => handleAddressChange(event.target.value)}
+          />
         </div>
       </div>
 
@@ -92,14 +136,18 @@ const LocationSection: React.FC<LocationSectionProps> = ({ onDataChange }) => {
           value={searchValue}
           onChange={(event) => setSearchValue(event.target.value)}
         />
-        <button className={styles.locBtn} type="button" onClick={useMyLocation}>
+        <button
+          className={styles.locBtn}
+          type="button"
+          onClick={useMyLocation}
+        >
           Use My Current Location
         </button>
       </div>
 
       <div className={styles.mapWrap}>
-        <Map 
-          lat={position.lat} 
+        <Map
+          lat={position.lat}
           lng={position.lng}
           onMapClick={(lat, lng) => setPosition({ lat, lng })}
         />
