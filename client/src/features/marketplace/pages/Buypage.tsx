@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Bed, Bath, Maximize, Heart } from 'lucide-react';
-import DashboardNavbar from '../components/DashboardNavbar';
-import styles from '../../marketplace/components/media/styles/Buy.module.css';
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, MapPin, Bed, Bath, Maximize, Heart } from "lucide-react";
+import DashboardNavbar from "../components/DashboardNavbar";
+import styles from "../../marketplace/components/media/styles/Buy.module.css";
 
 interface Property {
   id: number;
@@ -26,23 +26,26 @@ const Buy = () => {
   const [loading, setLoading] = useState(false);
 
   // Filter states
-  const [search, setSearch] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [propertyType, setPropertyType] = useState('');
-  const [city, setCity] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [search, setSearch] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [propertyType, setPropertyType] = useState("");
+  const [city, setCity] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   const fetchProperties = useCallback(async () => {
     // only set loading true if it's the first load to prevent flash on socket refresh
     try {
       const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (purpose) params.append('purpose', purpose);
-      if (propertyType) params.append('propertyType', propertyType);
-      if (city) params.append('city', city);
-      if (minPrice) params.append('minPrice', minPrice);
-      if (maxPrice) params.append('maxPrice', maxPrice);
+      if (search) params.append("search", search);
+
+      params.append("purpose", purpose || "Sell");
+      
+      if (purpose) params.append("purpose", purpose);
+      if (propertyType) params.append("propertyType", propertyType);
+      if (city) params.append("city", city);
+      if (minPrice) params.append("minPrice", minPrice);
+      if (maxPrice) params.append("maxPrice", maxPrice);
 
       const res = await fetch(`http://localhost:5000/api/properties?${params}`);
       const result = await res.json();
@@ -55,7 +58,7 @@ const Buy = () => {
         setProperties([]);
       }
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error("Fetch error:", err);
       setProperties([]);
     }
   }, [search, purpose, propertyType, city, minPrice, maxPrice]);
@@ -66,18 +69,18 @@ const Buy = () => {
   }, [fetchProperties]);
 
   const handleReset = () => {
-    setSearch('');
-    setPurpose('');
-    setPropertyType('');
-    setCity('');
-    setMinPrice('');
-    setMaxPrice('');
+    setSearch("");
+    setPurpose("");
+    setPropertyType("");
+    setCity("");
+    setMinPrice("");
+    setMaxPrice("");
     setTimeout(fetchProperties, 0);
   };
 
   const formatPrice = (p: string | number) => {
-    if (!p) return 'N/A';
-    return new Intl.NumberFormat('en-IN').format(Number(p));
+    if (!p) return "N/A";
+    return new Intl.NumberFormat("en-IN").format(Number(p));
   };
 
   const handleSeeMore = (id: number) => {
@@ -102,7 +105,7 @@ const Buy = () => {
               placeholder="Search by title, city or description..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchProperties()}
+              onKeyDown={(e) => e.key === "Enter" && fetchProperties()}
             />
           </div>
 
@@ -113,7 +116,10 @@ const Buy = () => {
             <option value="Lease">Lease</option>
           </select>
 
-          <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)}>
+          <select
+            value={propertyType}
+            onChange={(e) => setPropertyType(e.target.value)}
+          >
             <option value="">All Types</option>
             <option value="House">House</option>
             <option value="Apartment">Apartment</option>
@@ -159,17 +165,21 @@ const Buy = () => {
         {/* Results Header */}
         <div className={styles.resultsHead}>
           <span>
-            {loading ? 'Loading...' : `${properties.length} Properties Found`}
+            {loading ? "Loading..." : `${properties.length} Properties Found`}
           </span>
         </div>
 
         {/* Results Grid */}
         {loading ? (
-          <p style={{ textAlign: 'center', padding: 40 }}>Loading properties...</p>
+          <p style={{ textAlign: "center", padding: 40 }}>
+            Loading properties...
+          </p>
         ) : properties.length === 0 ? (
           <div className={styles.emptyState}>
             <p>No properties found.</p>
-            <small>Try adjusting your filters or post your first property!</small>
+            <small>
+              Try adjusting your filters or post your first property!
+            </small>
           </div>
         ) : (
           <div className={styles.grid}>
@@ -184,7 +194,7 @@ const Buy = () => {
                     src={
                       p.images && p.images.length > 0
                         ? p.images[0]
-                        : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'
+                        : "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"
                     }
                     alt={p.title}
                   />
