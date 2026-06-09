@@ -4,7 +4,7 @@ const path = require("path");
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:5000";
 
-// Helper - safely convert string/number to BigInt
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 const toBigInt = (val) => {
   if (val === null || val === undefined || val === "") return null;
   try {
@@ -16,7 +16,6 @@ const toBigInt = (val) => {
   }
 };
 
-// Helper - parse amenities (FormData se string aata hai)
 const parseAmenities = (val) => {
   if (!val) return [];
   if (Array.isArray(val)) return val;
@@ -28,10 +27,30 @@ const parseAmenities = (val) => {
   }
 };
 
-// Helper - boolean parse
 const toBool = (val) => {
   if (val === true || val === "true") return true;
   return false;
+};
+
+const serializeBigInt = (obj) => {
+  return JSON.parse(
+    JSON.stringify(obj, (_, value) =>
+      typeof value === "bigint" ? value.toString() : value
+    )
+  );
+};
+
+// ─── Socket helper ────────────────────────────────────────────────────────────
+// req se io nikaalta hai aur event emit karta hai
+const emitEvent = (req, event, room, data) => {
+  try {
+    const io = req.app.get("io");
+    if (io) {
+      io.to(room).emit(event, data);
+    }
+  } catch (err) {
+    console.warn("Socket emit error:", err.message);
+  }
 };
 
 // ==================== CREATE Property ====================
@@ -39,7 +58,8 @@ exports.createProperty = async (req, res) => {
   try {
     const d = req.body;
     const files = req.files || [];
-    const userId = req.user?.id ?? req.user?.userId ?? req.user?._id ?? d.userId;
+    const userId =
+      req.user?.id ?? req.user?.userId ?? req.user?._id ?? d.userId;
 
     if (userId === null || userId === undefined || userId === "") {
       return res.status(400).json({
@@ -85,16 +105,45 @@ exports.createProperty = async (req, res) => {
         images: imageUrls,
         videoUrl: d.videoUrl || null,
         floorPlan: d.floorPlan || null,
-
-        // ⭐ CHANGE: Default status "pending" (admin approve karega)
         status: "pending",
       },
+      // User info bhi include karo
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+      },
     });
+
+    const serialized = serializeBigInt(property);
+
+    // ── Socket Events ──────────────────────────────────────────────────
+    const io = req.app.get("io");
+    if (io) {
+      // 1. Admin ko notify karo - naya pending property aaya
+      io.to("admin_room").emit("new_property_pending", {
+        message: `New property submitted by ${property.user?.fullName || "User"}`,
+        property: serialized,
+        timestamp: new Date().toISOString(),
+      });
+
+      // 2. Property post karne wale user ko confirm karo
+      io.to(`user_${userId}`).emit("property_submitted", {
+        message: "Your property has been submitted and is pending approval.",
+        propertyId: property.id,
+        status: "pending",
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     res.status(201).json({
       success: true,
       message: "Property submitted successfully. Waiting for admin approval.",
-      data: property,
+      data: serialized,
     });
   } catch (err) {
     console.error("CREATE PROPERTY ERROR:", err);
@@ -106,13 +155,7 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-const serializeBigInt = (obj) => {
-  return JSON.parse(
-    JSON.stringify(obj, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
-  );
-};
+// ==================== GET All Properties (Public - Only Approved) ====================
 exports.getProperties = async (req, res) => {
   try {
     const {
@@ -120,22 +163,89 @@ exports.getProperties = async (req, res) => {
       purpose,
       propertyType,
       city,
+      locality,
       minPrice,
       maxPrice,
       status,
       bedrooms,
       bathrooms,
+      minBeds,
+      maxBeds,
+      minBaths,
+      maxBaths,
+      minArea,
+      maxArea,
+      areaUnit,
+      amenities,
     } = req.query;
 
-    const where = {};
-    where.status = status || "approved";
+    // ── IMPORTANT FIX: Hamesha sirf "approved" status return karo
+    // Yahi bug tha — pehle koi bhi status accept ho raha tha
+    const where = {
+      status: "approved", // ← FIXED: hardcoded, override nahi hoga
+    };
 
+    // Purpose filter
     if (purpose) where.purpose = purpose;
+
+    // Property type filter
     if (propertyType) where.propertyType = propertyType;
-    if (bedrooms) where.bedrooms = bedrooms;
-    if (bathrooms) where.bathrooms = bathrooms;
+
+    // City filter
     if (city) where.city = { contains: city, mode: "insensitive" };
 
+    // Locality filter
+    if (locality) {
+      where.locality = { contains: locality, mode: "insensitive" };
+    }
+
+    // Area unit filter
+    if (areaUnit) where.areaUnit = areaUnit;
+
+    // Bedrooms filter - exact ya range
+    if (bedrooms) {
+      where.bedrooms = bedrooms;
+    } else if (minBeds || maxBeds) {
+      // Bedrooms string field hai, compare karo
+      // Simple approach: agar minBeds set hai
+      if (minBeds && !maxBeds) {
+        where.bedrooms = { gte: minBeds };
+      } else if (!minBeds && maxBeds) {
+        where.bedrooms = { lte: maxBeds };
+      } else if (minBeds && maxBeds) {
+        where.bedrooms = { gte: minBeds, lte: maxBeds };
+      }
+    }
+
+    // Bathrooms filter
+    if (bathrooms) {
+      where.bathrooms = bathrooms;
+    } else if (minBaths || maxBaths) {
+      if (minBaths && !maxBaths) {
+        where.bathrooms = { gte: minBaths };
+      } else if (!minBaths && maxBaths) {
+        where.bathrooms = { lte: maxBaths };
+      } else if (minBaths && maxBaths) {
+        where.bathrooms = { gte: minBaths, lte: maxBaths };
+      }
+    }
+
+    // Area size filter
+    if (minArea || maxArea) {
+      where.areaSize = {};
+      if (minArea) where.areaSize.gte = minArea;
+      if (maxArea) where.areaSize.lte = maxArea;
+    }
+
+    // Amenities filter
+    if (amenities) {
+      const amenityList = amenities.split(",").map((a) => a.trim());
+      if (amenityList.length > 0) {
+        where.amenities = { hasEvery: amenityList };
+      }
+    }
+
+    // Search filter
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
@@ -146,6 +256,7 @@ exports.getProperties = async (req, res) => {
       ];
     }
 
+    // Price filter
     if (minPrice || maxPrice) {
       where.price = {};
       if (minPrice) where.price.gte = BigInt(minPrice);
@@ -155,9 +266,18 @@ exports.getProperties = async (req, res) => {
     const properties = await prisma.property.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
     });
 
-    // ✅ Serialize BigInt before sending
     res.json({
       success: true,
       count: properties.length,
@@ -173,15 +293,13 @@ exports.getProperties = async (req, res) => {
   }
 };
 
-
-// ==================== ⭐ NEW: ADMIN - Get all properties (sab status) ====================
+// ==================== ADMIN - Get All Properties ====================
 exports.getAdminProperties = async (req, res) => {
   try {
     const { status, search, page } = req.query;
 
     const where = {};
 
-    // Admin sab status dekh sakta hai
     if (status && status !== "all") {
       where.status = status;
     }
@@ -194,7 +312,6 @@ exports.getAdminProperties = async (req, res) => {
       ];
     }
 
-    // Pagination
     const pageNumber = parseInt(page) || 1;
     const pageSize = 10;
     const skip = (pageNumber - 1) * pageSize;
@@ -204,14 +321,24 @@ exports.getAdminProperties = async (req, res) => {
     const properties = await prisma.property.findMany({
       where,
       orderBy: { createdAt: "desc" },
-      skip: skip,
+      skip,
       take: pageSize,
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
     });
 
     res.json({
       success: true,
-      data: properties,
-      total: total,
+      data: serializeBigInt(properties),
+      total,
       page: pageNumber,
       totalPages: Math.ceil(total / pageSize),
     });
@@ -225,8 +352,7 @@ exports.getAdminProperties = async (req, res) => {
   }
 };
 
-
-// ==================== ⭐ NEW: ADMIN - Update Status (Approve/Reject) ====================
+// ==================== ADMIN - Update Status (Approve / Reject) ====================
 exports.updatePropertyStatus = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -239,7 +365,6 @@ exports.updatePropertyStatus = async (req, res) => {
         .json({ success: false, message: "Invalid property ID" });
     }
 
-    // Sirf ye 3 status allow karo
     const allowedStatus = ["pending", "approved", "rejected"];
     if (!allowedStatus.includes(status)) {
       return res.status(400).json({
@@ -248,16 +373,20 @@ exports.updatePropertyStatus = async (req, res) => {
       });
     }
 
-    const existing = await prisma.property.findUnique({ where: { id } });
+    const existing = await prisma.property.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+      },
+    });
+
     if (!existing) {
       return res
         .status(404)
         .json({ success: false, message: "Property not found" });
     }
 
-    const updateData = {
-      status: status,
-    };
+    const updateData = { status };
 
     if (status === "approved") {
       updateData.approvedAt = new Date();
@@ -272,12 +401,71 @@ exports.updatePropertyStatus = async (req, res) => {
     const property = await prisma.property.update({
       where: { id },
       data: updateData,
+      include: {
+        user: { select: { id: true, fullName: true, email: true } },
+      },
     });
+
+    const serialized = serializeBigInt(property);
+
+    // ── Socket Events ──────────────────────────────────────────────────
+    const io = req.app.get("io");
+    if (io) {
+      if (status === "approved") {
+        // 1. Sab public users ko live broadcast karo - nai property available hai
+        io.to("public_room").emit("property_approved", {
+          message: "A new property is now available!",
+          property: serialized,
+          timestamp: new Date().toISOString(),
+        });
+
+        // 2. Property owner ko notify karo
+        if (existing.userId) {
+          io.to(`user_${existing.userId}`).emit("your_property_approved", {
+            message: `Congratulations! Your property "${existing.title}" has been approved and is now live.`,
+            propertyId: id,
+            status: "approved",
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        // 3. Admin room ko bhi update bhejo
+        io.to("admin_room").emit("property_status_updated", {
+          propertyId: id,
+          status: "approved",
+          timestamp: new Date().toISOString(),
+        });
+      } else if (status === "rejected") {
+        // Owner ko rejection notify karo
+        if (existing.userId) {
+          io.to(`user_${existing.userId}`).emit("your_property_rejected", {
+            message: `Your property "${existing.title}" was rejected.`,
+            reason: rejectionReason || "No reason provided",
+            propertyId: id,
+            status: "rejected",
+            timestamp: new Date().toISOString(),
+          });
+        }
+
+        // Admin room update
+        io.to("admin_room").emit("property_status_updated", {
+          propertyId: id,
+          status: "rejected",
+          timestamp: new Date().toISOString(),
+        });
+      } else if (status === "pending") {
+        io.to("admin_room").emit("property_status_updated", {
+          propertyId: id,
+          status: "pending",
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
 
     res.json({
       success: true,
       message: `Property ${status} successfully`,
-      data: property,
+      data: serialized,
     });
   } catch (err) {
     console.error("UPDATE STATUS ERROR:", err);
@@ -289,29 +477,19 @@ exports.updatePropertyStatus = async (req, res) => {
   }
 };
 
-
-// ==================== ⭐ NEW: ADMIN - Dashboard Stats ====================
+// ==================== ADMIN - Dashboard Stats ====================
 exports.getDashboardStats = async (req, res) => {
   try {
-    const total = await prisma.property.count();
-    const pending = await prisma.property.count({
-      where: { status: "pending" },
-    });
-    const approved = await prisma.property.count({
-      where: { status: "approved" },
-    });
-    const rejected = await prisma.property.count({
-      where: { status: "rejected" },
-    });
+    const [total, pending, approved, rejected] = await Promise.all([
+      prisma.property.count(),
+      prisma.property.count({ where: { status: "pending" } }),
+      prisma.property.count({ where: { status: "approved" } }),
+      prisma.property.count({ where: { status: "rejected" } }),
+    ]);
 
     res.json({
       success: true,
-      data: {
-        total,
-        pending,
-        approved,
-        rejected,
-      },
+      data: { total, pending, approved, rejected },
     });
   } catch (err) {
     console.error("STATS ERROR:", err);
@@ -323,23 +501,38 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-
 // ==================== GET BY ID ====================
 exports.getPropertyById = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ success: false, message: "Invalid property ID" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
     }
 
-    const property = await prisma.property.findUnique({ where: { id } });
+    const property = await prisma.property.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+    });
 
     if (!property) {
-      return res.status(404).json({ success: false, message: "Property not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
     }
 
-    res.json({ success: true, data: property });
+    res.json({ success: true, data: serializeBigInt(property) });
   } catch (err) {
     console.error("GET PROPERTY BY ID ERROR:", err);
     res.status(500).json({
@@ -350,7 +543,7 @@ exports.getPropertyById = async (req, res) => {
   }
 };
 
-// ==================== UPDATE ====================
+// ==================== UPDATE Property ====================
 exports.updateProperty = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -358,15 +551,18 @@ exports.updateProperty = async (req, res) => {
     const files = req.files || [];
 
     if (isNaN(id)) {
-      return res.status(400).json({ success: false, message: "Invalid property ID" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
     }
 
     const existing = await prisma.property.findUnique({ where: { id } });
     if (!existing) {
-      return res.status(404).json({ success: false, message: "Property not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
     }
 
-    // Naye image URLs (agar files aayi hain)
     const newImageUrls = files.map(
       (file) => `${BASE_URL}/uploads/properties/${file.filename}`
     );
@@ -391,39 +587,53 @@ exports.updateProperty = async (req, res) => {
       ...(d.installmentAvailable !== undefined && {
         installmentAvailable: toBool(d.installmentAvailable),
       }),
-      ...(d.downPayment !== undefined && { downPayment: toBigInt(d.downPayment) }),
+      ...(d.downPayment !== undefined && {
+        downPayment: toBigInt(d.downPayment),
+      }),
       ...(d.monthlyInstallment !== undefined && {
         monthlyInstallment: toBigInt(d.monthlyInstallment),
       }),
       ...(d.duration !== undefined && { duration: d.duration }),
-      ...(d.monthlyRent !== undefined && { monthlyRent: toBigInt(d.monthlyRent) }),
+      ...(d.monthlyRent !== undefined && {
+        monthlyRent: toBigInt(d.monthlyRent),
+      }),
       ...(d.securityDeposit !== undefined && {
         securityDeposit: toBigInt(d.securityDeposit),
       }),
       ...(d.advanceMonths !== undefined && { advanceMonths: d.advanceMonths }),
-      ...(d.amenities !== undefined && { amenities: parseAmenities(d.amenities) }),
+      ...(d.amenities !== undefined && {
+        amenities: parseAmenities(d.amenities),
+      }),
       ...(d.city !== undefined && { city: d.city }),
       ...(d.locality !== undefined && { locality: d.locality }),
       ...(d.address !== undefined && { address: d.address }),
       ...(d.videoUrl !== undefined && { videoUrl: d.videoUrl }),
       ...(d.floorPlan !== undefined && { floorPlan: d.floorPlan }),
       ...(d.status !== undefined && { status: d.status }),
+      ...(newImageUrls.length > 0 && { images: newImageUrls }),
     };
-
-    // ⭐ Agar naye files aayi to images replace karo
-    if (newImageUrls.length > 0) {
-      updateData.images = newImageUrls;
-    }
 
     const property = await prisma.property.update({
       where: { id },
       data: updateData,
     });
 
+    const serialized = serializeBigInt(property);
+
+    // ── Socket: agar status update hua to emit karo ───────────────────
+    const io = req.app.get("io");
+    if (io && d.status === "approved") {
+      io.to("public_room").emit("property_approved", {
+        message: "A new property is now available!",
+        property: serialized,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     res.json({
       success: true,
       message: "Property updated successfully",
-      data: property,
+      data: serialized,
     });
   } catch (err) {
     console.error("UPDATE PROPERTY ERROR:", err);
@@ -435,28 +645,38 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-// ==================== DELETE ====================
+// ==================== DELETE Property ====================
 exports.deleteProperty = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
     if (isNaN(id)) {
-      return res.status(400).json({ success: false, message: "Invalid property ID" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
     }
 
     const existing = await prisma.property.findUnique({ where: { id } });
     if (!existing) {
-      return res.status(404).json({ success: false, message: "Property not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
     }
 
-    // ⭐ Image files delete karo disk se
+    // Image files delete karo disk se
     if (Array.isArray(existing.images)) {
       existing.images.forEach((url) => {
         try {
           const filename = url.split("/uploads/properties/")[1];
           if (filename) {
             const filepath = path.join(
-              __dirname, "..", "..", "..", "uploads", "properties", filename
+              __dirname,
+              "..",
+              "..",
+              "..",
+              "uploads",
+              "properties",
+              filename
             );
             if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
           }
@@ -467,6 +687,20 @@ exports.deleteProperty = async (req, res) => {
     }
 
     await prisma.property.delete({ where: { id } });
+
+    // ── Socket: property deleted notify karo ──────────────────────────
+    const io = req.app.get("io");
+    if (io) {
+      io.to("public_room").emit("property_deleted", {
+        propertyId: id,
+        timestamp: new Date().toISOString(),
+      });
+
+      io.to("admin_room").emit("property_deleted", {
+        propertyId: id,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     res.json({
       success: true,

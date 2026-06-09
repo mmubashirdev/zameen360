@@ -3,6 +3,8 @@ const dotenvPath = path.resolve(__dirname, "../.env");
 require("dotenv").config({ path: dotenvPath });
 
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const prisma = require("../server/configs/prisma");
 const passport = require("./configs/passport");
 const cors = require("cors");
@@ -15,21 +17,72 @@ const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
 
 const app = express();
 
+// ─── Create HTTP server (Socket.IO ke liye zaruri) ────────────────────────────
+const httpServer = http.createServer(app);
+
+// ─── Socket.IO setup ──────────────────────────────────────────────────────────
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  },
+});
+
+// ─── Socket.IO ko globally available karo (controllers mein use karne ke liye)
+app.set("io", io);
+
+// ─── Socket.IO connection handling ────────────────────────────────────────────
+io.on("connection", (socket) => {
+  console.log(`✅ Client connected: ${socket.id}`);
+
+  // User apne userId ke room mein join kare
+  // (taake sirf use notification mile)
+  socket.on("join_user_room", (userId) => {
+    if (userId) {
+      socket.join(`user_${userId}`);
+      console.log(`👤 User ${userId} joined room: user_${userId}`);
+    }
+  });
+
+  // Admin apne room mein join kare
+  socket.on("join_admin_room", () => {
+    socket.join("admin_room");
+    console.log(`🔑 Admin joined admin_room`);
+  });
+
+  // Public room - sab approved properties dekhne ke liye
+  socket.on("join_public", () => {
+    socket.join("public_room");
+    console.log(`🌍 Client joined public_room`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`❌ Client disconnected: ${socket.id}`);
+  });
+});
+
+// ─── Middleware ────────────────────────────────────────────────────────────────
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-
 ["uploads/profiles", "uploads/properties"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
+// ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", index);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/support", supportRoutes);
@@ -39,16 +92,20 @@ app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
 });
 
+// ─── 404 ──────────────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found." });
 });
 
+// ─── Error Handler ────────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ success: false, message: err.message });
 });
 
+// ─── Start Server (app.listen → httpServer.listen) ───────────────────────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Zameen 360 running on http://localhost:${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`🚀 Zameen 360 running on http://localhost:${PORT}`);
+  console.log(`🔌 Socket.IO ready`);
 });
