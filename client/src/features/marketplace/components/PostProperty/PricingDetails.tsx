@@ -3,8 +3,6 @@ import { useCallback } from "react";
 import styles from "../PostProperty/styles/PricingDetails.module.css";
 import { useProperty } from "../context/useProperty";
 
-// ✅ No PropertyData import needed here
-
 const amenitiesList = [
   "Central AC",
   "Generator Backup",
@@ -25,9 +23,11 @@ const amenitiesList = [
 ];
 
 const PricingDetails = () => {
-  const { data, updateData, errors } = useProperty(); // ✅ errors from context
+  const { data, updateData, errors } = useProperty();
 
   const propertyType = data.propertyType || "House";
+  const purpose = data.purpose || ""; // ✅ read purpose
+  const isRentOrLease = purpose === "Rent" || purpose === "Lease"; // ✅ condition
   const isPlotOrLand =
     propertyType === "Plot / Land" || propertyType === "Agricultural";
   const negotiable = data.negotiable ?? false;
@@ -41,7 +41,6 @@ const PricingDetails = () => {
   const advanceMonths = data.advanceMonths || "";
   const selected = data.amenities || [];
 
-  // ✅ Fix: Removed unused `trigger`
   const handleUpdate = useCallback(
     (updates: Partial<typeof data>) => updateData(updates),
     [updateData],
@@ -58,7 +57,8 @@ const PricingDetails = () => {
     <div className={styles.section}>
       <h3 className={styles.title}>C. Pricing Details</h3>
 
-      <div className={styles.grid}>
+      {/* ✅ Grid changes based on whether rent fields show */}
+      <div className={isRentOrLease ? styles.grid : styles.gridNoRent}>
         {/* Price */}
         <div>
           <label className={styles.label}>
@@ -70,9 +70,7 @@ const PricingDetails = () => {
             value={price}
             onChange={(e) => handleUpdate({ price: e.target.value })}
           />
-          {/* ✅ Validation error for price */}
           {errors?.price && <p className={styles.error}>{errors.price}</p>}
-         
         </div>
 
         {/* Negotiable toggle */}
@@ -88,46 +86,50 @@ const PricingDetails = () => {
           </label>
         </div>
 
-        {/* Rent fields */}
-        <div className={styles.rentBox}>
-          <div className={styles.rentTitle}>For Rent Only</div>
-          <div className={styles.rentGrid}>
-            <div>
-              <label className={styles.smLabel}>Monthly Rent (PKR)</label>
-              <input
-                className={styles.input}
-                type="number"
-                placeholder="100,000"
-                value={monthlyRent}
-                onChange={(e) => handleUpdate({ monthlyRent: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className={styles.smLabel}>Security Deposit</label>
-              <input
-                className={styles.input}
-                type="number"
-                placeholder="200,000"
-                value={securityDep}
-                onChange={(e) =>
-                  handleUpdate({ securityDeposit: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label className={styles.smLabel}>Advance Months</label>
-              <input
-                className={styles.input}
-                type="number"
-                placeholder="3"
-                value={advanceMonths}
-                onChange={(e) =>
-                  handleUpdate({ advanceMonths: e.target.value })
-                }
-              />
+        {/* ✅ For Rent Only - only shows when purpose is Rent or Lease */}
+        {isRentOrLease && (
+          <div className={styles.rentBox}>
+            <div className={styles.rentTitle}>For {purpose} Only</div>
+            <div className={styles.rentGrid}>
+              <div>
+                <label className={styles.smLabel}>Monthly Rent (PKR)</label>
+                <input
+                  className={styles.input}
+                  type="number"
+                  placeholder="100,000"
+                  value={monthlyRent}
+                  onChange={(e) =>
+                    handleUpdate({ monthlyRent: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className={styles.smLabel}>Security Deposit</label>
+                <input
+                  className={styles.input}
+                  type="number"
+                  placeholder="200,000"
+                  value={securityDep}
+                  onChange={(e) =>
+                    handleUpdate({ securityDeposit: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className={styles.smLabel}>Advance Months</label>
+                <input
+                  className={styles.input}
+                  type="number"
+                  placeholder="3"
+                  value={advanceMonths}
+                  onChange={(e) =>
+                    handleUpdate({ advanceMonths: e.target.value })
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Installment toggle */}

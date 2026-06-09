@@ -106,7 +106,13 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-
+const serializeBigInt = (obj) => {
+  return JSON.parse(
+    JSON.stringify(obj, (_, value) =>
+      typeof value === "bigint" ? value.toString() : value,
+    ),
+  );
+};
 exports.getProperties = async (req, res) => {
   try {
     const {
@@ -122,15 +128,12 @@ exports.getProperties = async (req, res) => {
     } = req.query;
 
     const where = {};
-
-    // ⭐ CHANGE: Default "approved" (pehle "published" tha)
     where.status = status || "approved";
 
     if (purpose) where.purpose = purpose;
     if (propertyType) where.propertyType = propertyType;
     if (bedrooms) where.bedrooms = bedrooms;
     if (bathrooms) where.bathrooms = bathrooms;
-
     if (city) where.city = { contains: city, mode: "insensitive" };
 
     if (search) {
@@ -154,10 +157,11 @@ exports.getProperties = async (req, res) => {
       orderBy: { createdAt: "desc" },
     });
 
+    // ✅ Serialize BigInt before sending
     res.json({
       success: true,
       count: properties.length,
-      data: properties,
+      data: serializeBigInt(properties),
     });
   } catch (err) {
     console.error("GET PROPERTIES ERROR:", err);
