@@ -5,11 +5,11 @@ import { AuthProvider } from "../features/auth/context/AuthContext";
 import { PropertyProvider } from "../features/marketplace/components/context/PropertyContext"; // ⭐ ADD
 import AppRouter from "./routes/Router";
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <AuthProvider>
       <UserProvider>
-        {/* ⭐ Wrap router with PropertyProvider */}
+        
         <PropertyProvider>
           <AppRouter />
         </PropertyProvider>

@@ -8,6 +8,8 @@ import { useProperty } from "../components/context/useProperty";
 import { useAuthContext } from "../../auth/context/useAuthContext";
 import type { PropertyData } from "../components/context/PropertyContext";
 import styles from "../components/media/styles/ReviewSubmit.module.css";
+import Map from "../components/media/Map";
+import { reverseGeocodeLatLng } from "../utils/geocoding";
 
 // ⭐ Props for step navigation (from CreatePropertyPost)
 interface ReviewSubmitProps {
@@ -86,12 +88,29 @@ const propertyConfig = {
 
 const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
   const navigate = useNavigate();
-  const { data, resetData } = useProperty();
+  const { data, updateData, resetData } = useProperty();
   const { token, isAuthenticated } = useAuthContext();
   const [agree1, setAgree1] = useState(false);
   const [agree2, setAgree2] = useState(false);
   const [notify, setNotify] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const handleMapUpdate = async (lat: number, lng: number) => {
+    toast.loading("Updating location...", { id: "locUpdate" });
+    const result = await reverseGeocodeLatLng(lat, lng, data.city, data.locality, data.address);
+    if (result) {
+      updateData({
+        city: result.city,
+        locality: result.locality,
+        address: result.address,
+        lat: result.lat,
+        lng: result.lng
+      });
+      toast.success("Location updated successfully!", { id: "locUpdate" });
+    } else {
+      toast.error("Failed to update location", { id: "locUpdate" });
+    }
+  };
 
   // ⭐ DEBUG - Console mein data dekhne ke liye
   console.log("📦 Review Page Data:", data);
@@ -377,10 +396,16 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
           <Row label="Area / Locality" value={data.locality} />
         </div>
         <Row label="Address" value={data.address} />
-        <div className={styles.mapBox}>
-          <MapPin size={28} color="#2563eb" />
-          <span>Map Preview</span>
-        </div>
+        {data.lat && data.lng ? (
+          <div style={{ marginTop: '10px', height: '400px', overflow: 'hidden', borderRadius: '8px' }}>
+            <Map lat={data.lat} lng={data.lng} onMapClick={handleMapUpdate} />
+          </div>
+        ) : (
+          <div className={styles.mapBox}>
+            <MapPin size={28} color="#2563eb" />
+            <span>Map Preview Not Available</span>
+          </div>
+        )}
       </Section>
 
       {/* ============ Terms & Conditions ============ */}

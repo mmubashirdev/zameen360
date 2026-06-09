@@ -37,6 +37,8 @@ export interface PropertyData {
   city?: string;
   locality?: string;
   address?: string;
+  lat?: number;
+  lng?: number;
   images?: string[];
   imageFiles?: UploadedImage[];
   videoUrl?: string;
