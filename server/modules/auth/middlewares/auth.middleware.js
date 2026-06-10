@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      include: { profile: true, sellerDetail: true, trustScoreData: true },
+      include: { profile: true, sellerDetail: true },
     });
 
     if (!user){

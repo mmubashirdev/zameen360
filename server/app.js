@@ -10,6 +10,8 @@ const fs = require("fs");
 
 const index = require("./modules/auth/routes/index");
 const propertyRoutes = require("./modules/marketplace/routes/property.routes");
+const sellerRoutes = require("./modules/sellerProfile/routes/sellerRoutes");
+const buyerRoutes = require("./modules/buyerProfile/routes/buyerRoutes");
 
 const app = express();
 
@@ -30,7 +32,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/auth", index);
 app.use("/api/properties", propertyRoutes);
+app.use("/api/seller", sellerRoutes); 
 
+app.use("/api/buyer", buyerRoutes);  
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
 });

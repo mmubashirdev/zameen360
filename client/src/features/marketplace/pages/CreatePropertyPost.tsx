@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import DashboardNavbar from "../components/DashboardNavbar";
 import ProgressSteps from "../components/PostProperty/ProgressSteps";
@@ -7,10 +8,32 @@ import PricingDetails from "../components/PostProperty/PricingDetails";
 import LivePreview from "../components/PostProperty/LivePreview";
 import styles from "../components/PostProperty/styles/PostProperty.module.css";
 import { useNavigate } from "react-router-dom";
-
+import { useAuthContext } from "../../auth/context/useAuthContext";
 
 const PostProperty = () => {
   const navigate = useNavigate();
+  const { user: authUser, isAuthenticated } = useAuthContext();
+  const userRole = (authUser as any)?.role;
+
+  // ⭐ Buyer Protection
+  useEffect(() => {
+    if (!isAuthenticated) {
+      alert("Please login to post a property");
+      navigate('/login');
+      return;
+    }
+
+    if (userRole === 'BUYER') {
+      alert("⚠️ Only Sellers can post properties!\n\nPlease switch to Seller account from your profile.");
+      navigate('/buyer-profile');
+      return;
+    }
+  }, [userRole, isAuthenticated, navigate]);
+
+  // Agar buyer hai ya logged in nahi, kuch nahi dikhao
+  if (!isAuthenticated || userRole === 'BUYER') {
+    return null;
+  }
 
   const NavigatetoMedia = () => {
     navigate("/media-and-details");

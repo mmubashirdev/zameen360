@@ -61,18 +61,6 @@ const RightSidebar: React.FC = () => {
             </svg>
             Add Property
           </button>
-          <button className="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 text-[13px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Boost Listing
-          </button>
-          <button className="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 text-[13px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11M5 16h14" />
-            </svg>
-            Upgrade Plan
-          </button>
         </div>
       </div>
     </aside>

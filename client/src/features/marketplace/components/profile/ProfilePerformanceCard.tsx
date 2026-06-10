@@ -1,11 +1,60 @@
 import React from 'react';
+import { useUser } from './UserContext';
 
 interface Props {
-  percentage: number;
-  verifications: string[];
+  percentage?: number;
+  verifications?: string[];
 }
 
-const ProfilePerformanceCard: React.FC<Props> = ({ percentage, verifications }) => {
+const ProfilePerformanceCard: React.FC<Props> = ({ percentage: propPercentage, verifications: propVerifications }) => {
+  const { user, loading } = useUser();
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-32 mb-3"></div>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-16 h-16 rounded-full bg-gray-200"></div>
+          <div className="flex-1">
+            <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-20"></div>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="h-3 bg-gray-200 rounded w-full"></div>
+          <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Dynamic percentage from backend (fallback to prop)
+  const percentage = user?.profileCompletion ?? propPercentage ?? 0;
+
+  // Dynamic verifications from backend - Business Verified REMOVED
+  const verifications: string[] = [];
+  if (user) {
+    if (user.verifications?.identity) verifications.push('Identity Verified');
+    if (user.verifications?.phone) verifications.push('Phone Verified');
+    if (user.verifications?.email) verifications.push('Email Verified');
+  } else if (propVerifications) {
+    // Fallback - filter out Business Verified
+    propVerifications
+      .filter((v) => !v.toLowerCase().includes('business'))
+      .forEach((v) => verifications.push(v));
+  }
+
+  // Completion status text
+  const getStatusText = () => {
+    if (percentage >= 90) return { text: 'Excellent!', color: 'text-green-600' };
+    if (percentage >= 70) return { text: 'Good', color: 'text-blue-600' };
+    if (percentage >= 50) return { text: 'Average', color: 'text-yellow-600' };
+    return { text: 'Needs Work', color: 'text-red-600' };
+  };
+
+  const status = getStatusText();
+
   const R = 28;
   const circ = 2 * Math.PI * R;
   const offset = circ - (percentage / 100) * circ;
@@ -37,12 +86,12 @@ const ProfilePerformanceCard: React.FC<Props> = ({ percentage, verifications }) 
         </div>
         <div>
           <p className="text-[12px] font-semibold text-gray-800">Profile Completion</p>
-          <p className="text-[11px] text-green-600 font-medium">Excellent!</p>
+          <p className={`text-[11px] font-medium ${status.color}`}>{status.text}</p>
         </div>
       </div>
 
       <div className="w-full bg-gray-100 rounded-full h-1.5 mb-3">
-        <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${percentage}%` }} />
+        <div className="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }} />
       </div>
 
       <div className="space-y-1.5">

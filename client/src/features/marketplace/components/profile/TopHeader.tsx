@@ -2,7 +2,12 @@ import React from 'react';
 import { useUser } from './UserContext';
 
 const TopHeader: React.FC = () => {
-  const { user } = useUser();
+  const { user, loading } = useUser();
+
+  // Display name - user load nahi hua toh "Guest"
+  const displayName = user?.fullName || 'Guest';
+  const profilePicture = user?.profilePicture;
+  const firstLetter = displayName.charAt(0).toUpperCase();
 
   return (
     <header className="h-[64px] bg-white border-b border-gray-200 fixed top-0 left-[220px] right-0 z-20 flex items-center px-6 gap-6">
@@ -46,16 +51,18 @@ const TopHeader: React.FC = () => {
           </span>
         </button>
 
-        {/* User Profile (TOP HEADER - shows uploaded image) */}
+        {/* User Profile - DYNAMIC */}
         <div className="flex items-center gap-2.5 cursor-pointer">
           <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-bold overflow-hidden border-2 border-blue-100">
-            {user.profileImage ? (
-              <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+            {profilePicture ? (
+              <img src={profilePicture} alt={displayName} className="w-full h-full object-cover" />
             ) : (
-              <span>{user.name.charAt(0)}</span>
+              <span>{firstLetter}</span>
             )}
           </div>
-          <span className="text-[14px] font-semibold text-gray-800">{user.name}</span>
+          <span className="text-[14px] font-semibold text-gray-800">
+            {loading ? 'Loading...' : displayName}
+          </span>
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
