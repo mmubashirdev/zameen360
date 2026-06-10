@@ -12,13 +12,10 @@ const fs = require("fs");
 
 const index = require("./modules/auth/routes/index");
 const propertyRoutes = require("./modules/marketplace/routes/property.routes");
-<<<<<<< HEAD
 const sellerRoutes = require("./modules/sellerProfile/routes/sellerRoutes");
 const buyerRoutes = require("./modules/buyerProfile/routes/buyerRoutes");
-=======
 const supportRoutes = require("./modules/support/routes/support.routes");
 const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
->>>>>>> a6c28bf5841c2990a08bc9aeb402e6e7036b6d83
 
 const app = express();
 
@@ -105,12 +102,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", index);
 app.use("/api/properties", propertyRoutes);
-<<<<<<< HEAD
 app.use("/api/seller", sellerRoutes); 
-=======
 app.use("/api/support", supportRoutes);
 app.use("/api/contactus", contactusRoutes);
->>>>>>> a6c28bf5841c2990a08bc9aeb402e6e7036b6d83
 
 app.use("/api/buyer", buyerRoutes);  
 app.get("/", (req, res) => {
@@ -132,8 +126,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`Zameen 360 running on http://localhost:${PORT}`);
-<<<<<<< HEAD
-=======
   console.log(`Socket.IO ready`);
->>>>>>> a6c28bf5841c2990a08bc9aeb402e6e7036b6d83
 });

@@ -12,9 +12,6 @@ module.exports = async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-<<<<<<< HEAD
-      include: { profile: true, sellerDetail: true },
-=======
       include: { 
         profile: true, 
         sellerDetail: true,
@@ -24,7 +21,6 @@ module.exports = async (req, res, next) => {
         activityLogs: true,
         properties: true
       },
->>>>>>> a6c28bf5841c2990a08bc9aeb402e6e7036b6d83
     });
 
     if (!user){

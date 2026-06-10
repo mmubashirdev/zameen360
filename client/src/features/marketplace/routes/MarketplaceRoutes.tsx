@@ -10,6 +10,8 @@ import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
 import MyListings from "../pages/MyListings";
 import BuyerProfile from "../pages/BuyerProfile";  // ⬅️ NEW
+import MediaAndDetail from "../pages/MediaAndDetail";
+import ReviewSubmit from "../pages/ReviewSubmit";
 
 const marketplaceRoutes = [
   {
