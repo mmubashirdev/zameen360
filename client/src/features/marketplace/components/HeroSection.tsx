@@ -88,10 +88,10 @@ const HeroSection: React.FC = () => {
     const q = locationInput.toLowerCase().trim();
 
     if (!q) {
-      /* show ALL cities with their first 3 localities when nothing typed */
+      /* show ALL cities with ALL their localities when nothing typed */
       return PAKISTAN_LOCATIONS.map((c) => ({
         city: c.name,
-        localities: c.localities.slice(0, 3),
+        localities: c.localities,
       }));
     }
 
@@ -104,14 +104,15 @@ const HeroSection: React.FC = () => {
       );
 
       if (cityMatch) {
-        /* show all localities when city matched */
-        results.push({ city: cityData.name, localities: cityData.localities.slice(0, 8) });
+        /* show ALL localities when city matched */
+        results.push({ city: cityData.name, localities: cityData.localities });
       } else if (matchLocs.length > 0) {
-        results.push({ city: cityData.name, localities: matchLocs.slice(0, 6) });
+        /* show ALL matching localities */
+        results.push({ city: cityData.name, localities: matchLocs });
       }
     });
 
-    return results; // no slice — return all matches
+    return results; // all matches, no cap
   }, [locationInput]);
 
   /* ─────────────────────────────────────────────────
