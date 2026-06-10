@@ -1,19 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const { uploadProperty } = require("../middleware/upload");
+const  authenticate  = require("../../auth/middlewares/auth.middleware");
 const propertyController = require("../Controller/property.controllers");
+const authMiddleware = require("../../auth/middlewares/auth.middleware");
 
 // ==================== PUBLIC ROUTES ====================
 
-// Create property (user submit karta hai - status pending)
+// Get all approved properties (public)
+router.get("/", propertyController.getProperties);
+
+// ==================== PROTECTED ROUTES (Requires Authentication) ====================
+
+// Create property (user submit karta hai - status pending) - PROTECTED
 router.post(
   "/",
+   authenticate,
   uploadProperty.array("images", 30),
   propertyController.createProperty
 );
-
-// Get all approved properties (public)
-router.get("/", propertyController.getProperties);
 
 // ==================== ⭐ ADMIN ROUTES (upar rakho warna :id ma fas jayenge) ====================
 

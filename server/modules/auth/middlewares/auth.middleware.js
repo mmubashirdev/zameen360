@@ -12,7 +12,19 @@ module.exports = async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
+<<<<<<< HEAD
       include: { profile: true, sellerDetail: true },
+=======
+      include: { 
+        profile: true, 
+        sellerDetail: true,
+        verifications: true,
+        sessions: true,
+        passwordResets: true,
+        activityLogs: true,
+        properties: true
+      },
+>>>>>>> a6c28bf5841c2990a08bc9aeb402e6e7036b6d83
     });
 
     if (!user){
@@ -29,7 +41,7 @@ module.exports = async (req, res, next) => {
     }
     if (e.name === "JsonWebTokenError"){
          return res.status(401).json({ success: false, message: "Invalid token." });
-    return res.status(500).json({ success: false, message: e.message });
     }
+    return res.status(500).json({ success: false, message: e.message });
   }
 };

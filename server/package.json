@@ -19,6 +19,9 @@
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^5.22.0",
@@ -36,11 +39,16 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.20.0",
-    "prisma": "^5.22.0",
     "react-hook-form": "^7.75.0",
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.15.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "prisma": "^5.22.0"
   }
 }

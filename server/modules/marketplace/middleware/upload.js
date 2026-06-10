@@ -5,11 +5,11 @@ const fs = require("fs");
 // ⭐ "server" hata diya kyunki npm start server folder se chal raha hai
 const uploadDir = path.join(process.cwd(), "uploads", "properties");
 
-console.log('📁 Multer saving to:', uploadDir);
+console.log(' Multer saving to:', uploadDir);
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-  console.log('📂 Created directory:', uploadDir);
+  console.log(' Created directory:', uploadDir);
 }
 
 const storage = multer.diskStorage({

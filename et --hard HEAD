@@ -1,0 +1,87 @@
+[33m8b94ccc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/landing[m[33m, [m[1;31morigin/feature/landing[m[33m)[m HEAD@{0}: commit (merge): Merge branch 'feature/landing' of https://github.com/UmairIsmail296/Zameen360 into feature/landing
+[33m372400f[m HEAD@{1}: commit: Changes
+[33m46921a9[m HEAD@{2}: commit: changes
+[33m610b607[m HEAD@{3}: pull origin feature/landing: Fast-forward
+[33m7928106[m HEAD@{4}: commit (merge): Merge branch 'feature/landing' of https://github.com/UmairIsmail296/Zameen360 into feature/landing
+[33m5486912[m HEAD@{5}: commit: prisma fix
+[33m9dd410c[m HEAD@{6}: commit: changes of admin
+[33m599c40f[m HEAD@{7}: pull origin feature/landing: Fast-forward
+[33m495f8a6[m HEAD@{8}: commit: admin
+[33m5f3c124[m HEAD@{9}: checkout: moving from feature/landing to feature/landing
+[33m5f3c124[m HEAD@{10}: reset: moving to HEAD
+[33m5f3c124[m HEAD@{11}: commit (merge): Merge branch 'feature/landing' of https://github.com/UmairIsmail296/Zameen360 into feature/landing
+[33mfcd1004[m HEAD@{12}: commit: admin
+[33mf436ca5[m HEAD@{13}: reset: moving to origin/feature/landing
+[33m8ef5daf[m HEAD@{14}: reset: moving to HEAD
+[33m8ef5daf[m HEAD@{15}: pull origin feature/landing: Merge made by the 'ort' strategy.
+[33m237487a[m HEAD@{16}: checkout: moving from de057597d274ea9e31de262befcb8e8f6214f693 to feature/landing
+[33mde05759[m HEAD@{17}: commit: umair post property code
+[33m864ef51[m HEAD@{18}: pull origin feature/landing: Fast-forward
+[33m18031fc[m HEAD@{19}: checkout: moving from 51d9426672381b2548e375cdf1e84486fce2ddc0 to 18031fc
+[33m51d9426[m HEAD@{20}: checkout: moving from a46069a673a47c6e662488b4ee039592eebd99a0 to 51d9426
+[33ma46069a[m HEAD@{21}: checkout: moving from 51d9426672381b2548e375cdf1e84486fce2ddc0 to a46069a
+[33m51d9426[m HEAD@{22}: checkout: moving from 1c7b9e3f2ef68912c18a073de234b2f5b08b42f6 to 51d9426
+[33m1c7b9e3[m HEAD@{23}: checkout: moving from 18031fca587ecf005bfcf91f0640427c18efd5d1 to 1c7b9e3
+[33m18031fc[m HEAD@{24}: checkout: moving from a6e1dfdb3af6a591f110fc1c3d1d2035b3a7d030 to 18031fc
+[33ma6e1dfd[m HEAD@{25}: checkout: moving from 864ef513ddd255bdab5b93e786b42d9df6333349 to a6e1dfd
+[33m864ef51[m HEAD@{26}: checkout: moving from 9c8b65548b121197f1b4cd833dab5956304cd984 to 864ef51
+[33m9c8b655[m HEAD@{27}: checkout: moving from 864ef513ddd255bdab5b93e786b42d9df6333349 to 9c8b655
+[33m864ef51[m HEAD@{28}: checkout: moving from feature/landing to 864ef51
+[33m237487a[m HEAD@{29}: commit: "changes"
+[33m864ef51[m HEAD@{30}: commit: "umair"
+[33m733edc9[m HEAD@{31}: commit: "umair"
+[33m9c8b655[m HEAD@{32}: commit (merge): Merge branch 'feature/landing' of https://github.com/UmairIsmail296/Zameen360 into feature/landing
+[33m51d9426[m HEAD@{33}: rebase (abort): returning to refs/heads/feature/landing
+[33m51d9426[m HEAD@{34}: rebase (abort): returning to refs/heads/feature/landing
+[33m7e31775[m HEAD@{35}: rebase (continue): umair
+[33ma6e1dfd[m HEAD@{36}: reset: moving to a6e1dfdb3af6a591f110fc1c3d1d2035b3a7d030
+[33ma6e1dfd[m HEAD@{37}: pull origin feature/landing: Fast-forward
+[33m18031fc[m HEAD@{38}: pull origin feature/landing: Merge made by the 'ort' strategy.
+[33m1c7b9e3[m HEAD@{39}: commit (amend): umair
+[33m51d9426[m HEAD@{40}: checkout: moving from fix to feature/landing
+[33m4909edc[m[33m ([m[1;32mfix[m[33m)[m HEAD@{41}: commit: save work
+[33m9088650[m[33m ([m[1;31morigin/fix[m[33m)[m HEAD@{42}: checkout: moving from fix to fix
+[33m9088650[m[33m ([m[1;31morigin/fix[m[33m)[m HEAD@{43}: checkout: moving from 9088650578fc625f655dc7fa95075db55654ba0a to fix
+[33m9088650[m[33m ([m[1;31morigin/fix[m[33m)[m HEAD@{44}: commit: bug
+[33m788e660[m HEAD@{45}: commit: your message here
+[33ma46069a[m HEAD@{46}: pull origin feature/landing --rebase (start): checkout a46069a673a47c6e662488b4ee039592eebd99a0
+[33m51d9426[m HEAD@{47}: reset: moving to HEAD
+[33m51d9426[m HEAD@{48}: commit: umair
+[33m5549483[m HEAD@{49}: pull origin feature/landing: Merge made by the 'ort' strategy.
+[33m090d692[m HEAD@{50}: commit (merge): Merge branch 'feature/landing' of https://github.com/UmairIsmail296/Zameen360 into feature/landing
+[33m3935835[m HEAD@{51}: commit: a
+[33m8947318[m HEAD@{52}: pull origin feature/landing: Fast-forward
+[33m73e3d77[m HEAD@{53}: reset: moving to origin/feature/landing
+[33m73e3d77[m HEAD@{54}: reset: moving to 73e3d77
+[33m73e3d77[m HEAD@{55}: reset: moving to 73e3d77
+[33m3bb0316[m HEAD@{56}: commit: stash
+[33m114bf32[m HEAD@{57}: pull origin feature/landing: Fast-forward
+[33m984074d[m HEAD@{58}: reset: moving to HEAD
+[33m984074d[m HEAD@{59}: pull origin feature/landing: Fast-forward
+[33m278f1e5[m HEAD@{60}: checkout: moving from feature/auth to feature/landing
+[33m7d69251[m[33m ([m[1;31morigin/feature/auth[m[33m, [m[1;32mfeature/auth[m[33m)[m HEAD@{61}: pull origin feature/auth: Fast-forward
+[33mf28c37c[m HEAD@{62}: pull --tags origin feature/auth: Merge made by the 'ort' strategy.
+[33me13220f[m HEAD@{63}: commit: Fix error
+[33mc49d1ea[m HEAD@{64}: commit: r
+[33m5eb969f[m HEAD@{65}: pull origin feature/auth: Fast-forward
+[33m73e3d77[m HEAD@{66}: reset: moving to HEAD@{10 hours ago}
+[33ma24dcc1[m HEAD@{67}: pull origin feature/auth: Fast-forward
+[33m73e3d77[m HEAD@{68}: reset: moving to HEAD@{7 hours ago}
+[33m73e3d77[m HEAD@{69}: reset: moving to HEAD@{10 hours ago}
+[33m9f3e871[m HEAD@{70}: revert: Revert "logo"
+[33m6cbf730[m HEAD@{71}: commit: logo
+[33mcca4e5d[m HEAD@{72}: rebase (finish): returning to refs/heads/feature/auth
+[33mcca4e5d[m HEAD@{73}: commit: fix problems
+[33m1f8626a[m HEAD@{74}: pull --rebase (start): checkout 1f8626aeee75a0327dd205d8f1a17a419df566ae
+[33m25f67a5[m HEAD@{75}: reset: moving to HEAD
+[33m25f67a5[m HEAD@{76}: commit: Fix error
+[33m73e3d77[m HEAD@{77}: pull origin feature/auth: Fast-forward
+[33mffdeae9[m HEAD@{78}: commit: template
+[33m09ce50e[m HEAD@{79}: rebase (finish): returning to refs/heads/feature/auth
+[33m09ce50e[m HEAD@{80}: rebase (continue): backend
+[33m8db0656[m HEAD@{81}: pull origin feature/auth --rebase (start): checkout 8db0656973646d43bdee12f685b34b11d274a5ad
+[33m9d0f803[m[33m ([m[1;32mmain[m[33m)[m HEAD@{82}: checkout: moving from main to feature/auth
+[33m9d0f803[m[33m ([m[1;32mmain[m[33m)[m HEAD@{83}: commit: backend
+[33md5ecb11[m HEAD@{84}: pull origin main --allow-unrelated-histories: Merge made by the 'ort' strategy.
+[33m30c9217[m HEAD@{85}: commit: push
+[33mf59ea56[m HEAD@{86}: clone: from https://github.com/mmubashirdev/zameen360.git

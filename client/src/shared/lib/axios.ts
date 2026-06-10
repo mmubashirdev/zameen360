@@ -61,7 +61,6 @@ axiosInstance.interceptors.response.use(
 
     if (status === 401 && !isAuthRequest) {
       localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER);
       window.location.href = "/login";
     }
 

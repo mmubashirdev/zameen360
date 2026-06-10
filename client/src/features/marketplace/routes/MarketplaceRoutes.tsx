@@ -1,12 +1,12 @@
-import PropertyDetails from "../pages/propertyDetails";
+// client/src/features/marketplace/routes/Marketplace.routes.tsx
+import PropertyDetails from "../pages/propertyDetail";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
-import MediaAndDetail from "../pages/MediaAndDetail";
 import ProfilePage from "../pages/profile";
-import ReviewSubmit from "../pages/ReviewSubmit";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
-import ContactUsPage from "../pages/Contactus";
+import ContactUsPage from "../pages/ContactUs";
+import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
 import MyListings from "../pages/MyListings";
 import BuyerProfile from "../pages/BuyerProfile";  // ⬅️ NEW
