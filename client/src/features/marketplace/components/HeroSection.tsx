@@ -20,12 +20,32 @@ const PROPERTY_TYPES = [
   "Penthouse",
 ];
 
-const PRICE_OPTIONS = [
-  { label: "Any Price",          value: "" },
-  { label: "Under 50 Lac",       value: "under50" },
-  { label: "50 Lac - 1 Crore",   value: "50to1cr" },
-  { label: "1 Crore - 5 Crore",  value: "1to5cr" },
-  { label: "Above 5 Crore",      value: "above5cr" },
+/* ── Dynamic price ranges ── */
+// Buy price options (PKR)
+const BUY_PRICE_OPTIONS: { label: string; min?: number; max?: number }[] = [
+  { label: "Any Price" },
+  { label: "Under 10 Lac",          max: 1_000_000 },
+  { label: "10 Lac – 25 Lac",       min: 1_000_000,  max: 2_500_000 },
+  { label: "25 Lac – 50 Lac",       min: 2_500_000,  max: 5_000_000 },
+  { label: "50 Lac – 1 Crore",      min: 5_000_000,  max: 10_000_000 },
+  { label: "1 Crore – 2 Crore",     min: 10_000_000, max: 20_000_000 },
+  { label: "2 Crore – 5 Crore",     min: 20_000_000, max: 50_000_000 },
+  { label: "5 Crore – 10 Crore",    min: 50_000_000, max: 100_000_000 },
+  { label: "10 Crore – 25 Crore",   min: 100_000_000,max: 250_000_000 },
+  { label: "Above 25 Crore",        min: 250_000_000 },
+];
+
+// Rent price options (monthly PKR)
+const RENT_PRICE_OPTIONS: { label: string; min?: number; max?: number }[] = [
+  { label: "Any Rent" },
+  { label: "Under 10,000",          max: 10_000 },
+  { label: "10K – 20K",             min: 10_000,  max: 20_000 },
+  { label: "20K – 40K",             min: 20_000,  max: 40_000 },
+  { label: "40K – 75K",             min: 40_000,  max: 75_000 },
+  { label: "75K – 1.5 Lac",         min: 75_000,  max: 150_000 },
+  { label: "1.5 Lac – 3 Lac",       min: 150_000, max: 300_000 },
+  { label: "3 Lac – 5 Lac",         min: 300_000, max: 500_000 },
+  { label: "Above 5 Lac",           min: 500_000 },
 ];
 
 const HeroSection: React.FC = () => {
@@ -37,7 +57,7 @@ const HeroSection: React.FC = () => {
   const [selectedCity,    setSelectedCity]    = useState("");
   const [selectedLocality,setSelectedLocality]= useState("");
   const [propertyType,    setPropertyType]    = useState("");
-  const [priceRange,      setPriceRange]      = useState("");
+  const [priceRange,      setPriceRange]      = useState("-1"); // index into price options array
 
   /* ── dropdown open/close ── */
   const [showLocationDrop,  setShowLocationDrop]  = useState(false);
@@ -68,10 +88,10 @@ const HeroSection: React.FC = () => {
     const q = locationInput.toLowerCase().trim();
 
     if (!q) {
-      /* show first 8 cities when nothing typed */
-      return PAKISTAN_LOCATIONS.slice(0, 8).map((c) => ({
+      /* show ALL cities with their first 3 localities when nothing typed */
+      return PAKISTAN_LOCATIONS.map((c) => ({
         city: c.name,
-        localities: [] as string[],
+        localities: c.localities.slice(0, 3),
       }));
     }
 
@@ -84,13 +104,14 @@ const HeroSection: React.FC = () => {
       );
 
       if (cityMatch) {
-        results.push({ city: cityData.name, localities: matchLocs.slice(0, 4) });
+        /* show all localities when city matched */
+        results.push({ city: cityData.name, localities: cityData.localities.slice(0, 8) });
       } else if (matchLocs.length > 0) {
         results.push({ city: cityData.name, localities: matchLocs.slice(0, 6) });
       }
     });
 
-    return results.slice(0, 10);
+    return results; // no slice — return all matches
   }, [locationInput]);
 
   /* ─────────────────────────────────────────────────
@@ -146,17 +167,15 @@ const HeroSection: React.FC = () => {
 
     if (propertyType) params.set("propertyType", propertyType);
 
-    /* price range → real PKR numbers */
-    const priceMap: Record<string, { min?: string; max?: string }> = {
-      under50:  {                  max: "5000000"  },
-      "50to1cr":{ min: "5000000", max: "10000000" },
-      "1to5cr": { min: "10000000",max: "50000000" },
-      above5cr: { min: "50000000"                 },
-    };
-    if (priceRange && priceMap[priceRange]) {
-      const { min, max } = priceMap[priceRange];
-      if (min) params.set("minPrice", min);
-      if (max) params.set("maxPrice", max);
+    /* price range — look up from the correct tab's options array */
+    const idx = parseInt(priceRange, 10);
+    if (idx >= 0) {
+      const opts = activeTab === "buy" ? BUY_PRICE_OPTIONS : RENT_PRICE_OPTIONS;
+      const chosen = opts[idx];
+      if (chosen) {
+        if (chosen.min !== undefined) params.set("minPrice", String(chosen.min));
+        if (chosen.max !== undefined) params.set("maxPrice", String(chosen.max));
+      }
     }
 
     const qs = params.toString();
@@ -240,7 +259,7 @@ const HeroSection: React.FC = () => {
               <button
                 key={tab}
                 className={`${styles.searchTab} ${activeTab === tab ? styles.searchTabActive : ""}`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => { setActiveTab(tab); setPriceRange("-1"); }}
               >
                 {tab === "buy" ? "Buy" : "Rent"}
               </button>
@@ -426,15 +445,21 @@ const HeroSection: React.FC = () => {
 
             {/* ── PRICE RANGE ── */}
             <div className={styles.searchField}>
-              <label className={styles.searchLabel}>Price Range</label>
+              <label className={styles.searchLabel}>
+                {activeTab === "buy" ? "Price Range" : "Rent Range"}
+              </label>
               <div className={styles.searchSelectWrapper}>
                 <select
                   className={styles.searchSelect}
                   value={priceRange}
-                  onChange={(e) => setPriceRange(e.target.value)}
+                  onChange={(e) => {
+                    setPriceRange(e.target.value);
+                  }}
                 >
-                  {PRICE_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                  {(activeTab === "buy" ? BUY_PRICE_OPTIONS : RENT_PRICE_OPTIONS).map((o, idx) => (
+                    <option key={idx} value={idx === 0 ? "-1" : String(idx)}>
+                      {o.label}
+                    </option>
                   ))}
                 </select>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"

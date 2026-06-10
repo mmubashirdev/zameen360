@@ -61,7 +61,6 @@ export default function GoogleCallbackPage() {
             isVerified: data.data.isVerified,
           };
 
-          localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
           ctx?.setUser?.(user, token);
 
           // Redirect to welcome

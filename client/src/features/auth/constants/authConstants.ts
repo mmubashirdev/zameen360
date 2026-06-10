@@ -46,7 +46,6 @@ export const PAKISTAN_CITIES: City[] = [
 
 export const STORAGE_KEYS = {
   TOKEN: "zameen360_token",
-  USER:  "zameen360_user",
 } as const;
 
 // ─── Hero Features ────────────────────────────────────────────────────────────

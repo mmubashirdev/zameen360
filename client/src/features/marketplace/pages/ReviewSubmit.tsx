@@ -184,7 +184,7 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
         "bedrooms", "bathrooms", "floors", "parking", "yearBuilt", "furnishing",
         "possession", "facing", "price", "downPayment", "monthlyInstallment",
         "duration", "monthlyRent", "securityDeposit", "advanceMonths",
-        "city", "locality", "address", "videoUrl", "floorPlan",
+        "city", "locality", "address", "videoUrl", "floorPlan", "lat", "lng"
       ];
 
       textFields.forEach((key) => {

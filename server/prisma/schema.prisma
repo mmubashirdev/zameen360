@@ -169,6 +169,8 @@ model Property {
   city                 String?
   locality             String?
   address              String?
+  latitude             Decimal? @db.Decimal(10, 7)
+  longitude            Decimal? @db.Decimal(10, 7)
   images               String[] @default([])
   videoUrl             String?  @map("video_url")
   floorPlan            String?  @map("floor_plan")
@@ -185,5 +187,6 @@ model Property {
   @@index([purpose])
   @@index([propertyType])
   @@index([price])
+  @@index([latitude, longitude])
   @@map("properties")
 }

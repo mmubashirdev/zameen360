@@ -52,11 +52,11 @@ const MediaAndDetail: React.FC<MediaAndDetailProps> = ({ onNext, onBack }) => {
   useEffect(() => {
     const imageFilesToSave: ContextUploadedImage[] = images.map(
       (img) =>
-        ({
-          id: img.id,
-          file: img.file,
-          url: img.url,
-        } as ContextUploadedImage)
+      ({
+        id: img.id,
+        file: img.file,
+        url: img.url,
+      } as ContextUploadedImage)
     );
 
     updateData({ imageFiles: imageFilesToSave });

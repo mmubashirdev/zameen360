@@ -141,12 +141,12 @@ const LocationSection: React.FC<LocationSectionProps> = ({
       setLocalityQuery(result.locality);
       setAddress(result.address);
 
-      onDataChange?.({ 
-        city: result.city, 
-        locality: result.locality, 
-        address: result.address, 
-        lat, 
-        lng 
+      onDataChange?.({
+        city: result.city,
+        locality: result.locality,
+        address: result.address,
+        lat,
+        lng
       });
     }
   };

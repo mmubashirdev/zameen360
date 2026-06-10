@@ -1,6 +1,4 @@
-// ─── Pakistan Cities & Localities Data ─────────────────────────────────────────
-// Cities are ordered by real-estate search popularity.
-// Each city includes comprehensive localities for property listing.
+
 
 export interface CityData {
   name: string;

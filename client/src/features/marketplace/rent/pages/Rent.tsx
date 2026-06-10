@@ -142,7 +142,8 @@ const RentPage = () => {
     if (urlMaxPrice) setMaxPrice(urlMaxPrice);
     if (urlLocality && !urlSearch) setSearch(urlLocality);
 
-    setInitialLoad(false);
+    // Defer so React batches state updates before fetch runs
+    setTimeout(() => setInitialLoad(false), 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

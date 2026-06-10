@@ -67,6 +67,21 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
+const apiLogger = (req, res, next) => {
+  const start = Date.now();
+  const originalSend = res.send;
+
+  res.send = function (data) {
+    console.log(`${req.method} ${req.originalUrl} | ${res.statusCode} | ${Date.now() - start}ms`);
+    return originalSend.call(this, data);
+  };
+
+  next();
+};
+
+app.use(apiLogger);
+
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -106,6 +121,6 @@ app.use((err, req, res, next) => {
 // ─── Start Server (app.listen → httpServer.listen) ───────────────────────────
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
-  console.log(`🚀 Zameen 360 running on http://localhost:${PORT}`);
-  console.log(`🔌 Socket.IO ready`);
+  console.log(`Zameen 360 running on http://localhost:${PORT}`);
+  console.log(`Socket.IO ready`);
 });
