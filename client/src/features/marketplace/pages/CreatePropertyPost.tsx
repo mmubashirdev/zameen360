@@ -1,7 +1,9 @@
 // client/src/features/marketplace/pages/CreatePropertyPost.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "@features/auth/hooks/useAuth";
 import { useProperty } from "../components/context/useProperty";
 import ProgressSteps from "../components/PostProperty/ProgressSteps";
 import BasicInformation from "../components/PostProperty/BasicInformation";
@@ -10,7 +12,7 @@ import PricingDetails from "../components/PostProperty/PricingDetails";
 import MediaAndDetailStep from "./MediaAndDetail";
 import ReviewSubmitStep from "./ReviewSubmit";
 import LivePreview from "../components/PostProperty/LivePreview";
-import PropertyNav from "../components/PostProperty/PropertyNav";
+import DashboardNavbar from "../components/DashboardNavbar";
 import styles from "../components/PostProperty/styles/PostProperty.module.css";
 
 interface NavButtonsProps {
@@ -44,6 +46,19 @@ const NavButtons = ({ step, onBack, onNext }: NavButtonsProps) => {
 const CreatePropertyPost = () => {
   const [step, setStep] = useState(1);
   const { validate, errors } = useProperty();
+  const { user, isLoading } = useAuthContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && user && user.role !== 'SELLER') {
+      toast.error("Only sellers can post properties. Please switch your account to Seller.");
+      navigate("/profile");
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading || (user && user.role !== 'SELLER')) {
+    return null; // or a loading spinner
+  }
 
   const handleNext = () => {
     const isValid = validate(step);
@@ -82,7 +97,7 @@ const CreatePropertyPost = () => {
 
   return (
     <div className={styles.page}>
-      <PropertyNav />
+      <DashboardNavbar />
       <main className={styles.main}>
         <div className={styles.heading}>
           <h1>Post Your Property</h1>

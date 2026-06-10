@@ -1,11 +1,10 @@
 import {
   registerBuyer,
-  registerSeller,
   loginUser,
   verifyOtp,
   resendOtp,
 } from "../api/authApi";
-import { USER_ROLES, STORAGE_KEYS } from "../constants/authConstants";
+import { STORAGE_KEYS } from "../constants/authConstants";
 import { getErrorMessage } from "@shared/utils/errorHandler";
 import type {
   AuthSuccessPayload,
@@ -73,10 +72,8 @@ export const handleSignup = async (
   data: SignupPayload,
 ): Promise<SignupServiceResult> => {
   try {
-    const isSeller = data.role?.toUpperCase() === USER_ROLES.SELLER;
-    const response = await (isSeller
-      ? registerSeller(data)
-      : registerBuyer(data));
+    // Always register as BUYER — user can switch to seller after signup
+    const response = await registerBuyer(data);
 
     if (!response?.data?.userId || !response.data.email) {
       throw new Error("Invalid signup response structure");

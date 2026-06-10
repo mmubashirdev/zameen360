@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '@features/auth/hooks/useAuth';
 import Sidebar from '../components/profile/Sidebar';
 import TopHeader from '../components/profile/TopHeader';
 import ProfileBanner from '../components/profile/ProfileBanner';
@@ -9,6 +11,33 @@ import QuickActionsCard from '../components/profile/QuickActionsCard';
 
 const ProfilePage: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState('dashboard');
+  const navigate = useNavigate();
+  const { user, isLoading } = useAuthContext();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const userRole = String(user.role || '').toUpperCase();
+
+    if (userRole === 'BUYER') {
+      navigate('/buyer-profile', { replace: true });
+      return;
+    }
+
+    if (userRole === 'ADMIN') {
+      navigate('/admin', { replace: true });
+      return;
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading || !user || String(user.role || '').toUpperCase() !== 'SELLER') {
+    return null;
+  }
 
   const bannerStats = [
     {

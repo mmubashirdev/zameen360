@@ -12,6 +12,7 @@ import {
   type BuyerProfile,
   type UpdateBuyerData,
 } from "../../../../api/buyer.api";
+import { useAuthContext } from "@features/auth/hooks/useAuth";
 
 interface BuyerContextType {
   buyer: BuyerProfile | null;
@@ -31,25 +32,24 @@ export const BuyerProvider: React.FC<{ children: ReactNode }> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
+
   const fetchBuyer = useCallback(async () => {
+    if (authLoading) return;
+
     try {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("zameen360_token");
-      if (!token) {
+      if (!isAuthenticated || !authUser) {
         setBuyer(null);
         setLoading(false);
         return;
       }
 
-      // Check role from localStorage first
-      const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
-      const userRole = String(storedUser.role || '').toUpperCase();
-
       // Only fetch if user is BUYER
-      if (userRole !== 'BUYER') {
-        console.log("⏭️ Skipping buyer fetch - user is", userRole);
+      if (authUser.role !== 'BUYER') {
+        console.log("⏭️ Skipping buyer fetch - user is", authUser.role);
         setBuyer(null);
         setLoading(false);
         return;
@@ -66,7 +66,7 @@ export const BuyerProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authUser, isAuthenticated, authLoading]);
 
   const updateBuyer = useCallback(async (data: UpdateBuyerData) => {
     try {

@@ -1,8 +1,10 @@
 import React from 'react';
-import { useUser } from './UserContext';
+import { useAuthContext } from '@features/auth/hooks/useAuth';
+import { useNavigate, Link } from 'react-router-dom';
 
 const TopHeader: React.FC = () => {
-  const { user, loading } = useUser();
+  const { user, isLoading } = useAuthContext();
+  const navigate = useNavigate();
 
   // Display name - user load nahi hua toh "Guest"
   const displayName = user?.fullName || 'Guest';
@@ -25,22 +27,22 @@ const TopHeader: React.FC = () => {
 
       {/* Nav Links */}
       <nav className="flex items-center gap-7 ml-4">
-        {['Explore', 'Properties', 'Agents', 'Projects', 'Blog'].map((link) => (
-          <a key={link} href="#" className="text-[14px] text-gray-700 hover:text-blue-600 font-normal">
-            {link}
-          </a>
+        {[
+          { label: 'Home', path: '/' },
+          { label: 'Buy', path: '/buy' },
+          { label: 'Rent', path: '/rent' },
+          { label: 'Sell', path: '/sell' },
+          { label: 'Projects', path: '/projects' },
+          { label: 'About Us', path: '/about-us' },
+          { label: 'Contact', path: '/contact' },
+        ].map((link) => (
+          <Link key={link.label} to={link.path} className="text-[14px] text-gray-700 hover:text-blue-600 font-normal">
+            {link.label}
+          </Link>
         ))}
       </nav>
 
       <div className="flex items-center gap-4 ml-auto">
-        {/* Post Property */}
-        <button className="bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-medium px-4 h-10 rounded-lg flex items-center gap-1.5">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Post Property
-        </button>
-
         {/* Notification */}
         <button className="relative w-10 h-10 flex items-center justify-center text-gray-500 hover:text-blue-600">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8}>
@@ -61,7 +63,7 @@ const TopHeader: React.FC = () => {
             )}
           </div>
           <span className="text-[14px] font-semibold text-gray-800">
-            {loading ? 'Loading...' : displayName}
+            {isLoading ? 'Loading...' : displayName}
           </span>
           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />

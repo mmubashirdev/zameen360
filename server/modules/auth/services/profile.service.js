@@ -30,4 +30,13 @@ const removePictureService = async (userId) => {
   return true;
 };
 
-module.exports = { getProfileService, updateProfileService, uploadPictureService, removePictureService };
+const becomeSellerService = async (userId) => {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw Object.assign(new Error("User not found."), { status: 404 });
+  if (user.role === "SELLER") throw Object.assign(new Error("You are already a seller."), { status: 400 });
+  const updated = await prisma.user.update({ where: { id: userId }, data: { role: "SELLER" } });
+  await prisma.userActivityLog.create({ data: { userId, action: "BECOME_SELLER", description: "User upgraded to seller", ipAddress: "system", status: "SUCCESS" } });
+  return { userId: updated.id, role: updated.role };
+};
+
+module.exports = { getProfileService, updateProfileService, uploadPictureService, removePictureService, becomeSellerService };

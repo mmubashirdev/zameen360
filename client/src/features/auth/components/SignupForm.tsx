@@ -11,6 +11,7 @@ import { useAuth, detectErrorField } from "../hooks/useAuth";
 import { PAKISTAN_CITIES } from "../constants/authConstants";
 import { getErrorMessage } from "@shared/utils/errorHandler";
 import type { ToastHook } from "../types/auth.types";
+import { becomeSeller } from "../api/authApi";
 
 import PasswordStrength from "./PasswordStrength";
 import SocialLogin from "./SocialLogin";
@@ -27,6 +28,10 @@ export default function SignupForm({ toast }: SignupFormProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // "Switch to Seller" state — only available after a successful signup in-session
+  const [isSellerSwitching, setIsSellerSwitching] = useState(false);
+  const [signedUpUserId, setSignedUpUserId] = useState<string | null>(null);
 
   const {
     register,
@@ -45,14 +50,11 @@ export default function SignupForm({ toast }: SignupFormProps) {
       city: "",
       password: "",
       confirmPassword: "",
-      role: undefined,
-      
     },
     mode: "onBlur",
   });
 
   const watchedPassword = watch("password");
-  const watchedRole = watch("role");
 
   // ── Submit ────────────────────────────────────────────────────────────────
 
@@ -61,6 +63,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
       try {
         const result = await signup(data);
         setSubmitSuccess(true);
+        setSignedUpUserId(result.data.userId);
         sessionStorage.removeItem("verify_email_resend_expiry");
         sessionStorage.removeItem("verify_email_code_expiry");
         sessionStorage.setItem("verify_email_pending_email", result.data.email);
@@ -117,7 +120,21 @@ export default function SignupForm({ toast }: SignupFormProps) {
     window.location.href = `${baseUrl}/auth/google`;
   }, []);
 
-
+  // ── Switch to Seller ──────────────────────────────────────────────────────
+  const handleBecomeSeller = useCallback(async () => {
+    setIsSellerSwitching(true);
+    try {
+      await becomeSeller();
+      toast.success("You're now a Seller!", "Your account has been upgraded.");
+    } catch (err) {
+      toast.error(
+        "Could not switch role",
+        getErrorMessage(err, "Please try again later.")
+      );
+    } finally {
+      setIsSellerSwitching(false);
+    }
+  }, [toast]);
 
   return (
     <div className={styles.formContainer}>
@@ -339,63 +356,6 @@ export default function SignupForm({ toast }: SignupFormProps) {
               </p>
             )}
           </div>
-        </div>
-
-        {/* ── Role Cards ──────────────────────────────────────────────── */}
-        <div className={styles.roleSection}>
-          <label className={styles.roleSectionLabel}>
-            I am a <span className={styles.required}>*</span>
-          </label>
-          <div
-            className={styles.roleCards}
-            role="radiogroup"
-            aria-label="Select your role"
-          >
-            {(
-              [
-                { value: "buyer", icon: "fa-user", label: "Buyer" },
-                { value: "seller", icon: "fa-house", label: "Seller" },
-              ] as const
-            ).map(({ value, icon, label }) => (
-              <label
-                key={value}
-                className={[
-                  styles.roleCard,
-                  watchedRole === value ? styles.roleCardSelected : "",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                tabIndex={0}
-                onKeyDown={(e: React.KeyboardEvent) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setValue("role", value, { shouldValidate: true });
-                  }
-                }}
-              >
-                <input
-                  {...register("role")}
-                  type="radio"
-                  value={value}
-                  className={styles.hiddenRadio}
-                  aria-label={label}
-                />
-                <div className={styles.roleIconWrap}>
-                  <i
-                    className={`fa-solid ${icon} ${styles.roleIcon}`}
-                    aria-hidden="true"
-                  />
-                </div>
-                <span className={styles.roleText}>{label}</span>
-              </label>
-            ))}
-          </div>
-          {errors.role && (
-            <p className={styles.fieldError} role="alert">
-              <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-              {errors.role.message}
-            </p>
-          )}
         </div>
 
         {/* ── Submit ──────────────────────────────────────────────────── */}

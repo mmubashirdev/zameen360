@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuthContext } from '@features/auth/hooks/useAuth';
 
 interface NavItem {
   label: string;
@@ -10,6 +11,7 @@ interface NavItem {
 
 const BuyerSidebar: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAuthContext();
 
   const navItems: NavItem[] = [
     {
@@ -89,8 +91,8 @@ const BuyerSidebar: React.FC = () => {
   ];
 
   const handleSignOut = () => {
+    logout();
     localStorage.removeItem('zameen360_token');
-    localStorage.removeItem('zameen360_user');
     navigate('/login');
     window.location.reload();
   };

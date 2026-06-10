@@ -1,21 +1,24 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '@features/auth/hooks/useAuth';
 import BuyerSidebar from '../components/profile/BuyerSidebar';
 import DashboardNavbar from '../components/DashboardNavbar';
 import BuyerProfileBanner from '../components/profile/BuyerProfileBanner';
 
 const BuyerProfile: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isLoading } = useAuthContext();
 
   // ⭐ Auto-redirect if user is SELLER
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
-    const userRole = String(storedUser.role || '').toUpperCase();
+    if (isLoading) return;
 
-    if (!localStorage.getItem('zameen360_token')) {
+    if (!user) {
       navigate('/login');
       return;
     }
+
+    const userRole = String(user.role || '').toUpperCase();
 
     if (userRole === 'SELLER') {
       console.log('🔄 Seller detected on buyer profile, redirecting to /profile');
@@ -27,13 +30,9 @@ const BuyerProfile: React.FC = () => {
       navigate('/admin', { replace: true });
       return;
     }
-  }, [navigate]);
+  }, [user, isLoading, navigate]);
 
-  // Don't render if user is not BUYER
-  const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
-  const userRole = String(storedUser.role || '').toUpperCase();
-  
-  if (userRole !== 'BUYER') {
+  if (isLoading || !user || String(user.role || '').toUpperCase() !== 'BUYER') {
     return null;
   }
 

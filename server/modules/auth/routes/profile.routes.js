@@ -15,5 +15,5 @@ router.get("/profile", auth, c.getProfile);
 router.put("/profile/update", auth, c.updateProfile);
 router.post("/profile/upload-picture", auth, upload.single("profilePicture"), c.uploadPicture);
 router.delete("/profile/remove-picture", auth, c.removePicture);
-router.get("/profile", auth, c.getProfile);
+router.post("/become-seller", auth, c.becomeSeller);
 module.exports = router;

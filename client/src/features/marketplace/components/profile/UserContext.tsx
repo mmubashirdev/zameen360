@@ -12,6 +12,7 @@ import {
   type SellerProfile,
   type UpdateProfileData,
 } from "../../../../api/seller.api";
+import { useAuthContext } from "@features/auth/hooks/useAuth";
 
 interface UserContextType {
   user: SellerProfile | null;
@@ -31,25 +32,24 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
+
   const fetchUser = useCallback(async () => {
+    if (authLoading) return;
+    
     try {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem("zameen360_token");
-      if (!token) {
+      if (!isAuthenticated || !authUser) {
         setUser(null);
         setLoading(false);
         return;
       }
 
-      // Check role from localStorage first
-      const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
-      const userRole = String(storedUser.role || '').toUpperCase();
-
       // Only fetch if user is SELLER
-      if (userRole !== 'SELLER') {
-        console.log("⏭️ Skipping seller fetch - user is", userRole);
+      if (authUser.role !== 'SELLER') {
+        console.log("⏭️ Skipping seller fetch - user is", authUser.role);
         setUser(null);
         setLoading(false);
         return;
@@ -65,7 +65,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authUser, isAuthenticated, authLoading]);
 
   const updateUser = useCallback(async (data: UpdateProfileData) => {
     try {

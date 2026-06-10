@@ -28,8 +28,6 @@ export interface SignupFormValues {
   city: string;
   password: string;
   confirmPassword: string;
-  role: "buyer" | "seller";
-  terms: true;
 }
 
 export interface SignupPayload {
@@ -39,7 +37,6 @@ export interface SignupPayload {
   city: string;
   password: string;
   confirmPassword: string;
-  role: string;
 }
 
 // ─── Login Types ──────────────────────────────────────────────────────────────

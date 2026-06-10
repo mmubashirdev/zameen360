@@ -19,3 +19,12 @@ exports.removePicture = async (req, res) => {
   try { await service.removePictureService(req.user.id); res.status(200).json({ success: true, message: "Removed." }); }
   catch (e) { res.status(500).json({ success: false, message: e.message }); }
 };
+
+exports.becomeSeller = async (req, res) => {
+  try {
+    const data = await service.becomeSellerService(req.user.id);
+    res.status(200).json({ success: true, message: "You are now a seller!", data });
+  } catch (e) {
+    res.status(e.status || 500).json({ success: false, message: e.message });
+  }
+};

@@ -20,11 +20,10 @@ const AuthenticatedNavbar = () => {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuthContext();
 
-  const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
-  const rawRole = (authUser as any)?.role || storedUser.role || '';
+  const rawRole = (authUser as any)?.role || '';
   const userRole = String(rawRole).toUpperCase();
-  const userName = (authUser as any)?.fullName || storedUser.fullName || "User";
-  const userEmail = (authUser as any)?.email || storedUser.email || "";
+  const userName = (authUser as any)?.fullName || "User";
+  const userEmail = (authUser as any)?.email || "";
   const profileImage = null;
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -70,7 +69,6 @@ const AuthenticatedNavbar = () => {
   const handleLogout = useCallback(() => {
     logout();
     localStorage.removeItem("zameen360_token");
-    localStorage.removeItem("zameen360_user");
     navigate("/login");
     window.location.reload();
   }, [logout, navigate]);
@@ -135,7 +133,7 @@ const AuthenticatedNavbar = () => {
             { to: "/sell", label: "Sell" },
             { to: "/projects", label: "Projects" },
             { to: "/about-us", label: "About Us" },
-            { to: "/contact-us", label: "Contact" },
+            { to: "/contact", label: "Contact" },
           ].map(({ to, label }) => (
             <li key={to}>
               <NavLink
@@ -152,15 +150,6 @@ const AuthenticatedNavbar = () => {
         </ul>
 
         <div className={styles.authNavRight}>
-          {userRole === 'SELLER' && (
-            <button
-              className={`${styles.authPostBtn} ${searchOpen ? styles.authPostBtnHidden : ""}`}
-              onClick={handlePostPropertyClick}
-            >
-              + Post Property
-            </button>
-          )}
-
           <div className={styles.searchContainer} ref={searchRef}>
             <div className={`${styles.searchWrapper} ${searchOpen ? styles.searchWrapperOpen : ""}`}>
               {searchOpen && (
@@ -343,7 +332,7 @@ const UnauthenticatedNavbar = () => {
         <li><NavLink to="/sell" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Sell</NavLink></li>
         <li><NavLink to="/projects" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Projects</NavLink></li>
         <li><NavLink to="/about-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>About Us</NavLink></li>
-        <li><NavLink to="/contact-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Contact Us</NavLink></li>
+        <li><NavLink to="/contact" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Contact Us</NavLink></li>
       </ul>
       <div className={styles.navActions}>
         <button className={styles.loginButton} onClick={() => navigate("/login")}>Login</button>

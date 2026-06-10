@@ -15,6 +15,7 @@ export const AUTH_ENDPOINTS = {
   RESET_PASSWORD:   "/auth/reset-password",
   GOOGLE_OAUTH:     "/auth/google",
   PROFILE:          "/auth/profile",
+  BECOME_SELLER:    "/auth/become-seller",
 } as const;
 
 // ─── User Roles ───────────────────────────────────────────────────────────────
