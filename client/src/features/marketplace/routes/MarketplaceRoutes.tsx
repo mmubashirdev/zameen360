@@ -8,10 +8,9 @@ import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/ContactUs";
 import Rent from "../rent/pages/Rent";
 import MyListings from "../pages/MyListings";
-import BuyerProfile from "../pages/BuyerProfile"; 
+import BuyerProfile from "../pages/BuyerProfile";  // ⬅️ NEW
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
- // ⬅️ NEW
 
 const marketplaceRoutes = [
   {
