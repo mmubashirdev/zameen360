@@ -2,6 +2,8 @@ import Logostyles from "../../marketplace/components/media/styles/Navbar.module.
 import styles from "../styles/dashboardNavbar.module.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/context/useAuthContext";
+import { useUser } from "../components/profile/UserContext";
+import { useBuyer } from "../components/profile/BuyerContext";
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Search,
@@ -16,15 +18,38 @@ import {
   Heart,
 } from "lucide-react";
 
+// Hidden when modal is open (controlled by body class)
 const AuthenticatedNavbar = () => {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuthContext();
+  const { user: sellerProfile } = useUser();
+  const { buyer: buyerProfile } = useBuyer();
 
-  const rawRole = (authUser as any)?.role || '';
+  // Get user data from multiple sources for sync
+  const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
+  const rawRole = (authUser as any)?.role || storedUser.role || '';
   const userRole = String(rawRole).toUpperCase();
-  const userName = (authUser as any)?.fullName || "User";
-  const userEmail = (authUser as any)?.email || "";
-  const profileImage = null;
+  
+  const userName = 
+    sellerProfile?.fullName || 
+    buyerProfile?.fullName || 
+    (authUser as any)?.fullName || 
+    storedUser.fullName || 
+    "User";
+  
+  // ⭐ Profile image from CURRENT context (always latest)
+  const profileImage = 
+    sellerProfile?.profilePicture || 
+    buyerProfile?.profilePicture || 
+    storedUser.profilePicture || 
+    null;
+  
+  const userEmail = 
+    sellerProfile?.email || 
+    buyerProfile?.email || 
+    (authUser as any)?.email || 
+    storedUser.email || 
+    "";
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -34,7 +59,16 @@ const AuthenticatedNavbar = () => {
   const searchRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
-  console.log("🔍 NAVBAR - userRole:", userRole, "userName:", userName);
+  // Sync profile image to localStorage whenever it changes
+  useEffect(() => {
+    if (profileImage) {
+      const currentStored = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
+      if (currentStored.profilePicture !== profileImage) {
+        currentStored.profilePicture = profileImage;
+        localStorage.setItem('zameen360_user', JSON.stringify(currentStored));
+      }
+    }
+  }, [profileImage]);
 
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
@@ -69,6 +103,7 @@ const AuthenticatedNavbar = () => {
   const handleLogout = useCallback(() => {
     logout();
     localStorage.removeItem("zameen360_token");
+    localStorage.removeItem("zameen360_user");
     navigate("/login");
     window.location.reload();
   }, [logout, navigate]);
@@ -102,7 +137,7 @@ const AuthenticatedNavbar = () => {
 
   const handlePostPropertyClick = () => {
     if (userRole === 'BUYER') {
-      alert("⚠️ Only Sellers can post properties!\n\nPlease switch to Seller from your profile.");
+      alert("Only Sellers can post properties.\n\nPlease switch to Seller from your profile.");
       navigate('/buyer-profile');
     } else {
       navigate("/post-property");
@@ -111,7 +146,7 @@ const AuthenticatedNavbar = () => {
 
   return (
     <>
-      <nav className={styles.authenticatedNavbar}>
+      <nav className={`${styles.authenticatedNavbar} navbar-main`}>
         <div className={styles.authNavLeft}>
           <Link to="/" className={styles.authLogoLink}>
             <div className={styles.authLogo}>
@@ -133,7 +168,7 @@ const AuthenticatedNavbar = () => {
             { to: "/sell", label: "Sell" },
             { to: "/projects", label: "Projects" },
             { to: "/about-us", label: "About Us" },
-            { to: "/contact", label: "Contact" },
+            { to: "/contact-us", label: "Contact" },
           ].map(({ to, label }) => (
             <li key={to}>
               <NavLink
@@ -150,6 +185,15 @@ const AuthenticatedNavbar = () => {
         </ul>
 
         <div className={styles.authNavRight}>
+          {userRole === 'SELLER' && (
+            <button
+              className={`${styles.authPostBtn} ${searchOpen ? styles.authPostBtnHidden : ""}`}
+              onClick={handlePostPropertyClick}
+            >
+              + Post Property
+            </button>
+          )}
+
           <div className={styles.searchContainer} ref={searchRef}>
             <div className={`${styles.searchWrapper} ${searchOpen ? styles.searchWrapperOpen : ""}`}>
               {searchOpen && (
@@ -202,7 +246,17 @@ const AuthenticatedNavbar = () => {
               title={userName}
             >
               {profileImage ? (
-                <img src={profileImage} alt="profile" className={styles.authAvatar} />
+                <img 
+                  src={profileImage} 
+                  alt="profile" 
+                  className={styles.authAvatar}
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }}
+                />
               ) : (
                 <div className={styles.authAvatarFallback}>
                   {userName.charAt(0).toUpperCase()}
@@ -225,7 +279,17 @@ const AuthenticatedNavbar = () => {
                 <div className={styles.authDropdownMenu}>
                   <div className={styles.dropdownUserInfo}>
                     {profileImage ? (
-                      <img src={profileImage} alt="profile" className={styles.dropdownAvatar} />
+                      <img 
+                        src={profileImage} 
+                        alt="profile" 
+                        className={styles.dropdownAvatar}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          objectFit: 'cover'
+                        }}
+                      />
                     ) : (
                       <div className={styles.dropdownAvatarFallback}>
                         {userName.charAt(0).toUpperCase()}
@@ -319,7 +383,7 @@ const AuthenticatedNavbar = () => {
 const UnauthenticatedNavbar = () => {
   const navigate = useNavigate();
   return (
-    <nav className={styles.navbar}>
+    <nav className={`${styles.navbar} navbar-main`}>
       <Link to="/">
         <div className={Logostyles.logo}>
           <span>Zameen<span className={Logostyles.logoAccent}>360</span></span>
@@ -332,7 +396,7 @@ const UnauthenticatedNavbar = () => {
         <li><NavLink to="/sell" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Sell</NavLink></li>
         <li><NavLink to="/projects" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Projects</NavLink></li>
         <li><NavLink to="/about-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>About Us</NavLink></li>
-        <li><NavLink to="/contact" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Contact Us</NavLink></li>
+        <li><NavLink to="/contact-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Contact Us</NavLink></li>
       </ul>
       <div className={styles.navActions}>
         <button className={styles.loginButton} onClick={() => navigate("/login")}>Login</button>

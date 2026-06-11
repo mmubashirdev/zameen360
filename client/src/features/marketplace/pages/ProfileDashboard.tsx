@@ -42,12 +42,11 @@ const ProfileDashboard: React.FC = () => {
       <DashboardNavbar />
       <Sidebar />
       <RightSidebar />
-
-      <main className="ml-[224px] mr-[280px] pt-[80px]">
+<aside className="w-[290px] fixed right-0 top-[64px] bottom-0..."></aside>
         <div className="p-5">
           <ProfileBanner />
         </div>
-      </main>
+      
     </div>
   );
 };
