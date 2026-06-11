@@ -1,7 +1,7 @@
 const path = require("path");
-const dotenvPath = path.resolve(__dirname, "../.env");
+const dotenvPath = path.resolve(__dirname, ".env");
+const morgan = require("morgan");
 require("dotenv").config({ path: dotenvPath });
-
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -69,20 +69,20 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-const apiLogger = (req, res, next) => {
-  const start = Date.now();
-  const originalSend = res.send;
+// const apiLogger = (req, res, next) => {
+//   const start = Date.now();
+//   const originalSend = res.send;
 
-  res.send = function (data) {
-    console.log(`${req.method} ${req.originalUrl} | ${res.statusCode} | ${Date.now() - start}ms`);
-    return originalSend.call(this, data);
-  };
+//   res.send = function (data) {
+//     console.log(`${req.method} ${req.originalUrl} | ${res.statusCode} | ${Date.now() - start}ms`);
+//     return originalSend.call(this, data);
+//   };
 
-  next();
-};
+//   next();
+// };
 
-app.use(apiLogger);
-
+// app.use(apiLogger);
+app.use(morgan("dev"));
 
 app.use(
   cors({
