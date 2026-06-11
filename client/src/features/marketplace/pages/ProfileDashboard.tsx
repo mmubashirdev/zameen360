@@ -42,7 +42,7 @@ const ProfileDashboard: React.FC = () => {
       <DashboardNavbar />
       <Sidebar />
       <RightSidebar />
-<aside className="w-[290px] fixed right-0 top-[64px] bottom-0..."></aside>
+<aside className="w-[290px] fixed right-0 top-[34px] bottom-0..."></aside>
         <div className="p-5">
           <ProfileBanner />
         </div>
