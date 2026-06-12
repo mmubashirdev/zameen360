@@ -12,7 +12,7 @@ import MyListings from "../pages/MyListings";
 import BuyerProfile from "../pages/BuyerProfile";  
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
-
+import PropertySubmitted from "../pages/PropertySubmitted"
 const marketplaceRoutes = [
   {
     path: "/",
@@ -39,7 +39,7 @@ const marketplaceRoutes = [
     element: <CreatePropertyPost />,
   },
   {
-    path: "/property",
+    path: "/property/:id",
     element: <PropertyDetails />,
   },
   {
@@ -49,6 +49,10 @@ const marketplaceRoutes = [
   {
     path: "/review",
     element: <ReviewSubmit />,
+  },
+  {
+    path: "/property-submitted",
+    element: <PropertySubmitted />,
   },
   {
     path: "/buy",
