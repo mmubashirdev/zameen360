@@ -6,9 +6,10 @@ import ProfilePage from "../pages/profile";
 import Buy from "../pages/Buypage";
 import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/ContactUs";
+import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
 import MyListings from "../pages/MyListings";
-import BuyerProfile from "../pages/BuyerProfile";  // ⬅️ NEW
+import BuyerProfile from "../pages/BuyerProfile";  
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import PropertySubmitted from "../pages/PropertySubmitted"
@@ -66,9 +67,13 @@ const marketplaceRoutes = [
     element: <AboutPage />,
   },
   {
-    path: "/contact",
+    path: "/contact-us",
     element: <ContactUsPage />,
   },
+  {
+    path: "/support",
+    element: <SupportPage />,
+  }
 ];
 
 export { marketplaceRoutes };
