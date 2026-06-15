@@ -183,7 +183,7 @@ const AuthenticatedNavbar = () => {
             { to: "/sell", label: "Sell" },
             { to: "/projects", label: "Projects" },
             { to: "/about-us", label: "About Us" },
-            { to: "/contact-us", label: "Contact" },
+            { to: "/contact-us", label: "Contact Us" },
           ].map(({ to, label }) => (
             <li key={to}>
               <NavLink
@@ -512,7 +512,7 @@ const UnauthenticatedNavbar = () => {
         </li>
         <li>
           <NavLink
-            to="/contact"
+            to="/contact-us"
             className={({ isActive }) => (isActive ? styles.activeLink : "")}
           >
             Contact Us

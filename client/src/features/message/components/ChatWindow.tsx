@@ -330,7 +330,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   // ─── Empty state ─────────────────────────────────────────────────────────────
   if (!conversationId && !newConversationContext) {
     return (
-      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[88vh] w-[1020px] items-center justify-center gap-3">
+      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[88vh] w-[930px] items-center justify-center gap-3">
         <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
           <Send className="w-7 h-7 text-blue-400" />
         </div>
@@ -352,7 +352,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   return (
     <>
       {/* ── Main Chat Container ─────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[88vh] w-[1020px] overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[90vh] w-[930px] overflow-hidden">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
