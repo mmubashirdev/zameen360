@@ -271,7 +271,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
         }
       } catch (err: any) {
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
-        setImageError("One or more images failed to send.");
+        setImageError("One or more images failed to send. ");
       }
     }
 
