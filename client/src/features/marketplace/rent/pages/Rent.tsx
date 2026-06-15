@@ -89,7 +89,7 @@ const RentPage = () => {
 
   // ── WebSocket — Live rental properties ────────────────────────────
   const { on } = useSocket({
-    userId: currentUser?.id,
+    userId: currentUser?.userId || currentUser?.id,
     joinPublic: true,
   });
 

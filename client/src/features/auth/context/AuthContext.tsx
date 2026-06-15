@@ -66,7 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const response = await getProfile();
         if (response.data) {
-          setUser(response.data.user as User, token);
+          setUser(response.data as User, token);
         } else {
           logout();
         }

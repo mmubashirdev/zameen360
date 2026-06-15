@@ -7,6 +7,8 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import DashboardNavbar from "../components/DashboardNavbar";
 // ✅ AFTER
+// import MapModal from "../components/hooks/mapmodal";
+import { useAuthContext } from "@features/auth/hooks/useAuth";
 import { useSocket } from "../components/hooks/usehook";
 import type { PropertyEventData } from "../components/hooks/usehook";
 import styles from "../../marketplace/components/media/styles/Buy.module.css";
@@ -28,11 +30,6 @@ interface Property {
   status: string;
 }
 
-interface StoredUser {
-  id: number;
-  fullName?: string;
-  email?: string;
-}
 
 const Buy = () => {
   const navigate = useNavigate();
@@ -42,11 +39,8 @@ const Buy = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // ── Get user from localStorage with proper typing ─────────────────
-  const storedUser = localStorage.getItem("user");
-  const currentUser: StoredUser | null = storedUser
-    ? (JSON.parse(storedUser) as StoredUser)
-    : null;
+  // ── Get user ──────────────────────────────────────────────────────
+  const { user: currentUser } = useAuthContext();
 
   // Filter states
   const [search, setSearch] = useState("");
@@ -88,7 +82,7 @@ const Buy = () => {
 
   // ── WebSocket — Live properties ───────────────────────────────────
   const { on } = useSocket({
-    userId: currentUser?.id,
+    userId: currentUser?.userId || currentUser?.id,
     joinPublic: true,
   });
 
@@ -142,8 +136,7 @@ const Buy = () => {
     if (urlMaxPrice) setMaxPrice(urlMaxPrice);
     if (urlLocality && !urlSearch) setSearch(urlLocality);
 
-    // Defer so React batches state updates before fetch runs
-    setTimeout(() => setInitialLoad(false), 0);
+    setInitialLoad(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
