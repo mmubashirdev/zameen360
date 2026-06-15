@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import { switchToSeller } from '../../../../api/buyer.api';
 
 interface Props {
@@ -7,13 +6,20 @@ interface Props {
   onClose: () => void;
 }
 
+interface FormErrors {
+  companyName?: string;
+  experience?: string;
+  specialization?: string;
+  aboutBusiness?: string;
+  licenseNumber?: string;
+}
+
 const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
-  const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1);
-  const [cnicError, setCnicError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -23,21 +29,40 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
     aboutBusiness: '',
   });
 
+  // Hide navbar when modal is open
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add('modal-open');
+      const navbar = document.querySelector('.navbar-main') as HTMLElement;
+      if (navbar) navbar.style.display = 'none';
+    } else {
+      document.body.classList.remove('modal-open');
+      const navbar = document.querySelector('.navbar-main') as HTMLElement;
+      if (navbar) navbar.style.display = '';
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+      const navbar = document.querySelector('.navbar-main') as HTMLElement;
+      if (navbar) navbar.style.display = '';
+    };
+  }, [open]);
+
   if (!open) return null;
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
+    }
   };
 
-  // CNIC validation - only numbers, max 13 digits
+  // CNIC validation - only numbers, auto format, max 13 digits
   const handleCnicChange = (value: string) => {
-    // Remove all non-digits
     const numbersOnly = value.replace(/\D/g, '');
-    
-    // Limit to 13 digits
     const limited = numbersOnly.slice(0, 13);
-    
-    // Format as XXXXX-XXXXXXX-X
+
     let formatted = limited;
     if (limited.length > 5) {
       formatted = limited.slice(0, 5) + '-' + limited.slice(5);
@@ -48,25 +73,68 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
 
     setFormData((prev) => ({ ...prev, licenseNumber: formatted }));
 
-    // Validation
     if (limited.length > 0 && limited.length < 13) {
-      setCnicError(`CNIC must be 13 digits (currently ${limited.length})`);
+      setErrors((prev) => ({ ...prev, licenseNumber: `CNIC must be 13 digits (currently ${limited.length})` }));
     } else {
-      setCnicError(null);
+      setErrors((prev) => ({ ...prev, licenseNumber: undefined }));
     }
   };
 
-  const validateCnic = () => {
-    const digits = formData.licenseNumber.replace(/\D/g, '');
-    if (formData.licenseNumber && digits.length !== 13) {
-      setCnicError('CNIC must be exactly 13 digits');
-      return false;
+  // Validate Step 1
+  const validateStep1 = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Company Name validation
+    if (!formData.companyName.trim()) {
+      newErrors.companyName = 'Company name is required';
+    } else if (formData.companyName.trim().length < 3) {
+      newErrors.companyName = 'Company name must be at least 3 characters';
+    } else if (formData.companyName.trim().length > 50) {
+      newErrors.companyName = 'Company name must not exceed 50 characters';
+    } else if (!/^[a-zA-Z0-9\s&.\-']+$/.test(formData.companyName)) {
+      newErrors.companyName = 'Company name contains invalid characters';
     }
-    return true;
+
+    // Experience validation
+    if (!formData.experience) {
+      newErrors.experience = 'Please select your experience';
+    }
+
+    // Specialization validation
+    if (!formData.specialization) {
+      newErrors.specialization = 'Please select your specialization';
+    }
+
+    // About Business validation
+    if (!formData.aboutBusiness.trim()) {
+      newErrors.aboutBusiness = 'Please tell us about your business';
+    } else if (formData.aboutBusiness.trim().length < 20) {
+      newErrors.aboutBusiness = 'Please provide at least 20 characters';
+    } else if (formData.aboutBusiness.trim().length > 500) {
+      newErrors.aboutBusiness = 'Maximum 500 characters allowed';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Validate Step 2
+  const validateStep2 = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    const digits = formData.licenseNumber.replace(/\D/g, '');
+    if (!formData.licenseNumber) {
+      newErrors.licenseNumber = 'CNIC is required for verification';
+    } else if (digits.length !== 13) {
+      newErrors.licenseNumber = 'CNIC must be exactly 13 digits';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
-    if (!validateCnic()) return;
+    if (!validateStep2()) return;
 
     try {
       setSaving(true);
@@ -87,7 +155,9 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
   };
 
   const handleNext = () => {
-    if (step < 2) setStep(step + 1);
+    if (validateStep1()) {
+      setStep(2);
+    }
   };
 
   const handleBack = () => {
@@ -95,9 +165,12 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+    <div 
+      className="fixed inset-0 bg-black/60 flex items-center justify-center p-4"
+      style={{ zIndex: 999999 }}
+    >
       <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header - BLUE THEME */}
+        {/* Header - Blue Theme */}
         <div className="bg-blue-600 px-6 py-5 relative">
           <button
             onClick={onClose}
@@ -149,7 +222,7 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
               </svg>
             </div>
             <h3 className="text-lg font-bold text-blue-800 mb-1">Congratulations!</h3>
-            <p className="text-sm text-blue-700">You are now a Seller. Redirecting to your seller profile...</p>
+            <p className="text-sm text-blue-700">You are now a Seller. Redirecting...</p>
           </div>
         )}
 
@@ -167,10 +240,11 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
               <div className="p-6 space-y-4">
                 <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
                   <p className="text-xs text-blue-800">
-                    Tell us about your business to start selling properties
+                    Tell us about your business. All fields are required.
                   </p>
                 </div>
 
+                {/* Company Name */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Company / Business Name <span className="text-red-500">*</span>
@@ -180,18 +254,29 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
                     value={formData.companyName}
                     onChange={(e) => handleChange('companyName', e.target.value)}
                     placeholder="e.g., Malik Properties"
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    maxLength={50}
+                    className={`w-full bg-gray-50 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
+                      errors.companyName ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
+                    }`}
                   />
+                  {errors.companyName ? (
+                    <p className="text-xs text-red-600 mt-1">{errors.companyName}</p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">{formData.companyName.length}/50 characters</p>
+                  )}
                 </div>
 
+                {/* Experience */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Years of Experience
+                    Years of Experience <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.experience}
                     onChange={(e) => handleChange('experience', e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full bg-gray-50 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
+                      errors.experience ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
+                    }`}
                   >
                     <option value="">Select Experience</option>
                     <option value="0-1">Less than 1 year</option>
@@ -200,16 +285,22 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
                     <option value="5-10">5-10 years</option>
                     <option value="10+">10+ years</option>
                   </select>
+                  {errors.experience && (
+                    <p className="text-xs text-red-600 mt-1">{errors.experience}</p>
+                  )}
                 </div>
 
+                {/* Specialization */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Specialization
+                    Specialization <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.specialization}
                     onChange={(e) => handleChange('specialization', e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full bg-gray-50 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
+                      errors.specialization ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
+                    }`}
                   >
                     <option value="">Select Specialization</option>
                     <option value="Residential">Residential Properties</option>
@@ -218,29 +309,41 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
                     <option value="Plots">Plots & Land</option>
                     <option value="Rental">Rental Properties</option>
                   </select>
+                  {errors.specialization && (
+                    <p className="text-xs text-red-600 mt-1">{errors.specialization}</p>
+                  )}
                 </div>
 
+                {/* About Business */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    About Your Business
+                    About Your Business <span className="text-red-500">*</span>
                   </label>
                   <textarea
                     value={formData.aboutBusiness}
                     onChange={(e) => handleChange('aboutBusiness', e.target.value)}
                     rows={3}
-                    placeholder="Tell us about your business..."
-                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    placeholder="Describe your business, services, and experience (minimum 20 characters)..."
+                    maxLength={500}
+                    className={`w-full bg-gray-50 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 resize-none ${
+                      errors.aboutBusiness ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
+                    }`}
                   />
+                  {errors.aboutBusiness ? (
+                    <p className="text-xs text-red-600 mt-1">{errors.aboutBusiness}</p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">{formData.aboutBusiness.length}/500 characters (min 20)</p>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Step 2: Verification - CNIC */}
+            {/* Step 2: Verification */}
             {step === 2 && (
               <div className="p-6 space-y-4">
                 <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
                   <p className="text-xs text-blue-800">
-                    This information helps us verify your identity
+                    Provide your CNIC for identity verification
                   </p>
                 </div>
 
@@ -255,11 +358,11 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
                     placeholder="35202-1234567-8"
                     maxLength={15}
                     className={`w-full bg-gray-50 border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 ${
-                      cnicError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
+                      errors.licenseNumber ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-blue-500'
                     }`}
                   />
-                  {cnicError ? (
-                    <p className="text-xs text-red-600 mt-1">{cnicError}</p>
+                  {errors.licenseNumber ? (
+                    <p className="text-xs text-red-600 mt-1">{errors.licenseNumber}</p>
                   ) : (
                     <p className="text-xs text-gray-500 mt-1">
                       Enter your 13-digit CNIC number (Format: XXXXX-XXXXXXX-X)
@@ -323,16 +426,15 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
               {step < 2 ? (
                 <button
                   onClick={handleNext}
-                  disabled={!formData.companyName}
-                  className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
                   Next
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
-                  disabled={saving || !!cnicError || !formData.licenseNumber}
-                  className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  disabled={saving}
+                  className="px-6 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 flex items-center gap-2"
                 >
                   {saving ? (
                     <>

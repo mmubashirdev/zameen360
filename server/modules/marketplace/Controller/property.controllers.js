@@ -1,8 +1,11 @@
+// server/modules/marketplace/Controller/property.controllers.js
 const prisma = require("../../../configs/prisma");
-const fs = require("fs");
-const path = require("path");
+const cloudinary = require("../../../configs/cloudinary");
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:5000";
+console.log(
+  "Cloudinary upload_stream available:",
+  typeof cloudinary.uploader?.upload_stream,
+);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const toBigInt = (val) => {
@@ -35,21 +38,52 @@ const toBool = (val) => {
 const serializeBigInt = (obj) => {
   return JSON.parse(
     JSON.stringify(obj, (_, value) =>
-      typeof value === "bigint" ? value.toString() : value
-    )
+      typeof value === "bigint" ? value.toString() : value,
+    ),
   );
 };
 
-// ─── Socket helper ────────────────────────────────────────────────────────────
-// req se io nikaalta hai aur event emit karta hai
-const emitEvent = (req, event, room, data) => {
+// ✅ Upload single buffer to Cloudinary
+const uploadToCloudinary = (buffer, folder = "zameen360/properties") => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "image",
+        transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
+      },
+      (error, result) => {
+        if (error)
+          reject(new Error(`Cloudinary upload failed: ${error.message}`));
+        else resolve(result.secure_url);
+      },
+    );
+    stream.end(buffer);
+  });
+};
+
+// ✅ Upload multiple files to Cloudinary
+const uploadMultipleToCloudinary = async (
+  files,
+  folder = "zameen360/properties",
+) => {
+  const promises = files.map((file) => uploadToCloudinary(file.buffer, folder));
+  return Promise.all(promises);
+};
+
+// ✅ Delete image from Cloudinary by URL
+const deleteFromCloudinary = async (url) => {
   try {
-    const io = req.app.get("io");
-    if (io) {
-      io.to(room).emit(event, data);
-    }
+    if (!url || !url.includes("cloudinary.com")) return;
+    const parts = url.split("/");
+    const uploadIndex = parts.indexOf("upload");
+    if (uploadIndex === -1) return;
+    const pathParts = parts.slice(uploadIndex + 1);
+    if (pathParts[0].startsWith("v")) pathParts.shift();
+    const publicId = pathParts.join("/").replace(/\.[^/.]+$/, "");
+    await cloudinary.uploader.destroy(publicId);
   } catch (err) {
-    console.warn("Socket emit error:", err.message);
+    console.warn("Cloudinary delete failed:", err.message);
   }
 };
 
@@ -68,13 +102,27 @@ exports.createProperty = async (req, res) => {
       });
     }
 
-    const imageUrls = files.map(
-      (file) => `${BASE_URL}/uploads/properties/${file.filename}`
-    );
+    // ✅ Upload to Cloudinary instead of local disk
+    let imageUrls = [];
+    if (files.length > 0) {
+      try {
+        imageUrls = await uploadMultipleToCloudinary(files);
+        console.log(`✅ Uploaded ${imageUrls.length} images to Cloudinary`);
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr.message);
+        return res.status(500).json({
+          success: false,
+          message: "Image upload failed. Please try again.",
+          error: uploadErr.message,
+        });
+      }
+    }
 
     const property = await prisma.property.create({
       data: {
-        userId: userId,
+        user: {
+          connect: { id: Number(userId) }, // ✅ Fixed: use relation connect
+        },
         purpose: d.purpose || null,
         propertyType: d.propertyType || null,
         title: d.title || null,
@@ -104,36 +152,28 @@ exports.createProperty = async (req, res) => {
         address: d.address || null,
         latitude: d.lat ? Number(d.lat) : null,
         longitude: d.lng ? Number(d.lng) : null,
-        images: imageUrls,
+        images: imageUrls, // ✅ Cloudinary URLs
         videoUrl: d.videoUrl || null,
         floorPlan: d.floorPlan || null,
         status: "pending",
       },
-      // User info bhi include karo
       include: {
         user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
+          select: { id: true, fullName: true, email: true },
         },
       },
     });
 
     const serialized = serializeBigInt(property);
 
-    // ── Socket Events ──────────────────────────────────────────────────
+    // Socket Events
     const io = req.app.get("io");
     if (io) {
-      // 1. Admin ko notify karo - naya pending property aaya
       io.to("admin_room").emit("new_property_pending", {
         message: `New property submitted by ${property.user?.fullName || "User"}`,
         property: serialized,
         timestamp: new Date().toISOString(),
       });
-
-      // 2. Property post karne wale user ko confirm karo
       io.to(`user_${userId}`).emit("property_submitted", {
         message: "Your property has been submitted and is pending approval.",
         propertyId: property.id,
@@ -168,7 +208,6 @@ exports.getProperties = async (req, res) => {
       locality,
       minPrice,
       maxPrice,
-      status,
       bedrooms,
       bathrooms,
       minBeds,
@@ -181,73 +220,41 @@ exports.getProperties = async (req, res) => {
       amenities,
     } = req.query;
 
-    // ── IMPORTANT FIX: Hamesha sirf "approved" status return karo
-    // Yahi bug tha — pehle koi bhi status accept ho raha tha
-    const where = {
-      status: "approved", // ← FIXED: hardcoded, override nahi hoga
-    };
+    const where = { status: "approved" };
 
-    // Purpose filter
     if (purpose) where.purpose = purpose;
-
-    // Property type filter
     if (propertyType) where.propertyType = propertyType;
-
-    // City filter
     if (city) where.city = { contains: city, mode: "insensitive" };
-
-    // Locality filter
-    if (locality) {
-      where.locality = { contains: locality, mode: "insensitive" };
-    }
-
-    // Area unit filter
+    if (locality) where.locality = { contains: locality, mode: "insensitive" };
     if (areaUnit) where.areaUnit = areaUnit;
 
-    // Bedrooms filter - exact ya range
     if (bedrooms) {
       where.bedrooms = bedrooms;
     } else if (minBeds || maxBeds) {
-      // Bedrooms string field hai, compare karo
-      // Simple approach: agar minBeds set hai
-      if (minBeds && !maxBeds) {
-        where.bedrooms = { gte: minBeds };
-      } else if (!minBeds && maxBeds) {
-        where.bedrooms = { lte: maxBeds };
-      } else if (minBeds && maxBeds) {
-        where.bedrooms = { gte: minBeds, lte: maxBeds };
-      }
+      where.bedrooms = {};
+      if (minBeds) where.bedrooms.gte = minBeds;
+      if (maxBeds) where.bedrooms.lte = maxBeds;
     }
 
-    // Bathrooms filter
     if (bathrooms) {
       where.bathrooms = bathrooms;
     } else if (minBaths || maxBaths) {
-      if (minBaths && !maxBaths) {
-        where.bathrooms = { gte: minBaths };
-      } else if (!minBaths && maxBaths) {
-        where.bathrooms = { lte: maxBaths };
-      } else if (minBaths && maxBaths) {
-        where.bathrooms = { gte: minBaths, lte: maxBaths };
-      }
+      where.bathrooms = {};
+      if (minBaths) where.bathrooms.gte = minBaths;
+      if (maxBaths) where.bathrooms.lte = maxBaths;
     }
 
-    // Area size filter
     if (minArea || maxArea) {
       where.areaSize = {};
       if (minArea) where.areaSize.gte = minArea;
       if (maxArea) where.areaSize.lte = maxArea;
     }
 
-    // Amenities filter
     if (amenities) {
       const amenityList = amenities.split(",").map((a) => a.trim());
-      if (amenityList.length > 0) {
-        where.amenities = { hasEvery: amenityList };
-      }
+      if (amenityList.length > 0) where.amenities = { hasEvery: amenityList };
     }
 
-    // Search filter
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
@@ -258,7 +265,6 @@ exports.getProperties = async (req, res) => {
       ];
     }
 
-    // Price filter
     if (minPrice || maxPrice) {
       where.price = {};
       if (minPrice) where.price.gte = BigInt(minPrice);
@@ -270,12 +276,7 @@ exports.getProperties = async (req, res) => {
       orderBy: { createdAt: "desc" },
       include: {
         user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phone: true,
-          },
+          select: { id: true, fullName: true, email: true, phone: true },
         },
       },
     });
@@ -299,12 +300,9 @@ exports.getProperties = async (req, res) => {
 exports.getAdminProperties = async (req, res) => {
   try {
     const { status, search, page } = req.query;
-
     const where = {};
 
-    if (status && status !== "all") {
-      where.status = status;
-    }
+    if (status && status !== "all") where.status = status;
 
     if (search) {
       where.OR = [
@@ -317,7 +315,6 @@ exports.getAdminProperties = async (req, res) => {
     const pageNumber = parseInt(page) || 1;
     const pageSize = 10;
     const skip = (pageNumber - 1) * pageSize;
-
     const total = await prisma.property.count({ where });
 
     const properties = await prisma.property.findMany({
@@ -327,12 +324,7 @@ exports.getAdminProperties = async (req, res) => {
       take: pageSize,
       include: {
         user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phone: true,
-          },
+          select: { id: true, fullName: true, email: true, phone: true },
         },
       },
     });
@@ -354,7 +346,7 @@ exports.getAdminProperties = async (req, res) => {
   }
 };
 
-// ==================== ADMIN - Update Status (Approve / Reject) ====================
+// ==================== ADMIN - Update Status ====================
 exports.updatePropertyStatus = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -377,9 +369,7 @@ exports.updatePropertyStatus = async (req, res) => {
 
     const existing = await prisma.property.findUnique({
       where: { id },
-      include: {
-        user: { select: { id: true, fullName: true, email: true } },
-      },
+      include: { user: { select: { id: true, fullName: true, email: true } } },
     });
 
     if (!existing) {
@@ -403,25 +393,19 @@ exports.updatePropertyStatus = async (req, res) => {
     const property = await prisma.property.update({
       where: { id },
       data: updateData,
-      include: {
-        user: { select: { id: true, fullName: true, email: true } },
-      },
+      include: { user: { select: { id: true, fullName: true, email: true } } },
     });
 
     const serialized = serializeBigInt(property);
-
-    // ── Socket Events ──────────────────────────────────────────────────
     const io = req.app.get("io");
+
     if (io) {
       if (status === "approved") {
-        // 1. Sab public users ko live broadcast karo - nai property available hai
         io.to("public_room").emit("property_approved", {
           message: "A new property is now available!",
           property: serialized,
           timestamp: new Date().toISOString(),
         });
-
-        // 2. Property owner ko notify karo
         if (existing.userId) {
           io.to(`user_${existing.userId}`).emit("your_property_approved", {
             message: `Congratulations! Your property "${existing.title}" has been approved and is now live.`,
@@ -430,15 +414,12 @@ exports.updatePropertyStatus = async (req, res) => {
             timestamp: new Date().toISOString(),
           });
         }
-
-        // 3. Admin room ko bhi update bhejo
         io.to("admin_room").emit("property_status_updated", {
           propertyId: id,
           status: "approved",
           timestamp: new Date().toISOString(),
         });
       } else if (status === "rejected") {
-        // Owner ko rejection notify karo
         if (existing.userId) {
           io.to(`user_${existing.userId}`).emit("your_property_rejected", {
             message: `Your property "${existing.title}" was rejected.`,
@@ -448,14 +429,12 @@ exports.updatePropertyStatus = async (req, res) => {
             timestamp: new Date().toISOString(),
           });
         }
-
-        // Admin room update
         io.to("admin_room").emit("property_status_updated", {
           propertyId: id,
           status: "rejected",
           timestamp: new Date().toISOString(),
         });
-      } else if (status === "pending") {
+      } else {
         io.to("admin_room").emit("property_status_updated", {
           propertyId: id,
           status: "pending",
@@ -489,17 +468,16 @@ exports.getDashboardStats = async (req, res) => {
       prisma.property.count({ where: { status: "rejected" } }),
     ]);
 
-    res.json({
-      success: true,
-      data: { total, pending, approved, rejected },
-    });
+    res.json({ success: true, data: { total, pending, approved, rejected } });
   } catch (err) {
     console.error("STATS ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch stats",
-      error: err.message,
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch stats",
+        error: err.message,
+      });
   }
 };
 
@@ -518,12 +496,7 @@ exports.getPropertyById = async (req, res) => {
       where: { id },
       include: {
         user: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-            phone: true,
-          },
+          select: { id: true, fullName: true, email: true, phone: true },
         },
       },
     });
@@ -537,11 +510,13 @@ exports.getPropertyById = async (req, res) => {
     res.json({ success: true, data: serializeBigInt(property) });
   } catch (err) {
     console.error("GET PROPERTY BY ID ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch property",
-      error: err.message,
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to fetch property",
+        error: err.message,
+      });
   }
 };
 
@@ -565,9 +540,18 @@ exports.updateProperty = async (req, res) => {
         .json({ success: false, message: "Property not found" });
     }
 
-    const newImageUrls = files.map(
-      (file) => `${BASE_URL}/uploads/properties/${file.filename}`
-    );
+    // ✅ Upload new images to Cloudinary, delete old ones
+    let newImageUrls = [];
+    if (files.length > 0) {
+      newImageUrls = await uploadMultipleToCloudinary(files);
+
+      // Delete old Cloudinary images
+      if (Array.isArray(existing.images) && existing.images.length > 0) {
+        await Promise.allSettled(
+          existing.images.map((url) => deleteFromCloudinary(url)),
+        );
+      }
+    }
 
     const updateData = {
       ...(d.purpose !== undefined && { purpose: d.purpose }),
@@ -621,10 +605,8 @@ exports.updateProperty = async (req, res) => {
       where: { id },
       data: updateData,
     });
-
     const serialized = serializeBigInt(property);
 
-    // ── Socket: agar status update hua to emit karo ───────────────────
     const io = req.app.get("io");
     if (io && d.status === "approved") {
       io.to("public_room").emit("property_approved", {
@@ -641,11 +623,13 @@ exports.updateProperty = async (req, res) => {
     });
   } catch (err) {
     console.error("UPDATE PROPERTY ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update property",
-      error: err.message,
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to update property",
+        error: err.message,
+      });
   }
 };
 
@@ -667,55 +651,39 @@ exports.deleteProperty = async (req, res) => {
         .json({ success: false, message: "Property not found" });
     }
 
-    // Image files delete karo disk se
-    if (Array.isArray(existing.images)) {
-      existing.images.forEach((url) => {
-        try {
-          const filename = url.split("/uploads/properties/")[1];
-          if (filename) {
-            const filepath = path.join(
-              __dirname,
-              "..",
-              "..",
-              "..",
-              "uploads",
-              "properties",
-              filename
-            );
-            if (fs.existsSync(filepath)) fs.unlinkSync(filepath);
-          }
-        } catch (e) {
-          console.warn("Could not delete file:", e.message);
-        }
-      });
+    // ✅ Delete images from Cloudinary
+    if (Array.isArray(existing.images) && existing.images.length > 0) {
+      await Promise.allSettled(
+        existing.images.map((url) => deleteFromCloudinary(url)),
+      );
+      console.log(
+        `🗑️ Deleted ${existing.images.length} images from Cloudinary`,
+      );
     }
 
     await prisma.property.delete({ where: { id } });
 
-    // ── Socket: property deleted notify karo ──────────────────────────
     const io = req.app.get("io");
     if (io) {
       io.to("public_room").emit("property_deleted", {
         propertyId: id,
         timestamp: new Date().toISOString(),
       });
-
       io.to("admin_room").emit("property_deleted", {
         propertyId: id,
         timestamp: new Date().toISOString(),
       });
     }
 
-    res.json({
-      success: true,
-      message: "Property deleted successfully",
-    });
+    res.json({ success: true, message: "Property deleted successfully" });
   } catch (err) {
     console.error("DELETE PROPERTY ERROR:", err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete property",
-      error: err.message,
-    });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Failed to delete property",
+        error: err.message,
+      });
   }
 };

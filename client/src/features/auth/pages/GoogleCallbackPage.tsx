@@ -39,7 +39,9 @@ export default function GoogleCallbackPage() {
     // Fetch user profile
     const fetchUser = async () => {
       try {
-        const response = await axiosInstance.get("/auth/profile");
+        const response = await axiosInstance.get("/auth/profile",{
+          withCredentials: true
+        });
         const data = response as unknown as {
           success: boolean;
           data?: {

@@ -2,6 +2,8 @@ import Logostyles from "../../marketplace/components/media/styles/Navbar.module.
 import styles from "../styles/dashboardNavbar.module.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/context/useAuthContext";
+import { useUser } from "../components/profile/UserContext";
+import { useBuyer } from "../components/profile/BuyerContext";
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
   Search,
@@ -17,15 +19,36 @@ import {
 } from "lucide-react";
 import NotificationDropdown from "../components/NotificationDropdown"; 
 
+// Hidden when modal is open (controlled by body class)
 const AuthenticatedNavbar = () => {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuthContext();
+  const { user: sellerProfile } = useUser();
+  const { buyer: buyerProfile } = useBuyer();
 
   const rawRole = (authUser as any)?.role || "";
   const userRole = String(rawRole).toUpperCase();
-  const userName = (authUser as any)?.fullName || "User";
-  const userEmail = (authUser as any)?.email || "";
-  const profileImage = null;
+  
+  const userName = 
+    sellerProfile?.fullName || 
+    buyerProfile?.fullName || 
+    (authUser as any)?.fullName || 
+    storedUser.fullName || 
+    "User";
+  
+  // ⭐ Profile image from CURRENT context (always latest)
+  const profileImage = 
+    sellerProfile?.profilePicture || 
+    buyerProfile?.profilePicture || 
+    storedUser.profilePicture || 
+    null;
+  
+  const userEmail = 
+    sellerProfile?.email || 
+    buyerProfile?.email || 
+    (authUser as any)?.email || 
+    storedUser.email || 
+    "";
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -37,7 +60,16 @@ const AuthenticatedNavbar = () => {
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const notificationRef = useRef<HTMLDivElement | null>(null); 
 
-  console.log("🔍 NAVBAR - userRole:", userRole, "userName:", userName);
+  // Sync profile image to localStorage whenever it changes
+  useEffect(() => {
+    if (profileImage) {
+      const currentStored = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
+      if (currentStored.profilePicture !== profileImage) {
+        currentStored.profilePicture = profileImage;
+        localStorage.setItem('zameen360_user', JSON.stringify(currentStored));
+      }
+    }
+  }, [profileImage]);
 
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
@@ -79,6 +111,7 @@ const AuthenticatedNavbar = () => {
   const handleLogout = useCallback(() => {
     logout();
     localStorage.removeItem("zameen360_token");
+    localStorage.removeItem("zameen360_user");
     navigate("/login");
     window.location.reload();
   }, [logout, navigate]);
@@ -123,7 +156,7 @@ const AuthenticatedNavbar = () => {
 
   return (
     <>
-      <nav className={styles.authenticatedNavbar}>
+      <nav className={`${styles.authenticatedNavbar} navbar-main`}>
         <div className={styles.authNavLeft}>
           <Link to="/" className={styles.authLogoLink}>
             <div className={styles.authLogo}>
@@ -149,7 +182,7 @@ const AuthenticatedNavbar = () => {
             { to: "/sell", label: "Sell" },
             { to: "/projects", label: "Projects" },
             { to: "/about-us", label: "About Us" },
-            { to: "/contact", label: "Contact" },
+            { to: "/contact-us", label: "Contact" },
           ].map(({ to, label }) => (
             <li key={to}>
               <NavLink
@@ -168,6 +201,15 @@ const AuthenticatedNavbar = () => {
         </ul>
 
         <div className={styles.authNavRight}>
+          {userRole === 'SELLER' && (
+            <button
+              className={`${styles.authPostBtn} ${searchOpen ? styles.authPostBtnHidden : ""}`}
+              onClick={handlePostPropertyClick}
+            >
+              + Post Property
+            </button>
+          )}
+
           <div className={styles.searchContainer} ref={searchRef}>
             <div
               className={`${styles.searchWrapper} ${
@@ -410,7 +452,7 @@ const AuthenticatedNavbar = () => {
 const UnauthenticatedNavbar = () => {
   const navigate = useNavigate();
   return (
-    <nav className={styles.navbar}>
+    <nav className={`${styles.navbar} navbar-main`}>
       <Link to="/">
         <div className={Logostyles.logo}>
           <span>
