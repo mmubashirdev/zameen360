@@ -16,6 +16,7 @@ const sellerRoutes = require("./modules/sellerProfile/routes/sellerRoutes");
 const buyerRoutes = require("./modules/buyerProfile/routes/buyerRoutes");
 const supportRoutes = require("./modules/support/routes/support.routes");
 const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
+const messageRoutes = require("./modules/message/routes/message.routes");
 
 const app = express();
 
@@ -25,7 +26,7 @@ const httpServer = http.createServer(app);
 // ─── Socket.IO setup ──────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://127.0.0.1:5173"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
@@ -34,16 +35,35 @@ const io = new Server(httpServer, {
 // ─── Socket.IO ko globally available karo (controllers mein use karne ke liye)
 app.set("io", io);
 
+// ─── Online Users Tracking ──────────────────────────────────────────────────────
+const onlineUsers = new Map(); // Map<socketId, userId>
+app.set("onlineUsers", onlineUsers);
+
 // ─── Socket.IO connection handling ────────────────────────────────────────────
 io.on("connection", (socket) => {
   console.log(`✅ Client connected: ${socket.id}`);
 
   // User apne userId ke room mein join kare
   // (taake sirf use notification mile)
-  socket.on("join_user_room", (userId) => {
+  socket.on("join_user_room", async (userId) => {
+    console.log(`Received join_user_room event with userId:`, userId);
     if (userId) {
       socket.join(`user_${userId}`);
+      onlineUsers.set(socket.id, Number(userId));
       console.log(`👤 User ${userId} joined room: user_${userId}`);
+
+      // Notify others
+      io.emit("user_status_update", { userId: Number(userId), isOnline: true });
+
+      // Update DB
+      try {
+        await prisma.user.update({
+          where: { id: Number(userId) },
+          data: { lastActiveAt: new Date() }
+        });
+      } catch (err) {
+        console.error("Error updating lastActiveAt on connect:", err);
+      }
     }
   });
 
@@ -59,8 +79,26 @@ io.on("connection", (socket) => {
     console.log(`🌍 Client joined public_room`);
   });
 
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     console.log(`❌ Client disconnected: ${socket.id}`);
+    const userId = onlineUsers.get(socket.id);
+    if (userId) {
+      onlineUsers.delete(socket.id);
+      
+      // Update DB
+      try {
+        const now = new Date();
+        await prisma.user.update({
+          where: { id: Number(userId) },
+          data: { lastActiveAt: now }
+        });
+        
+        // Notify others
+        io.emit("user_status_update", { userId: Number(userId), isOnline: false, lastActiveAt: now.toISOString() });
+      } catch (err) {
+        console.error("Error updating lastActiveAt on disconnect:", err);
+      }
+    }
   });
 });
 
@@ -86,7 +124,7 @@ app.use(morgan("dev"));
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
   })
 );
@@ -95,7 +133,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-["uploads/profiles", "uploads/properties"].forEach((d) => {
+["uploads/profiles", "uploads/properties", "uploads/messages"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
@@ -105,8 +143,9 @@ app.use("/api/properties", propertyRoutes);
 app.use("/api/seller", sellerRoutes); 
 app.use("/api/support", supportRoutes);
 app.use("/api/contactus", contactusRoutes);
-
-app.use("/api/buyer", buyerRoutes);  
+app.use("/api/buyer", buyerRoutes);
+app.use("/api/messages", messageRoutes);
+  
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
 });

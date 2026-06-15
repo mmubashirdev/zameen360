@@ -1,10 +1,18 @@
 const { sendEmail } = require("../../../utils/sendEmail");
 
-const submitContactFormService = async (name, email, subject, message, phone) => {
-  const contactName = name || email?.split('@')[0];
+const submitContactFormService = async (
+  name,
+  email,
+  subject,
+  message,
+  phone,
+) => {
+  const contactName = name || email?.split("@")[0];
 
   if (!contactName || !email || !subject || !message) {
-    const error = new Error("All fields are required: name (or email), email, subject, and message");
+    const error = new Error(
+      "All fields are required: name (or email), email, subject, and message",
+    );
     error.status = 400;
     throw error;
   }
@@ -19,7 +27,8 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
   const sendContactUsEmail = async (to, formData) => {
     const { name, email, phone, subject, message } = formData;
 
-    const adminEmail = process.env.ADMIN_EMAIL || "shahzaib.334aug25webbpt@gmail.com";
+    const adminEmail =
+      process.env.ADMIN_EMAIL || "shahzaib.334aug25webbpt@gmail.com";
 
     const html = `
   <!DOCTYPE html>
@@ -89,7 +98,7 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
                       Full Name
                     </td>
                     <td style="padding:8px 0; color:#0F172A; font-size:14px; line-height:1.6;">
-                      ${name || 'Not provided'}
+                      ${name || "Not provided"}
                     </td>
                   </tr>
 
@@ -99,7 +108,7 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
                       Email Address
                     </td>
                     <td style="padding:8px 0; color:#0F172A; font-size:14px; line-height:1.6;">
-                      ${email || 'Not provided'}
+                      ${email || "Not provided"}
                     </td>
                   </tr>
 
@@ -109,7 +118,7 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
                       Phone Number
                     </td>
                     <td style="padding:8px 0; color:#0F172A; font-size:14px; line-height:1.6;">
-                      ${phone || 'Not provided'}
+                      ${phone || "Not provided"}
                     </td>
                   </tr>
 
@@ -119,7 +128,7 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
                       Subject
                     </td>
                     <td style="padding:8px 0; color:#0F172A; font-size:14px; line-height:1.6; font-weight:600;">
-                      ${subject || 'No subject'}
+                      ${subject || "No subject"}
                     </td>
                   </tr>
 
@@ -129,7 +138,7 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
                       Message
                     </td>
                     <td style="padding:8px 0; color:#0F172A; font-size:14px; line-height:1.6; border-top:1px solid #E5E7EB; padding-top:12px;">
-                      ${message ? message.replace(/\n/g, '<br>') : 'No message provided'}
+                      ${message ? message.replace(/\n/g, "<br>") : "No message provided"}
                     </td>
                   </tr>
 
@@ -236,7 +245,8 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
     return await sendEmail(to, "New Contact Us Submission - Zameen 360", html);
   };
 
-  const adminEmail = process.env.ADMIN_EMAIL || "shahzaib.334aug25webbpt@gmail.com";
+  const adminEmail =
+    process.env.ADMIN_EMAIL || "shahzaib.334aug25webbpt@gmail.com";
 
   const emailSent = await sendContactUsEmail(adminEmail, {
     name: contactName,
@@ -247,7 +257,9 @@ const submitContactFormService = async (name, email, subject, message, phone) =>
   });
 
   if (!emailSent) {
-    const error = new Error("Unable to send contact inquiry at this time. Please try again later.");
+    const error = new Error(
+      "Unable to send contact inquiry at this time. Please try again later.",
+    );
     error.status = 500;
     throw error;
   }
