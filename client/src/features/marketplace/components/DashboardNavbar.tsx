@@ -26,6 +26,7 @@ const AuthenticatedNavbar = () => {
   const { user: sellerProfile } = useUser();
   const { buyer: buyerProfile } = useBuyer();
 
+  const storedUser = JSON.parse(localStorage.getItem("zameen360_user") || "{}");
   const rawRole = (authUser as any)?.role || "";
   const userRole = String(rawRole).toUpperCase();
   
@@ -143,16 +144,16 @@ const AuthenticatedNavbar = () => {
     setMenuOpen(false);
   };
 
-  // const handlePostPropertyClick = () => {
-  //   if (userRole === "BUYER") {
-  //     alert(
-  //       "⚠️ Only Sellers can post properties!\n\nPlease switch to Seller from your profile."
-  //     );
-  //     navigate("/buyer-profile");
-  //   } else {
-  //     navigate("/post-property");
-  //   }
-  // };
+  const handlePostPropertyClick = () => {
+    if (userRole === "BUYER") {
+      alert(
+        "⚠️ Only Sellers can post properties!\n\nPlease switch to Seller from your profile."
+      );
+      navigate("/buyer-profile");
+    } else {
+      navigate("/post-property");
+    }
+  };
 
   return (
     <>
