@@ -1,4 +1,4 @@
-// server/modules/marketplace/Controller/property.controllers.js
+
 const prisma = require("../../../configs/prisma");
 const cloudinary = require("../../../configs/cloudinary");
 
@@ -7,7 +7,7 @@ console.log(
   typeof cloudinary.uploader?.upload_stream,
 );
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const toBigInt = (val) => {
   if (val === null || val === undefined || val === "") return null;
   try {
@@ -43,7 +43,6 @@ const serializeBigInt = (obj) => {
   );
 };
 
-// ✅ Upload single buffer to Cloudinary
 const uploadToCloudinary = (buffer, folder = "zameen360/properties") => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
@@ -62,7 +61,6 @@ const uploadToCloudinary = (buffer, folder = "zameen360/properties") => {
   });
 };
 
-// ✅ Upload multiple files to Cloudinary
 const uploadMultipleToCloudinary = async (
   files,
   folder = "zameen360/properties",
@@ -71,7 +69,6 @@ const uploadMultipleToCloudinary = async (
   return Promise.all(promises);
 };
 
-// ✅ Delete image from Cloudinary by URL
 const deleteFromCloudinary = async (url) => {
   try {
     if (!url || !url.includes("cloudinary.com")) return;
@@ -87,7 +84,7 @@ const deleteFromCloudinary = async (url) => {
   }
 };
 
-// ==================== CREATE Property ====================
+
 exports.createProperty = async (req, res) => {
   try {
     const d = req.body;
@@ -102,7 +99,7 @@ exports.createProperty = async (req, res) => {
       });
     }
 
-    // ✅ Upload to Cloudinary instead of local disk
+    
     let imageUrls = [];
     if (files.length > 0) {
       try {
@@ -121,7 +118,7 @@ exports.createProperty = async (req, res) => {
     const property = await prisma.property.create({
       data: {
         user: {
-          connect: { id: Number(userId) }, // ✅ Fixed: use relation connect
+          connect: { id: Number(userId) }, 
         },
         purpose: d.purpose || null,
         propertyType: d.propertyType || null,
@@ -152,7 +149,7 @@ exports.createProperty = async (req, res) => {
         address: d.address || null,
         latitude: d.lat ? Number(d.lat) : null,
         longitude: d.lng ? Number(d.lng) : null,
-        images: imageUrls, // ✅ Cloudinary URLs
+        images: imageUrls, 
         videoUrl: d.videoUrl || null,
         floorPlan: d.floorPlan || null,
         status: "pending",
@@ -166,7 +163,7 @@ exports.createProperty = async (req, res) => {
 
     const serialized = serializeBigInt(property);
 
-    // Socket Events
+    
     const io = req.app.get("io");
     if (io) {
       io.to("admin_room").emit("new_property_pending", {
@@ -197,7 +194,7 @@ exports.createProperty = async (req, res) => {
   }
 };
 
-// ==================== GET All Properties (Public - Only Approved) ====================
+
 exports.getProperties = async (req, res) => {
   try {
     const {
@@ -296,7 +293,7 @@ exports.getProperties = async (req, res) => {
   }
 };
 
-// ==================== ADMIN - Get All Properties ====================
+
 exports.getAdminProperties = async (req, res) => {
   try {
     const { status, search, page } = req.query;
@@ -458,7 +455,7 @@ exports.updatePropertyStatus = async (req, res) => {
   }
 };
 
-// ==================== ADMIN - Dashboard Stats ====================
+
 exports.getDashboardStats = async (req, res) => {
   try {
     const [total, pending, approved, rejected] = await Promise.all([
@@ -481,7 +478,7 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
-// ==================== GET BY ID ====================
+
 exports.getPropertyById = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -520,7 +517,7 @@ exports.getPropertyById = async (req, res) => {
   }
 };
 
-// ==================== UPDATE Property ====================
+
 exports.updateProperty = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
@@ -633,7 +630,7 @@ exports.updateProperty = async (req, res) => {
   }
 };
 
-// ==================== DELETE Property ====================
+
 exports.deleteProperty = async (req, res) => {
   try {
     const id = parseInt(req.params.id);

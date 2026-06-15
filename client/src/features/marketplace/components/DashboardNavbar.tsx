@@ -17,6 +17,7 @@ import {
   List,
   Heart,
 } from "lucide-react";
+import NotificationDropdown from "../components/NotificationDropdown"; 
 
 // Hidden when modal is open (controlled by body class)
 const AuthenticatedNavbar = () => {
@@ -25,9 +26,8 @@ const AuthenticatedNavbar = () => {
   const { user: sellerProfile } = useUser();
   const { buyer: buyerProfile } = useBuyer();
 
-  // Get user data from multiple sources for sync
-  const storedUser = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
-  const rawRole = (authUser as any)?.role || storedUser.role || '';
+  const storedUser = JSON.parse(localStorage.getItem("zameen360_user") || "{}");
+  const rawRole = (authUser as any)?.role || "";
   const userRole = String(rawRole).toUpperCase();
   
   const userName = 
@@ -54,10 +54,12 @@ const AuthenticatedNavbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notificationOpen, setNotificationOpen] = useState(false); 
 
   const avatarRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const notificationRef = useRef<HTMLDivElement | null>(null); 
 
   // Sync profile image to localStorage whenever it changes
   useEffect(() => {
@@ -78,6 +80,12 @@ const AuthenticatedNavbar = () => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setSearchOpen(false);
       }
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(e.target as Node)
+      ) {
+        setNotificationOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
@@ -94,6 +102,7 @@ const AuthenticatedNavbar = () => {
       if (e.key === "Escape") {
         setSearchOpen(false);
         setSearchQuery("");
+        setNotificationOpen(false); // ✅ NEW
       }
     }
     document.addEventListener("keydown", handleEsc);
@@ -127,7 +136,7 @@ const AuthenticatedNavbar = () => {
   };
 
   const handleProfileClick = () => {
-    if (userRole === 'BUYER') {
+    if (userRole === "BUYER") {
       navigate("/buyer-profile");
     } else {
       navigate("/profile");
@@ -136,9 +145,11 @@ const AuthenticatedNavbar = () => {
   };
 
   const handlePostPropertyClick = () => {
-    if (userRole === 'BUYER') {
-      alert("Only Sellers can post properties.\n\nPlease switch to Seller from your profile.");
-      navigate('/buyer-profile');
+    if (userRole === "BUYER") {
+      alert(
+        "⚠️ Only Sellers can post properties!\n\nPlease switch to Seller from your profile."
+      );
+      navigate("/buyer-profile");
     } else {
       navigate("/post-property");
     }
@@ -160,7 +171,11 @@ const AuthenticatedNavbar = () => {
           </Link>
         </div>
 
-        <ul className={`${styles.authNavLinks} ${searchOpen ? styles.authNavLinksHidden : ""}`}>
+        <ul
+          className={`${styles.authNavLinks} ${
+            searchOpen ? styles.authNavLinksHidden : ""
+          }`}
+        >
           {[
             { to: "/", label: "Home" },
             { to: "/buy", label: "Buy" },
@@ -175,7 +190,9 @@ const AuthenticatedNavbar = () => {
                 to={to}
                 end={to === "/"}
                 className={({ isActive }) =>
-                  isActive ? `${styles.authNavLink} ${styles.authActiveLink}` : styles.authNavLink
+                  isActive
+                    ? `${styles.authNavLink} ${styles.authActiveLink}`
+                    : styles.authNavLink
                 }
               >
                 {label}
@@ -195,7 +212,11 @@ const AuthenticatedNavbar = () => {
           )}
 
           <div className={styles.searchContainer} ref={searchRef}>
-            <div className={`${styles.searchWrapper} ${searchOpen ? styles.searchWrapperOpen : ""}`}>
+            <div
+              className={`${styles.searchWrapper} ${
+                searchOpen ? styles.searchWrapperOpen : ""
+              }`}
+            >
               {searchOpen && (
                 <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
                   <input
@@ -221,41 +242,62 @@ const AuthenticatedNavbar = () => {
                 </form>
               )}
               <button
-                className={`${styles.authIconBtn} ${styles.searchToggleBtn} ${searchOpen ? styles.searchToggleBtnActive : ""}`}
+                className={`${styles.authIconBtn} ${styles.searchToggleBtn} ${
+                  searchOpen ? styles.searchToggleBtnActive : ""
+                }`}
                 onClick={handleSearchToggle}
                 title={searchOpen ? "Close search" : "Search"}
               >
-                {searchOpen ? <X size={18} strokeWidth={2.2} /> : <Search size={18} strokeWidth={2.2} />}
+                {searchOpen ? (
+                  <X size={18} strokeWidth={2.2} />
+                ) : (
+                  <Search size={18} strokeWidth={2.2} />
+                )}
               </button>
             </div>
           </div>
 
-          <div className={styles.notificationContainer}>
-            <button className={styles.authIconBtn} title="Notifications">
+          {/* ************* notification ************ ////// */}
+          <div className={styles.notificationContainer} ref={notificationRef}>
+            <button
+              className={styles.authIconBtn}
+              title="Notifications"
+              onClick={() => setNotificationOpen((prev) => !prev)}
+            >
               <Bell size={18} strokeWidth={2.2} />
             </button>
             <span className={styles.notificationBadge}>3</span>
+
+            {notificationOpen && (
+              <NotificationDropdown
+                onClose={() => setNotificationOpen(false)}
+                onMarkAllRead={() => {
+                  // keep your logic here if needed
+                  console.log("Mark all as read");
+                }}
+                onViewAll={() => {
+                  navigate("/notifications");
+                  setNotificationOpen(false);
+                }}
+              />
+            )}
           </div>
 
           <div className={styles.authNavDivider} />
 
           <div className={styles.authAvatarContainer} ref={avatarRef}>
             <button
-              className={`${styles.authAvatarBtn} ${menuOpen ? styles.authAvatarBtnActive : ""}`}
+              className={`${styles.authAvatarBtn} ${
+                menuOpen ? styles.authAvatarBtnActive : ""
+              }`}
               onClick={() => setMenuOpen((s) => !s)}
               title={userName}
             >
               {profileImage ? (
-                <img 
-                  src={profileImage} 
-                  alt="profile" 
+                <img
+                  src={profileImage}
+                  alt="profile"
                   className={styles.authAvatar}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    objectFit: 'cover'
-                  }}
                 />
               ) : (
                 <div className={styles.authAvatarFallback}>
@@ -269,26 +311,25 @@ const AuthenticatedNavbar = () => {
                 size={14}
                 strokeWidth={2.5}
                 className={styles.chevron}
-                style={{ transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                style={{
+                  transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)",
+                }}
               />
             </button>
 
             {menuOpen && (
               <>
-                <div className={styles.dropdownBackdrop} onClick={() => setMenuOpen(false)} />
+                <div
+                  className={styles.dropdownBackdrop}
+                  onClick={() => setMenuOpen(false)}
+                />
                 <div className={styles.authDropdownMenu}>
                   <div className={styles.dropdownUserInfo}>
                     {profileImage ? (
-                      <img 
-                        src={profileImage} 
-                        alt="profile" 
+                      <img
+                        src={profileImage}
+                        alt="profile"
                         className={styles.dropdownAvatar}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '50%',
-                          objectFit: 'cover'
-                        }}
                       />
                     ) : (
                       <div className={styles.dropdownAvatarFallback}>
@@ -299,14 +340,17 @@ const AuthenticatedNavbar = () => {
                       <strong>{userName}</strong>
                       <small>{userEmail}</small>
                       {userRole && (
-                        <span style={{
-                          fontSize: '10px',
-                          color: userRole === 'SELLER' ? '#f59e0b' : '#10b981',
-                          fontWeight: 'bold',
-                          textTransform: 'uppercase',
-                          display: 'block',
-                          marginTop: '2px'
-                        }}>
+                        <span
+                          style={{
+                            fontSize: "10px",
+                            color:
+                              userRole === "SELLER" ? "#f59e0b" : "#10b981",
+                            fontWeight: "bold",
+                            textTransform: "uppercase",
+                            display: "block",
+                            marginTop: "2px",
+                          }}
+                        >
                           {userRole}
                         </span>
                       )}
@@ -314,12 +358,19 @@ const AuthenticatedNavbar = () => {
                   </div>
                   <div className={styles.dropdownDivider} />
 
-                  <button className={styles.authDropdownItem} onClick={handleProfileClick}>
-                    <User size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                  <button
+                    className={styles.authDropdownItem}
+                    onClick={handleProfileClick}
+                  >
+                    <User
+                      size={16}
+                      strokeWidth={2}
+                      className={styles.dropdownItemIcon}
+                    />
                     <span>My Profile</span>
                   </button>
 
-                  {userRole === 'SELLER' && (
+                  {userRole === "SELLER" && (
                     <button
                       className={styles.authDropdownItem}
                       onClick={() => {
@@ -327,12 +378,16 @@ const AuthenticatedNavbar = () => {
                         setMenuOpen(false);
                       }}
                     >
-                      <List size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                      <List
+                        size={16}
+                        strokeWidth={2}
+                        className={styles.dropdownItemIcon}
+                      />
                       <span>My Listings</span>
                     </button>
                   )}
 
-                  {userRole === 'BUYER' && (
+                  {userRole === "BUYER" && (
                     <button
                       className={styles.authDropdownItem}
                       onClick={() => {
@@ -340,7 +395,11 @@ const AuthenticatedNavbar = () => {
                         setMenuOpen(false);
                       }}
                     >
-                      <Heart size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                      <Heart
+                        size={16}
+                        strokeWidth={2}
+                        className={styles.dropdownItemIcon}
+                      />
                       <span>Saved Properties</span>
                     </button>
                   )}
@@ -352,7 +411,11 @@ const AuthenticatedNavbar = () => {
                       setMenuOpen(false);
                     }}
                   >
-                    <Settings size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                    <Settings
+                      size={16}
+                      strokeWidth={2}
+                      className={styles.dropdownItemIcon}
+                    />
                     <span>Settings</span>
                   </button>
                   <div className={styles.dropdownDivider} />
@@ -363,7 +426,11 @@ const AuthenticatedNavbar = () => {
                       setMenuOpen(false);
                     }}
                   >
-                    <LogOut size={16} strokeWidth={2} className={styles.dropdownItemIcon} />
+                    <LogOut
+                      size={16}
+                      strokeWidth={2}
+                      className={styles.dropdownItemIcon}
+                    />
                     <span>Logout</span>
                   </button>
                 </div>
@@ -374,7 +441,10 @@ const AuthenticatedNavbar = () => {
       </nav>
 
       {searchOpen && (
-        <div className={styles.searchOverlay} onClick={() => setSearchOpen(false)} />
+        <div
+          className={styles.searchOverlay}
+          onClick={() => setSearchOpen(false)}
+        />
       )}
     </>
   );
@@ -386,21 +456,79 @@ const UnauthenticatedNavbar = () => {
     <nav className={`${styles.navbar} navbar-main`}>
       <Link to="/">
         <div className={Logostyles.logo}>
-          <span>Zameen<span className={Logostyles.logoAccent}>360</span></span>
+          <span>
+            Zameen<span className={Logostyles.logoAccent}>360</span>
+          </span>
         </div>
       </Link>
       <ul className={styles.navLinks}>
-        <li><NavLink to="/" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Home</NavLink></li>
-        <li><NavLink to="/buy" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Buy</NavLink></li>
-        <li><NavLink to="/rent" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Rent</NavLink></li>
-        <li><NavLink to="/sell" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Sell</NavLink></li>
-        <li><NavLink to="/projects" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Projects</NavLink></li>
-        <li><NavLink to="/about-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>About Us</NavLink></li>
-        <li><NavLink to="/contact-us" className={({ isActive }) => (isActive ? styles.activeLink : "")}>Contact Us</NavLink></li>
+        <li>
+          <NavLink
+            to="/"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Home
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/buy"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Buy
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/rent"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Rent
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/sell"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Sell
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/projects"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Projects
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/about-us"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            About Us
+          </NavLink>
+        </li>
+        <li>
+          <NavLink
+            to="/contact"
+            className={({ isActive }) => (isActive ? styles.activeLink : "")}
+          >
+            Contact Us
+          </NavLink>
+        </li>
       </ul>
       <div className={styles.navActions}>
-        <button className={styles.loginButton} onClick={() => navigate("/login")}>Login</button>
-        <button className={styles.postPropertyButton} onClick={() => navigate("/login")}>Post Property</button>
+        <button className={styles.loginButton} onClick={() => navigate("/login")}>
+          Login
+        </button>
+        <button
+          className={styles.postPropertyButton}
+          onClick={() => navigate("/login")}
+        >
+          Post Property
+        </button>
       </div>
     </nav>
   );

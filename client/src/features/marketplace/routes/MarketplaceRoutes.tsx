@@ -12,7 +12,11 @@ import MyListings from "../pages/MyListings";
 import BuyerProfile from "../pages/BuyerProfile";  
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
-import PropertySubmitted from "../pages/PropertySubmitted"
+import PropertySubmitted from "../pages/PropertySubmitted";
+import MessagesPage from "@features/message/page/MessagesPage";
+
+
+
 const marketplaceRoutes = [
   {
     path: "/",
@@ -69,6 +73,11 @@ const marketplaceRoutes = [
   {
     path: "/contact-us",
     element: <ContactUsPage />,
+  },
+ 
+  {
+    path: "/messages",
+    element: <MessagesPage />,
   },
   {
     path: "/support",
