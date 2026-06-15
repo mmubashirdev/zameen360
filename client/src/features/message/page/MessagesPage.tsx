@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MessagesSidebar from "../components/MessagesSidebar";
 import ChatWindow from "../components/ChatWindow";
-import PropertyDetailsSidebar from "../components/PropertyDetailsSidebar";
+
 
 interface NewConversationContext {
   sellerId: number;
@@ -65,10 +65,7 @@ const MessagesPage = () => {
             />
           </div>
 
-          {/* Right Sidebar - Property Details */}
-          <div className="col-span-3 overflow-y-auto">
-            <PropertyDetailsSidebar conversationId ={selectedConversationId} />
-          </div>
+         
         </div>
       </main>
     </div>

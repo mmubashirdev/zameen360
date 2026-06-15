@@ -20,6 +20,7 @@ import {
 import NotificationDropdown from "../components/NotificationDropdown"; 
 
 // Hidden when modal is open (controlled by body class)
+const storedUser = JSON.parse(localStorage.getItem("zameen360_user") || "{}");
 const AuthenticatedNavbar = () => {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuthContext();
