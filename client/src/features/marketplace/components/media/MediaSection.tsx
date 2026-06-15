@@ -46,28 +46,10 @@ const MediaSection: React.FC<MediaSectionProps> = ({ onDataChange }) => {
           <div>
             Upload Video
             <br />
-            <span className={styles.small}>or paste YouTube URL</span>
           </div>
-          <input
-            ref={videoRef}
-            type="file"
-            accept="video/*"
-            hidden
-            onChange={(event) => setVideoFile(event.target.files?.[0] || null)}
-          />
         </div>
         {videoFile && <p className={styles.fileName}>Selected: {videoFile.name}</p>}
-        <input
-          type="text"
-          className={styles.input}
-          placeholder="Paste YouTube URL here"
-          value={youtubeUrl}
-          onChange={(event) => handleYoutubeUrlChange(event.target.value)}
-        />
-        <p className={styles.hint}>e.g. https://youtube.com/watch?v=abc123</p>
-        {youtubeUrl && getYouTubeEmbed(youtubeUrl) && (
-          <iframe className={styles.preview} src={getYouTubeEmbed(youtubeUrl)} title="Video preview" allowFullScreen />
-        )}
+       
       </div>
 
       <div className={styles.card}>
@@ -76,16 +58,8 @@ const MediaSection: React.FC<MediaSectionProps> = ({ onDataChange }) => {
         </label>
         <div className={styles.uploadBox}>
           <div className={styles.icon}>3D</div>
-          <div>Paste 3D Tour Link</div>
+          <div>Paste Panorama Photos</div>
         </div>
-        <input
-          type="text"
-          className={styles.input}
-          placeholder="Paste 3D Tour Link"
-          value={tourLink}
-          onChange={(event) => setTourLink(event.target.value)}
-        />
-        <p className={styles.hint}>e.g. https://my-matterport.com/show/?m=abc123</p>
       </div>
 
       <div className={styles.card}>
