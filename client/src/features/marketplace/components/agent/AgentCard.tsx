@@ -54,7 +54,11 @@ const AgentCard = ({ user, propertyId }: Props) => {
 
         <div className="flex items-center gap-3 mb-4">
           {user.profilePicture ? (
-            <img src={user.profilePicture} alt={user.fullName} className="w-14 h-14 rounded-full object-cover" />
+            <img
+              src={user.profilePicture}
+              alt={user.fullName}
+              className="w-14 h-14 rounded-full object-cover"
+            />
           ) : (
             <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
               <User className="w-7 h-7 text-blue-600" />
@@ -62,7 +66,9 @@ const AgentCard = ({ user, propertyId }: Props) => {
           )}
           <div>
             <div className="font-semibold text-gray-900">{user.fullName}</div>
-            {user.city && <div className="text-xs text-gray-500">{user.city}</div>}
+            {user.city && (
+              <div className="text-xs text-gray-500">{user.city}</div>
+            )}
             {user.sellerDetail?.isPremium && (
               <span className="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded">
                 Premium
@@ -74,7 +80,9 @@ const AgentCard = ({ user, propertyId }: Props) => {
         {user.sellerDetail && (
           <div className="grid grid-cols-2 gap-2 mb-4 text-center">
             <div className="bg-gray-50 rounded-lg p-2">
-              <div className="text-lg font-bold text-blue-600">{user.sellerDetail.totalListings}</div>
+              <div className="text-lg font-bold text-blue-600">
+                {user.sellerDetail.totalListings}
+              </div>
               <div className="text-xs text-gray-500">Listings</div>
             </div>
             <div className="bg-gray-50 rounded-lg p-2">
@@ -88,7 +96,7 @@ const AgentCard = ({ user, propertyId }: Props) => {
 
         <div className="space-y-2">
           {user.phone && (
-            <button 
+            <button
               onClick={() => setShowCallModal(true)}
               className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
             >
@@ -97,17 +105,21 @@ const AgentCard = ({ user, propertyId }: Props) => {
             </button>
           )}
           {user.phone && (
-            <a href={`https://wa.me/${user.phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer"
-              className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
+            <a
+              href={`https://wa.me/${user.phone.replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+            >
               <MessageCircle className="w-4 h-4" />
               WhatsApp
             </a>
           )}
-          <button 
+          <button
             onClick={handleMessageClick}
-            className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition"
+            className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition cursor-pointer hover:text-blue-600"
           >
-            <MessageSquare className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4 " />
             Message
           </button>
         </div>
@@ -117,7 +129,7 @@ const AgentCard = ({ user, propertyId }: Props) => {
       {showCallModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
           <div className="bg-white rounded-2xl w-full max-w-sm p-6 relative shadow-2xl animate-in fade-in zoom-in duration-200">
-            <button 
+            <button
               onClick={() => setShowCallModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition p-1"
             >
@@ -127,16 +139,18 @@ const AgentCard = ({ user, propertyId }: Props) => {
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Phone className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-1">Call Agent</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">
+                Call Agent
+              </h3>
               <p className="text-gray-500 text-sm mb-6">{user.fullName}</p>
-              
+
               <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100">
                 <p className="text-2xl font-semibold tracking-wide text-gray-800">
                   {user.phone}
                 </p>
               </div>
-              
-              <a 
+
+              <a
                 href={`tel:${user.phone}`}
                 className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition font-medium"
               >

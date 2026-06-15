@@ -27,6 +27,7 @@ const AuthenticatedNavbar = () => {
   const { user: sellerProfile } = useUser();
   const { buyer: buyerProfile } = useBuyer();
 
+  const storedUser = JSON.parse(localStorage.getItem("zameen360_user") || "{}");
   const rawRole = (authUser as any)?.role || "";
   const userRole = String(rawRole).toUpperCase();
   
