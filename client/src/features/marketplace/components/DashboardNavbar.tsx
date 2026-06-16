@@ -17,68 +17,134 @@ import {
   List,
   Heart,
 } from "lucide-react";
-import NotificationDropdown from "../components/NotificationDropdown"; 
+import NotificationDropdown from "../components/NotificationDropdown";
+import socket from "@shared/lib/socket";
+import axiosInstance from "@shared/lib/axios";
 
-// Hidden when modal is open (controlled by body class)
-const storedUser = JSON.parse(localStorage.getItem("zameen360_user") || "{}");
+// ─── Custom hook: real-time unread message count ──────────────────────────────
+const useUnreadCount = (currentUser: any) => {
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchCount = useCallback(async () => {
+    try {
+      const result: any = await axiosInstance.get("/messages/unread-count");
+      if (result.success) setUnreadCount(result.data.count);
+    } catch (err) {
+      console.error("unread count error:", err);
+    }
+  }, []);
+
+  // Fetch on mount
+  useEffect(() => {
+    if (!(currentUser?.userId || currentUser?.id)) return;
+    fetchCount();
+  }, [fetchCount, currentUser?.userId, currentUser?.id]);
+
+  // Real-time socket increment
+  useEffect(() => {
+    if (!(currentUser?.userId || currentUser?.id)) return;
+    const myId = Number(currentUser?.userId || currentUser?.id);
+
+    const onReceiveMessage = (data: {
+      message: any;
+      conversationId: number;
+    }) => {
+      // Only count messages from OTHER users
+      if (Number(data.message.senderId) === myId) return;
+      setUnreadCount((prev) => prev + 1);
+    };
+
+    socket.on("receive_message", onReceiveMessage);
+    return () => {
+      socket.off("receive_message", onReceiveMessage);
+    };
+  }, [currentUser?.userId, currentUser?.id]);
+
+  // Reset when ChatWindow marks messages as read
+  useEffect(() => {
+    const handleRead = () => fetchCount();
+    window.addEventListener("messages_marked_read", handleRead);
+    return () =>
+      window.removeEventListener("messages_marked_read", handleRead);
+  }, [fetchCount]);
+
+  return { unreadCount, setUnreadCount };
+};
+
+// ─── Authenticated Navbar ─────────────────────────────────────────────────────
 const AuthenticatedNavbar = () => {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuthContext();
   const { user: sellerProfile } = useUser();
   const { buyer: buyerProfile } = useBuyer();
 
-  const storedUser = JSON.parse(localStorage.getItem("zameen360_user") || "{}");
+  const storedUser = JSON.parse(
+    localStorage.getItem("zameen360_user") || "{}"
+  );
   const rawRole = (authUser as any)?.role || "";
   const userRole = String(rawRole).toUpperCase();
-  
-  const userName = 
-    sellerProfile?.fullName || 
-    buyerProfile?.fullName || 
-    (authUser as any)?.fullName || 
-    storedUser.fullName || 
+
+  const userName =
+    sellerProfile?.fullName ||
+    buyerProfile?.fullName ||
+    (authUser as any)?.fullName ||
+    storedUser.fullName ||
     "User";
-  
-  // ⭐ Profile image from CURRENT context (always latest)
-  const profileImage = 
-    sellerProfile?.profilePicture || 
-    buyerProfile?.profilePicture || 
-    storedUser.profilePicture || 
+
+  const profileImage =
+    sellerProfile?.profilePicture ||
+    buyerProfile?.profilePicture ||
+    storedUser.profilePicture ||
     null;
-  
-  const userEmail = 
-    sellerProfile?.email || 
-    buyerProfile?.email || 
-    (authUser as any)?.email || 
-    storedUser.email || 
+
+  const userEmail =
+    sellerProfile?.email ||
+    buyerProfile?.email ||
+    (authUser as any)?.email ||
+    storedUser.email ||
     "";
 
+  // ─── UI state ───────────────────────────────────────────────────────────────
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [notificationOpen, setNotificationOpen] = useState(false); 
+  const [notificationOpen, setNotificationOpen] = useState(false);
 
+  // ─── Real unread count ──────────────────────────────────────────────────────
+  const { unreadCount, setUnreadCount } = useUnreadCount(authUser);
+
+  // ─── Refs ───────────────────────────────────────────────────────────────────
   const avatarRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const notificationRef = useRef<HTMLDivElement | null>(null); 
+  const notificationRef = useRef<HTMLDivElement | null>(null);
 
-  // Sync profile image to localStorage whenever it changes
+  // ─── Sync profile image to localStorage ────────────────────────────────────
   useEffect(() => {
     if (profileImage) {
-      const currentStored = JSON.parse(localStorage.getItem('zameen360_user') || '{}');
+      const currentStored = JSON.parse(
+        localStorage.getItem("zameen360_user") || "{}"
+      );
       if (currentStored.profilePicture !== profileImage) {
         currentStored.profilePicture = profileImage;
-        localStorage.setItem('zameen360_user', JSON.stringify(currentStored));
+        localStorage.setItem("zameen360_user", JSON.stringify(currentStored));
       }
     }
   }, [profileImage]);
 
+  // ─── Outside click handler ──────────────────────────────────────────────────
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
-      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+      if (
+        avatarRef.current &&
+        !avatarRef.current.contains(e.target as Node)
+      ) {
         setMenuOpen(false);
       }
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(e.target as Node)
+      ) {
         setSearchOpen(false);
       }
       if (
@@ -92,24 +158,27 @@ const AuthenticatedNavbar = () => {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
+  // ─── Focus search input when opened ────────────────────────────────────────
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
 
+  // ─── Escape key handler ─────────────────────────────────────────────────────
   useEffect(() => {
     function handleEsc(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setSearchOpen(false);
         setSearchQuery("");
-        setNotificationOpen(false); // ✅ NEW
+        setNotificationOpen(false);
       }
     }
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
+  // ─── Handlers ───────────────────────────────────────────────────────────────
   const handleLogout = useCallback(() => {
     logout();
     localStorage.removeItem("zameen360_token");
@@ -156,9 +225,25 @@ const AuthenticatedNavbar = () => {
     }
   };
 
+  // ─── Notification handlers ──────────────────────────────────────────────────
+  const handleNotificationOpen = () => {
+    setNotificationOpen((prev) => !prev);
+  };
+
+  const handleMarkAllRead = () => {
+    setUnreadCount(0);
+    setNotificationOpen(false);
+  };
+
+  const handleViewAll = () => {
+    navigate("/messages");
+    setNotificationOpen(false);
+  };
+
   return (
     <>
       <nav className={`${styles.authenticatedNavbar} navbar-main`}>
+        {/* ── Logo ─────────────────────────────────────────────────────────── */}
         <div className={styles.authNavLeft}>
           <Link to="/" className={styles.authLogoLink}>
             <div className={styles.authLogo}>
@@ -172,6 +257,7 @@ const AuthenticatedNavbar = () => {
           </Link>
         </div>
 
+        {/* ── Nav Links ────────────────────────────────────────────────────── */}
         <ul
           className={`${styles.authNavLinks} ${
             searchOpen ? styles.authNavLinksHidden : ""
@@ -202,16 +288,21 @@ const AuthenticatedNavbar = () => {
           ))}
         </ul>
 
+        {/* ── Right Side ───────────────────────────────────────────────────── */}
         <div className={styles.authNavRight}>
-          {userRole === 'SELLER' && (
+          {/* Post Property button (sellers only) */}
+          {userRole === "SELLER" && (
             <button
-              className={`${styles.authPostBtn} ${searchOpen ? styles.authPostBtnHidden : ""}`}
+              className={`${styles.authPostBtn} ${
+                searchOpen ? styles.authPostBtnHidden : ""
+              }`}
               onClick={handlePostPropertyClick}
             >
               + Post Property
             </button>
           )}
 
+          {/* ── Search ───────────────────────────────────────────────────── */}
           <div className={styles.searchContainer} ref={searchRef}>
             <div
               className={`${styles.searchWrapper} ${
@@ -219,7 +310,10 @@ const AuthenticatedNavbar = () => {
               }`}
             >
               {searchOpen && (
-                <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+                <form
+                  onSubmit={handleSearchSubmit}
+                  className={styles.searchForm}
+                >
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -258,34 +352,36 @@ const AuthenticatedNavbar = () => {
             </div>
           </div>
 
-          {/* ************* notification ************ ////// */}
+          {/* ── Notification Bell ─────────────────────────────────────────── */}
           <div className={styles.notificationContainer} ref={notificationRef}>
             <button
               className={styles.authIconBtn}
               title="Notifications"
-              onClick={() => setNotificationOpen((prev) => !prev)}
+              onClick={handleNotificationOpen}
             >
               <Bell size={18} strokeWidth={2.2} />
             </button>
-            <span className={styles.notificationBadge}>3</span>
 
+            {/* Real unread badge — only shown when count > 0 */}
+            {unreadCount > 0 && (
+              <span className={styles.notificationBadge}>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+
+            {/* Dropdown */}
             {notificationOpen && (
               <NotificationDropdown
                 onClose={() => setNotificationOpen(false)}
-                onMarkAllRead={() => {
-                  // keep your logic here if needed
-                  console.log("Mark all as read");
-                }}
-                onViewAll={() => {
-                  navigate("/notifications");
-                  setNotificationOpen(false);
-                }}
+                onMarkAllRead={handleMarkAllRead}
+                onViewAll={handleViewAll}
               />
             )}
           </div>
 
           <div className={styles.authNavDivider} />
 
+          {/* ── Avatar / Profile Menu ─────────────────────────────────────── */}
           <div className={styles.authAvatarContainer} ref={avatarRef}>
             <button
               className={`${styles.authAvatarBtn} ${
@@ -325,6 +421,7 @@ const AuthenticatedNavbar = () => {
                   onClick={() => setMenuOpen(false)}
                 />
                 <div className={styles.authDropdownMenu}>
+                  {/* User info header */}
                   <div className={styles.dropdownUserInfo}>
                     {profileImage ? (
                       <img
@@ -357,8 +454,10 @@ const AuthenticatedNavbar = () => {
                       )}
                     </div>
                   </div>
+
                   <div className={styles.dropdownDivider} />
 
+                  {/* My Profile */}
                   <button
                     className={styles.authDropdownItem}
                     onClick={handleProfileClick}
@@ -371,6 +470,7 @@ const AuthenticatedNavbar = () => {
                     <span>My Profile</span>
                   </button>
 
+                  {/* My Listings (sellers only) */}
                   {userRole === "SELLER" && (
                     <button
                       className={styles.authDropdownItem}
@@ -388,6 +488,7 @@ const AuthenticatedNavbar = () => {
                     </button>
                   )}
 
+                  {/* Saved Properties (buyers only) */}
                   {userRole === "BUYER" && (
                     <button
                       className={styles.authDropdownItem}
@@ -405,6 +506,7 @@ const AuthenticatedNavbar = () => {
                     </button>
                   )}
 
+                  {/* Settings */}
                   <button
                     className={styles.authDropdownItem}
                     onClick={() => {
@@ -419,7 +521,10 @@ const AuthenticatedNavbar = () => {
                     />
                     <span>Settings</span>
                   </button>
+
                   <div className={styles.dropdownDivider} />
+
+                  {/* Logout */}
                   <button
                     className={`${styles.authDropdownItem} ${styles.authDropdownLogout}`}
                     onClick={() => {
@@ -441,6 +546,7 @@ const AuthenticatedNavbar = () => {
         </div>
       </nav>
 
+      {/* Search overlay */}
       {searchOpen && (
         <div
           className={styles.searchOverlay}
@@ -451,6 +557,7 @@ const AuthenticatedNavbar = () => {
   );
 };
 
+// ─── Unauthenticated Navbar ───────────────────────────────────────────────────
 const UnauthenticatedNavbar = () => {
   const navigate = useNavigate();
   return (
@@ -463,65 +570,32 @@ const UnauthenticatedNavbar = () => {
         </div>
       </Link>
       <ul className={styles.navLinks}>
-        <li>
-          <NavLink
-            to="/"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            Home
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/buy"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            Buy
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/rent"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            Rent
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/sell"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            Sell
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/projects"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            Projects
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/about-us"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            About Us
-          </NavLink>
-        </li>
-        <li>
-          <NavLink
-            to="/contact-us"
-            className={({ isActive }) => (isActive ? styles.activeLink : "")}
-          >
-            Contact Us
-          </NavLink>
-        </li>
+        {[
+          { to: "/", label: "Home" },
+          { to: "/buy", label: "Buy" },
+          { to: "/rent", label: "Rent" },
+          { to: "/sell", label: "Sell" },
+          { to: "/projects", label: "Projects" },
+          { to: "/about-us", label: "About Us" },
+          { to: "/contact-us", label: "Contact Us" },
+        ].map(({ to, label }) => (
+          <li key={to}>
+            <NavLink
+              to={to}
+              className={({ isActive }) =>
+                isActive ? styles.activeLink : ""
+              }
+            >
+              {label}
+            </NavLink>
+          </li>
+        ))}
       </ul>
       <div className={styles.navActions}>
-        <button className={styles.loginButton} onClick={() => navigate("/login")}>
+        <button
+          className={styles.loginButton}
+          onClick={() => navigate("/login")}
+        >
           Login
         </button>
         <button
@@ -535,6 +609,7 @@ const UnauthenticatedNavbar = () => {
   );
 };
 
+// ─── Export ───────────────────────────────────────────────────────────────────
 function DashboardNavbar() {
   const { isAuthenticated } = useAuthContext();
   return isAuthenticated ? <AuthenticatedNavbar /> : <UnauthenticatedNavbar />;

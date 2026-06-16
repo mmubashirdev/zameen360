@@ -14,6 +14,8 @@ import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import PropertySubmitted from "../pages/PropertySubmitted";
 import MessagesPage from "@features/message/page/MessagesPage";
+import TermsOfService from "../components/term&policy/Termsofservice";
+import PrivacyPolicy from "../components/term&policy/Privacypolicy";
 
 
 
@@ -82,6 +84,15 @@ const marketplaceRoutes = [
   {
     path: "/support",
     element: <SupportPage />,
+  },
+   {
+    path: "/terms",
+    element: <TermsOfService />
+  },
+
+   {
+    path: "/privacy-policy",
+    element: <PrivacyPolicy />
   }
 ];
 
