@@ -14,9 +14,10 @@ import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import PropertySubmitted from "../pages/PropertySubmitted";
 import MessagesPage from "@features/message/page/MessagesPage";
-import VirtualTourPage from "../../marketplace/components/shared/VirtualTour";
 import TermsOfService from "../components/term&policy/Termsofservice";
 import PrivacyPolicy from "../components/term&policy/Privacypolicy";
+
+import VirtualTourPage from "../../marketplace/pages/VirtualTourPage";
 
 const marketplaceRoutes = [
   {
@@ -94,7 +95,7 @@ const marketplaceRoutes = [
   },
 
   {
-    path: "/privacy-policy",
+    path: "/privacy",
     element: <PrivacyPolicy />,
   },
 ];

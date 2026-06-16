@@ -82,6 +82,10 @@ const PropertyDetails = () => {
 
   if (!property) return null;
 
+  // console.log("Property panoramas:", property.panoramas);
+  // console.log("hasTour:", hasTour);
+  // console.log("panoramaRooms:", panoramaRooms);
+
   // ✅ Map panoramas — pass to VirtualTourPage via route state
   const panoramaRooms: PanoramaRoom[] = (property?.panoramas || []).map(
     (p: any) => ({

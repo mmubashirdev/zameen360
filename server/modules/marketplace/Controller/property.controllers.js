@@ -4,7 +4,7 @@ const cloudinary = require("../../../configs/cloudinary");
 
 
 const {
-  uploadToCloudinaryToPath,
+  uploadToCloudinaryFromPath,
 } = require("../../../utils/uploadToCloudinary");
 
 
@@ -154,7 +154,6 @@ exports.panorama = async (req, res) => {
     });
   }
 };
-
 
 
 exports.createProperty = async (req, res) => {
