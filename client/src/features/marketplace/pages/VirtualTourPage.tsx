@@ -5,13 +5,11 @@ import * as THREE from "three";
 import { ArrowLeft, Maximize, Minimize, RotateCcw } from "lucide-react";
 import DashboardNavbar from "../components/DashboardNavbar";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 interface PanoramaRoom {
   roomName: string;
   imageUrl: string;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 const VirtualTourPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -23,8 +21,8 @@ const VirtualTourPage = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [propertyTitle, setPropertyTitle] = useState("");
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [sceneReady, setSceneReady] = useState(false); // ✅ Track scene initialization
 
-  // Three.js refs
   const mountRef = useRef<HTMLDivElement>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -33,7 +31,6 @@ const VirtualTourPage = () => {
   const animFrameRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Control refs
   const isDragging = useRef(false);
   const prevMousePos = useRef({ x: 0, y: 0 });
   const lon = useRef(0);
@@ -43,24 +40,25 @@ const VirtualTourPage = () => {
 
   const currentRoom = rooms[currentRoomIndex];
 
-  // ─── Step 1: Get rooms from state OR fetch from API ─────────────────────
+  // ─── Fetch rooms ──────────────────────────────────────────────────────
   useEffect(() => {
     const stateRooms = (location.state as any)?.panoramas;
     const stateTitle = (location.state as any)?.propertyTitle;
 
     if (stateRooms && stateRooms.length > 0) {
+      console.log("✅ Using rooms from navigation state:", stateRooms);
       setRooms(stateRooms);
       setPropertyTitle(stateTitle || "Property Tour");
       return;
     }
 
-    // Fallback: fetch from API
     const fetchPanoramas = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/properties/${id}`);
         const result = await res.json();
 
         if (result.success && result.data?.panoramas?.length > 0) {
+          console.log("✅ Fetched panoramas from API:", result.data.panoramas);
           setRooms(
             result.data.panoramas.map((p: any) => ({
               roomName: p.roomName,
@@ -80,139 +78,176 @@ const VirtualTourPage = () => {
     if (id) fetchPanoramas();
   }, [id, location.state]);
 
-  // ─── Step 2: Init Three.js scene ────────────────────────────────────────
-  const initScene = useCallback(() => {
-    if (!mountRef.current) return;
+  // ─── Init Three.js (only ONCE when rooms first load) ──────────────────
+  useEffect(() => {
+    if (rooms.length === 0 || !mountRef.current || sceneReady) return;
 
-    const w = mountRef.current.clientWidth;
-    const h = mountRef.current.clientHeight;
+    // ✅ Wait for next frame so the DOM has actual dimensions
+    const initTimer = setTimeout(() => {
+      if (!mountRef.current) return;
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(w, h);
-    mountRef.current.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+      const w = mountRef.current.clientWidth;
+      const h = mountRef.current.clientHeight;
 
-    // Scene
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
+      console.log("🎬 Initializing Three.js scene:", { w, h });
 
-    // Camera placed at center
-    const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
-    camera.position.set(0, 0, 0.1);
-    cameraRef.current = camera;
+      if (w === 0 || h === 0) {
+        console.warn("⚠️ Container has zero dimensions, retrying...");
+        return;
+      }
 
-    // Sphere — texture wraps inside
-    const geometry = new THREE.SphereGeometry(500, 60, 40);
-    geometry.scale(-1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: 0x222222 });
-    const sphere = new THREE.Mesh(geometry, material);
-    scene.add(sphere);
-    sphereRef.current = sphere;
-  }, []);
+      // Renderer
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(w, h);
+      mountRef.current.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
 
-  // ─── Step 3: Load texture ───────────────────────────────────────────────
-  const loadTexture = useCallback((imageUrl: string) => {
+      // Scene
+      const scene = new THREE.Scene();
+      sceneRef.current = scene;
+
+      // Camera at center
+      const camera = new THREE.PerspectiveCamera(75, w / h, 0.1, 1000);
+      camera.position.set(0, 0, 0.1);
+      cameraRef.current = camera;
+
+      // Sphere
+      const geometry = new THREE.SphereGeometry(500, 60, 40);
+      geometry.scale(-1, 1, 1);
+      const material = new THREE.MeshBasicMaterial({ color: 0x222222 });
+      const sphere = new THREE.Mesh(geometry, material);
+      scene.add(sphere);
+      sphereRef.current = sphere;
+
+      // Start animation loop
+      const animate = () => {
+        animFrameRef.current = requestAnimationFrame(animate);
+        if (!cameraRef.current || !rendererRef.current || !sceneRef.current)
+          return;
+
+        lat.current = Math.max(-85, Math.min(85, lat.current));
+        const phi = THREE.MathUtils.degToRad(90 - lat.current);
+        const theta = THREE.MathUtils.degToRad(lon.current);
+
+        cameraRef.current.lookAt(
+          Math.sin(phi) * Math.cos(theta),
+          Math.cos(phi),
+          Math.sin(phi) * Math.sin(theta),
+        );
+
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      };
+      animate();
+
+      setSceneReady(true); // ✅ Mark scene as ready
+      console.log("✅ Scene ready");
+    }, 100); // Small delay to ensure DOM is painted
+
+    return () => {
+      clearTimeout(initTimer);
+    };
+  }, [rooms, sceneReady]);
+
+  // ─── Load texture when room changes (after scene is ready) ────────────
+  useEffect(() => {
+    if (!sceneReady || !currentRoom || !sphereRef.current) return;
+
+    console.log("🖼️ Loading texture:", currentRoom.imageUrl);
     setIsLoading(true);
+
     const loader = new THREE.TextureLoader();
+    // ✅ Enable CORS for Cloudinary images
+    loader.setCrossOrigin("anonymous");
+
     loader.load(
-      imageUrl,
+      currentRoom.imageUrl,
       (texture) => {
+        console.log("✅ Texture loaded successfully");
         texture.colorSpace = THREE.SRGBColorSpace;
         if (sphereRef.current) {
           const mat = sphereRef.current.material as THREE.MeshBasicMaterial;
+          // Dispose old texture
+          if (mat.map) mat.map.dispose();
           mat.map = texture;
+          mat.color.set(0xffffff); // ✅ Reset color to white so texture shows properly
           mat.needsUpdate = true;
         }
+        lon.current = 0;
+        lat.current = 0;
         setIsLoading(false);
       },
-      undefined,
+      (progress) => {
+        console.log("Loading:", (progress.loaded / progress.total) * 100, "%");
+      },
       (err) => {
-        console.error("Texture load error:", err);
+        console.error("❌ Texture load error:", err);
         setIsLoading(false);
       },
     );
-  }, []);
+  }, [sceneReady, currentRoom]);
 
-  // ─── Step 4: Animation loop ─────────────────────────────────────────────
-  const animate = useCallback(() => {
-    animFrameRef.current = requestAnimationFrame(animate);
-    if (!cameraRef.current || !rendererRef.current || !sceneRef.current) return;
-
-    lat.current = Math.max(-85, Math.min(85, lat.current));
-    const phi = THREE.MathUtils.degToRad(90 - lat.current);
-    const theta = THREE.MathUtils.degToRad(lon.current);
-
-    cameraRef.current.lookAt(
-      Math.sin(phi) * Math.cos(theta),
-      Math.cos(phi),
-      Math.sin(phi) * Math.sin(theta),
-    );
-
-    rendererRef.current.render(sceneRef.current, cameraRef.current);
-  }, []);
-
-  // ─── Step 5: Window resize ──────────────────────────────────────────────
-  const handleResize = useCallback(() => {
-    if (!mountRef.current || !rendererRef.current || !cameraRef.current) return;
-    const w = mountRef.current.clientWidth;
-    const h = mountRef.current.clientHeight;
-    cameraRef.current.aspect = w / h;
-    cameraRef.current.updateProjectionMatrix();
-    rendererRef.current.setSize(w, h);
-  }, []);
-
-  // ─── Step 6: Mouse events ───────────────────────────────────────────────
-  const onMouseDown = useCallback((e: MouseEvent) => {
-    isDragging.current = true;
-    prevMousePos.current = { x: e.clientX, y: e.clientY };
-  }, []);
-
-  const onMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging.current) return;
-    lon.current -= (e.clientX - prevMousePos.current.x) * 0.2;
-    lat.current -= (e.clientY - prevMousePos.current.y) * 0.2;
-    prevMousePos.current = { x: e.clientX, y: e.clientY };
-  }, []);
-
-  const onMouseUp = useCallback(() => {
-    isDragging.current = false;
-  }, []);
-
-  const onWheel = useCallback((e: WheelEvent) => {
-    e.preventDefault();
-    if (!cameraRef.current) return;
-    currentFov.current = THREE.MathUtils.clamp(
-      currentFov.current + e.deltaY * 0.05,
-      30,
-      100,
-    );
-    cameraRef.current.fov = currentFov.current;
-    cameraRef.current.updateProjectionMatrix();
-  }, []);
-
-  // ─── Step 7: Touch events ───────────────────────────────────────────────
-  const onTouchStart = useCallback((e: TouchEvent) => {
-    lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, []);
-
-  const onTouchMove = useCallback((e: TouchEvent) => {
-    if (!lastTouch.current) return;
-    lon.current -= (e.touches[0].clientX - lastTouch.current.x) * 0.3;
-    lat.current -= (e.touches[0].clientY - lastTouch.current.y) * 0.3;
-    lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-  }, []);
-
-  // ─── Step 8: Lifecycle ──────────────────────────────────────────────────
+  // ─── Window resize handler ────────────────────────────────────────────
   useEffect(() => {
-    if (rooms.length === 0) return;
+    const handleResize = () => {
+      if (!mountRef.current || !rendererRef.current || !cameraRef.current)
+        return;
+      const w = mountRef.current.clientWidth;
+      const h = mountRef.current.clientHeight;
+      cameraRef.current.aspect = w / h;
+      cameraRef.current.updateProjectionMatrix();
+      rendererRef.current.setSize(w, h);
+    };
 
-    initScene();
-    animate();
     window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    const el = mountRef.current!;
+  // ─── Mouse / Touch / Wheel events ─────────────────────────────────────
+  useEffect(() => {
+    if (!sceneReady || !mountRef.current) return;
+
+    const el = mountRef.current;
+
+    const onMouseDown = (e: MouseEvent) => {
+      isDragging.current = true;
+      prevMousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      lon.current -= (e.clientX - prevMousePos.current.x) * 0.2;
+      lat.current -= (e.clientY - prevMousePos.current.y) * 0.2;
+      prevMousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const onMouseUp = () => {
+      isDragging.current = false;
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (!cameraRef.current) return;
+      currentFov.current = THREE.MathUtils.clamp(
+        currentFov.current + e.deltaY * 0.05,
+        30,
+        100,
+      );
+      cameraRef.current.fov = currentFov.current;
+      cameraRef.current.updateProjectionMatrix();
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!lastTouch.current) return;
+      lon.current -= (e.touches[0].clientX - lastTouch.current.x) * 0.3;
+      lat.current -= (e.touches[0].clientY - lastTouch.current.y) * 0.3;
+      lastTouch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    };
+
     el.addEventListener("mousedown", onMouseDown);
     el.addEventListener("mousemove", onMouseMove);
     el.addEventListener("mouseup", onMouseUp);
@@ -222,8 +257,6 @@ const VirtualTourPage = () => {
     el.addEventListener("touchmove", onTouchMove);
 
     return () => {
-      cancelAnimationFrame(animFrameRef.current);
-      window.removeEventListener("resize", handleResize);
       el.removeEventListener("mousedown", onMouseDown);
       el.removeEventListener("mousemove", onMouseMove);
       el.removeEventListener("mouseup", onMouseUp);
@@ -231,9 +264,21 @@ const VirtualTourPage = () => {
       el.removeEventListener("wheel", onWheel);
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [sceneReady]);
 
+  // ─── Cleanup on unmount ───────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      if (sphereRef.current) {
+        sphereRef.current.geometry.dispose();
+        const mat = sphereRef.current.material as THREE.MeshBasicMaterial;
+        if (mat.map) mat.map.dispose();
+        mat.dispose();
+      }
       rendererRef.current?.dispose();
-      if (mountRef.current && rendererRef.current) {
+      if (mountRef.current && rendererRef.current?.domElement) {
         try {
           mountRef.current.removeChild(rendererRef.current.domElement);
         } catch {
@@ -241,18 +286,9 @@ const VirtualTourPage = () => {
         }
       }
     };
-  }, [rooms]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
-  // ─── Step 9: Load texture when room changes ─────────────────────────────
-  useEffect(() => {
-    if (currentRoom) {
-      loadTexture(currentRoom.imageUrl);
-      lon.current = 0;
-      lat.current = 0;
-    }
-  }, [currentRoom, loadTexture]);
-
-  // ─── Step 10: Fullscreen ────────────────────────────────────────────────
+  // ─── Fullscreen toggle ────────────────────────────────────────────────
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
@@ -280,8 +316,8 @@ const VirtualTourPage = () => {
     }
   };
 
-  // ─── Empty state ────────────────────────────────────────────────────────
-  if (rooms.length === 0 && !isLoading) {
+  // ─── Empty state ──────────────────────────────────────────────────────
+  if (rooms.length === 0 && fetchError) {
     return (
       <div className="min-h-screen bg-gray-50">
         <DashboardNavbar />
@@ -289,11 +325,8 @@ const VirtualTourPage = () => {
           <div className="bg-white rounded-2xl p-12 shadow-sm">
             <p className="text-5xl mb-4">🏠</p>
             <h2 className="text-xl font-bold text-gray-800 mb-2">
-              {fetchError || "No 360° Tour Available"}
+              {fetchError}
             </h2>
-            <p className="text-gray-500 mb-6">
-              This property doesn't have a virtual tour yet.
-            </p>
             <button
               onClick={() => navigate(-1)}
               className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -306,16 +339,15 @@ const VirtualTourPage = () => {
     );
   }
 
-  // ─── Main render ────────────────────────────────────────────────────────
+  // ─── Main render ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col" ref={containerRef}>
+    <div className="h-screen bg-gray-900 flex flex-col" ref={containerRef}>
       {/* Header */}
-      <div className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 px-4 py-3 flex items-center justify-between z-10">
+      <div className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 px-4 py-3 flex items-center justify-between z-10 shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
             className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-            title="Back to property"
           >
             <ArrowLeft size={20} />
           </button>
@@ -332,14 +364,12 @@ const VirtualTourPage = () => {
           <button
             onClick={resetView}
             className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-            title="Reset view"
           >
             <RotateCcw size={18} />
           </button>
           <button
             onClick={toggleFullscreen}
             className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
-            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
             {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
           </button>
@@ -348,7 +378,7 @@ const VirtualTourPage = () => {
 
       {/* Room tabs */}
       {rooms.length > 1 && (
-        <div className="bg-gray-900/90 backdrop-blur-sm px-4 py-2 flex gap-2 overflow-x-auto z-10 border-b border-gray-800">
+        <div className="bg-gray-900/90 px-4 py-2 flex gap-2 overflow-x-auto border-b border-gray-800 shrink-0">
           {rooms.map((room, index) => (
             <button
               key={index}
@@ -365,17 +395,20 @@ const VirtualTourPage = () => {
         </div>
       )}
 
-      {/* Three.js Canvas */}
+      {/* ✅ Canvas — flex-1 fills remaining space, minHeight ensures non-zero */}
       <div
-        className="flex-1 relative"
-        style={{ cursor: isDragging.current ? "grabbing" : "grab" }}
+        className="flex-1 relative bg-black"
+        style={{
+          minHeight: "400px",
+          cursor: isDragging.current ? "grabbing" : "grab",
+        }}
       >
-        <div ref={mountRef} className="w-full h-full" />
+        <div ref={mountRef} className="absolute inset-0 w-full h-full" />
 
         {/* Loading overlay */}
         {isLoading && (
-          <div className="absolute inset-0 bg-gray-900 flex flex-col items-center justify-center gap-3 z-10">
-            <div className="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 bg-gray-900/80 flex flex-col items-center justify-center gap-3 z-10">
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-white text-sm font-medium">
               Loading 360° view...
             </p>
@@ -407,8 +440,7 @@ const VirtualTourPage = () => {
             {currentRoomIndex > 0 && (
               <button
                 onClick={() => setCurrentRoomIndex((i) => i - 1)}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
-                title="Previous room"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm"
               >
                 ←
               </button>
@@ -416,8 +448,7 @@ const VirtualTourPage = () => {
             {currentRoomIndex < rooms.length - 1 && (
               <button
                 onClick={() => setCurrentRoomIndex((i) => i + 1)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-colors"
-                title="Next room"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm"
               >
                 →
               </button>
