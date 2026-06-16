@@ -29,7 +29,7 @@ const LoanCalculator = ({ propertyPrice, downPayment }: Props) => {
   }, [price, down, rate, years]);
 
   return (
-    <div className="bg-white rounded-xl p-4 border shadow-sm">
+    <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
       <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
         <Calculator className="w-4 h-4" />
         Loan Calculator
@@ -38,23 +38,18 @@ const LoanCalculator = ({ propertyPrice, downPayment }: Props) => {
         <div>
           <label className="text-xs text-gray-500">Price (PKR)</label>
           <input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))}
-            className="w-full border rounded-lg px-3 py-1.5 text-sm" />
+            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm" />
         </div>
         <div>
           <label className="text-xs text-gray-500">Down Payment</label>
           <input type="number" value={down} onChange={(e) => setDown(Number(e.target.value))}
-            className="w-full border rounded-lg px-3 py-1.5 text-sm" />
+            className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm" />
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="text-xs text-gray-500">Rate %</label>
-            <input type="number" value={rate} onChange={(e) => setRate(Number(e.target.value))}
-              className="w-full border rounded-lg px-3 py-1.5 text-sm" />
-          </div>
+        <div className="gap-2">
           <div>
             <label className="text-xs text-gray-500">Years</label>
             <input type="number" value={years} onChange={(e) => setYears(Number(e.target.value))}
-              className="w-full border rounded-lg px-3 py-1.5 text-sm" />
+              className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm" />
           </div>
         </div>
         <div className="bg-blue-50 rounded-lg p-3 text-center">

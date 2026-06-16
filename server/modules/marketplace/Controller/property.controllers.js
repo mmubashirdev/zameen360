@@ -2,6 +2,12 @@
 const prisma = require("../../../configs/prisma");
 const cloudinary = require("../../../configs/cloudinary");
 
+
+const {
+  uploadToCloudinaryToPath,
+} = require("../../../utils/uploadToCloudinary");
+
+
 console.log(
   "Cloudinary upload_stream available:",
   typeof cloudinary.uploader?.upload_stream,
@@ -86,6 +92,69 @@ const deleteFromCloudinary = async (url) => {
     console.warn("Cloudinary delete failed:", err.message);
   }
 };
+
+exports.panorama = async (req, res) => {
+  try {
+    const propertyId = parseInt(req.params.id);
+    const files = req.files || [];
+    const roomNames = JSON.parse(req.body.roomNames || "[]");
+
+    if (isNaN(propertyId)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
+    }
+
+    if (files.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No panorama files uploaded" });
+    }
+
+    const panoramas = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const roomName = roomNames[i] || `Room ${i + 1}`;
+
+      // ✅ Use the CORRECT function — uploadToCloudinaryFromPath
+      const imageUrl = await uploadToCloudinaryFromPath(
+        file.path,
+        "zameen360/panoramas",
+      );
+
+      const panorama = await prisma.panorama.create({
+        data: {
+          propertyId,
+          roomName,
+          imageUrl,
+          hotspots: [],
+          order: i,
+        },
+      });
+
+      panoramas.push(panorama);
+    }
+
+    console.log(
+      `✅ ${panoramas.length} panoramas saved for property ${propertyId}`,
+    );
+
+    res.status(201).json({
+      success: true,
+      message: `${panoramas.length} panorama(s) uploaded`,
+      data: panoramas,
+    });
+  } catch (err) {
+    console.error("PANORAMA UPLOAD ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload panoramas",
+      error: err.message,
+    });
+  }
+};
+
 
 
 exports.createProperty = async (req, res) => {
@@ -482,10 +551,10 @@ exports.getDashboardStats = async (req, res) => {
 };
 
 
+// In property.controllers.js — fix getPropertyById
 exports.getPropertyById = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-
     if (isNaN(id)) {
       return res
         .status(400)
@@ -498,6 +567,10 @@ exports.getPropertyById = async (req, res) => {
         user: {
           select: { id: true, fullName: true, email: true, phone: true },
         },
+        // ✅ MUST include this — buyer needs panoramas to see 360° button
+        panoramas: {
+          orderBy: { order: "asc" },
+        },
       },
     });
 
@@ -507,19 +580,21 @@ exports.getPropertyById = async (req, res) => {
         .json({ success: false, message: "Property not found" });
     }
 
+    // ✅ Debug log
+    console.log(
+      `Property ${id} has ${property.panoramas?.length || 0} panoramas`,
+    );
+
     res.json({ success: true, data: serializeBigInt(property) });
   } catch (err) {
     console.error("GET PROPERTY BY ID ERROR:", err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch property",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch property",
+      error: err.message,
+    });
   }
 };
-
 
 exports.updateProperty = async (req, res) => {
   try {

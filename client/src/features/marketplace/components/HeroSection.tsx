@@ -242,12 +242,12 @@ const HeroSection: React.FC = () => {
               </svg>
             </button>
 
-            <button
+            {/* <button
               className={styles.btnSecondary}
               onClick={() => navigate("/post-property")}
             >
               Post Property
-            </button>
+            </button> */}
           </div>
         </div>
 

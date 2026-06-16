@@ -1,6 +1,8 @@
 // server/utils/uploadToCloudinary.js
 const cloudinary = require("../configs/cloudinary");
 
+
+
 /**
  * Upload a single buffer to Cloudinary
  * @param {Buffer} buffer - File buffer from multer memoryStorage

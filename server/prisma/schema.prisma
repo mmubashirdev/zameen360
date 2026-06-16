@@ -188,12 +188,26 @@ model Property {
   updatedAt            DateTime @updatedAt @map("updated_at")
   user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   conversations        Conversation[]
+  panoramas            Panorama[]
   @@index([city])
   @@index([purpose])
   @@index([propertyType])
   @@index([price])
   @@index([latitude, longitude])
   @@map("properties")
+}
+
+model Panorama {
+  id          Int      @id @default(autoincrement())
+  propertyId  Int      @map("property_id")
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomName    String   @map("room_name")
+  imageUrl    String   @map("image_url")
+  hotspots    Json     @default("[]")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("panoramas")
 }
 
 model Conversation {

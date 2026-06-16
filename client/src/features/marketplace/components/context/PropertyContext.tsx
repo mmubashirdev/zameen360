@@ -43,8 +43,13 @@ export interface PropertyData {
   imageFiles?: UploadedImage[];
   videoUrl?: string;
   floorPlan?: string;
+  panoramas?: PanoramaItem[];
 }
 
+export interface PanoramaItem {
+  roomName?: string;
+  file: File;
+}
 // ⭐ Errors type
 export type PropertyErrors = Partial<Record<keyof PropertyData, string>>;
 
