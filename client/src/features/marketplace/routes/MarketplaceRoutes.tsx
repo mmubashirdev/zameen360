@@ -9,14 +9,14 @@ import ContactUsPage from "../pages/ContactUs";
 import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
 import MyListings from "../pages/MyListings";
-import BuyerProfile from "../pages/BuyerProfile";  
+import BuyerProfile from "../pages/BuyerProfile";
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import PropertySubmitted from "../pages/PropertySubmitted";
 import MessagesPage from "@features/message/page/MessagesPage";
-import VirtualTourPage from "../../marketplace/components/shared/VirtualTour"
-
-
+import VirtualTourPage from "../../marketplace/components/shared/VirtualTour";
+import TermsOfService from "../components/term&policy/Termsofservice";
+import PrivacyPolicy from "../components/term&policy/Privacypolicy";
 
 const marketplaceRoutes = [
   {
@@ -32,7 +32,7 @@ const marketplaceRoutes = [
     element: <ProfilePage />,
   },
   {
-    path: "/buyer-profile",        // ⬅️ NEW ROUTE
+    path: "/buyer-profile", // ⬅️ NEW ROUTE
     element: <BuyerProfile />,
   },
   {
@@ -75,7 +75,7 @@ const marketplaceRoutes = [
     path: "/contact-us",
     element: <ContactUsPage />,
   },
- 
+
   {
     path: "/messages",
     element: <MessagesPage />,
@@ -87,7 +87,16 @@ const marketplaceRoutes = [
   {
     path: "/property/:id/virtual-tour",
     element: <VirtualTourPage />,
-  }
+  },
+  {
+    path: "/terms",
+    element: <TermsOfService />,
+  },
+
+  {
+    path: "/privacy-policy",
+    element: <PrivacyPolicy />,
+  },
 ];
 
 export { marketplaceRoutes };

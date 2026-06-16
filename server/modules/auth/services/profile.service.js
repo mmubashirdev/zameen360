@@ -1,9 +1,14 @@
 const prisma = require("../../../configs/prisma");
 
 const getProfileService = async (userId) => {
-  return await prisma.user.findUnique({ where: { id: userId }, include: { profile: true, sellerDetail: true, trustScore: true } });
+  return await prisma.user.findUnique({
+    where: { id: userId },  
+    include: {
+      profile: true,
+      sellerDetail: true,
+    },
+  });
 };
-
 const updateProfileService = async (userId, currentUser, data, ip) => {
   const { fullName, phone, city, bio, whatsappNumber, dateOfBirth, gender, address } = data;
 
