@@ -10,8 +10,9 @@ import type { PropertyData } from "../components/context/PropertyContext";
 import styles from "../components/media/styles/ReviewSubmit.module.css";
 import Map from "../components/media/Map";
 import { reverseGeocodeLatLng } from "../utils/geocoding";
+import FormLoader from "../../../shared/components/FormLoader";
+import Loader from "../../../shared/Loader";
 
-// ⭐ Props for step navigation (from CreatePropertyPost)
 interface ReviewSubmitProps {
   onBack?: () => void;
   onEditStep?: (step: number) => void;
@@ -49,35 +50,98 @@ const Row = ({ label, value }: RowProps) => (
 
 const propertyConfig = {
   House: {
-    show: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: [] as string[],
   },
   Apartment: {
-    show: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: [] as string[],
   },
   Villa: {
-    show: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: [] as string[],
   },
   "Plot / Land": {
     show: ["facingDirection", "possession"],
-    hide: ["bedrooms", "bathrooms", "floors", "parking", "yearBuilt", "furnishing"],
+    hide: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "yearBuilt",
+      "furnishing",
+    ],
   },
   Agricultural: {
     show: [] as string[],
-    hide: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "yearBuilt", "furnishing"],
+    hide: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "yearBuilt",
+      "furnishing",
+    ],
   },
   Commercial: {
-    show: ["floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: ["bedrooms", "bathrooms"],
   },
   Shop: {
-    show: ["floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: ["bedrooms", "bathrooms"],
   },
   Office: {
-    show: ["floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: ["bedrooms", "bathrooms"],
   },
   Warehouse: {
@@ -87,6 +151,9 @@ const propertyConfig = {
 };
 
 const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
+  const [publishing, setPublishing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState("");
   const navigate = useNavigate();
   const { data, updateData, resetData } = useProperty();
   const { token, isAuthenticated } = useAuthContext();
@@ -162,9 +229,6 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
     }
   };
 
-  // ⭐ Publish handler - submit to backend
-  // In ReviewSubmit.tsx — replace the handlePublish function
-  // In ReviewSubmit.tsx — replace the handlePublish function
   const handlePublish = async () => {
     if (!agree1 || !agree2) {
       toast.error("Please accept the required terms");
@@ -182,7 +246,9 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       navigate("/login");
       return;
     }
-
+    setPublishing(true);
+    setPhase("Uploading images...");
+    setProgress(20);
     setLoading(true);
     try {
       // ── Step 1: Create property (images only) ─────────────────────────────
@@ -241,11 +307,17 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
         }
       });
 
+      setPhase("Creating property...");
+      setProgress(50);
+
       const res = await fetch("http://localhost:5000/api/properties", {
         method: "POST",
         headers: { Authorization: `Bearer ${authToken}` },
         body: formData,
       });
+
+      setPhase("Saving panoramas...");
+      setProgress(80);
 
       const result = await res.json();
 
@@ -297,6 +369,8 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
         }
       }
 
+      setProgress(100);
+      setPublishing(false);
       toast.success("Property submitted successfully!");
       resetData();
 
@@ -313,11 +387,11 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       toast.error(message);
     } finally {
       setLoading(false);
+      setPublishing(false);
     }
   };
 
   return (
-    // ⭐ Direct form return - parent (CreatePropertyPost) handles navbar/heading
     <div className={styles.form}>
       {/* ============ A. Basic Information ============ */}
       <Section title="A. Basic Information" onEdit={handleEditBasic}>
@@ -560,9 +634,21 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
         >
           <Rocket size={16} /> {loading ? "Publishing..." : "Publish Property"}
         </button>
+        {publishing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl px-8 py-6 min-w-400px">
+              <Loader
+                variant="bar"
+                progress={progress}
+                message={phase}
+                color="#2563eb"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-};;;
+};
 
 export default ReviewSubmit;

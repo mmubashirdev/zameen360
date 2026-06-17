@@ -126,7 +126,7 @@ const PropertyDetails = () => {
                     }
                     className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-linear-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 shadow-md"
                   >
-                    🌐 Take 360° Virtual Tour
+                    3D View
                   </button>
                 </div>
               )}

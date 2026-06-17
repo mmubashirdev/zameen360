@@ -12,7 +12,7 @@ import { useAuthContext } from "@features/auth/hooks/useAuth";
 import { useSocket } from "../components/hooks/usehook";
 import type { PropertyEventData } from "../components/hooks/usehook";
 import styles from "../../marketplace/components/media/styles/Buy.module.css";
-
+import SkeletonCard from "../../../shared/components/SkeletonCard";
 interface Property {
   id: number;
   title: string;
@@ -87,7 +87,7 @@ const Buy = () => {
   });
 
   useEffect(() => {
-    // ✅ Properly typed callback
+
     const handleApproved = (data: PropertyEventData) => {
       if (!data.property) return;
       const newProperty = data.property as Property;
@@ -100,7 +100,7 @@ const Buy = () => {
         return [newProperty, ...prev];
       });
 
-      toast.success(`🏠 New property: ${newProperty.title || "New listing"}`, {
+      toast.success(`New property: ${newProperty.title || "New listing"}`, {
         duration: 5000,
         position: "top-right",
       });

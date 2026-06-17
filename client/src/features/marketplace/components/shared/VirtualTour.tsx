@@ -412,8 +412,8 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
 
         {/* Controls hint */}
         <div className="absolute top-4 right-4 z-10 bg-black/40 text-white text-xs px-2.5 py-1 rounded-lg pointer-events-none flex flex-col gap-1">
-          <span>🖱 Drag to look around</span>
-          <span>⚲ Scroll to zoom</span>
+          <span>Drag to look around</span>
+          <span>Scroll to zoom</span>
         </div>
 
         {/* Room counter */}

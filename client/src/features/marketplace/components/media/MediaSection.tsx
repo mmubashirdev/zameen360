@@ -1,4 +1,3 @@
-// client/src/features/marketplace/components/media/MediaSection.tsx
 import { useRef, useState, useCallback } from "react";
 import { Camera, X, Plus, AlertCircle, CheckCircle2 } from "lucide-react";
 import styles from "./styles/MediaSection.module.css";
@@ -199,38 +198,37 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
 
   return (
     <>
-
-          <div className={`${styles.card} mb-4 h-40`}>
-          <label className={styles.label}>
-            3D Virtual Tour <span className={styles.optional}>(Optional)</span>
-          </label>
+      <div className={`${styles.card} mb-4 h-40`}>
+        <label className={styles.label}>
+          3D Virtual Tour <span className={styles.optional}>(Optional)</span>
+        </label>
+        <div
+          className={`${styles.uploadBox}`}
+          onClick={() => setTourOpen(true)}
+          style={{
+            cursor: "pointer",
+            borderColor: validRoomCount > 0 ? "#16a34a" : undefined,
+          }}
+        >
           <div
-            className={`${styles.uploadBox}`}
-            onClick={() => setTourOpen(true)}
-            style={{
-              cursor: "pointer",
-              borderColor: validRoomCount > 0 ? "#16a34a" : undefined,
-            }}
+            className={styles.icon}
+            style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}
           >
-            <div
-              className={styles.icon}
-              style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}
-            >
-              3D
-            </div>
-            <div style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}>
-              {validRoomCount > 0
-                ? `${validRoomCount} room${validRoomCount !== 1 ? "s" : ""} uploaded`
-                : "Upload 360° Room Photos"}
-            </div>
+            3D
           </div>
-          {validRoomCount > 0 && (
-            <p className={styles.fileName}>
-              ✓ {validRoomCount} room{validRoomCount > 1 ? "s" : ""} ready for
-              virtual tour
-            </p>
-          )}
+          <div style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}>
+            {validRoomCount > 0
+              ? `${validRoomCount} room${validRoomCount !== 1 ? "s" : ""} uploaded`
+              : "Upload 360° Room Photos"}
+          </div>
         </div>
+        {validRoomCount > 0 && (
+          <p className={styles.fileName}>
+            ✓ {validRoomCount} room{validRoomCount > 1 ? "s" : ""} ready for
+            virtual tour
+          </p>
+        )}
+      </div>
       {/* ✅ Original 3-card row — unchanged */}
       <div className={styles.row}>
         {/* Card 1: Video */}
@@ -259,7 +257,6 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
             onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
           />
         </div>
-
 
         {/* Card 3: Floor Plan */}
         <div className={styles.card}>
@@ -331,15 +328,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
               {/* Scrollable Content */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
                 {/* Info banner */}
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 flex gap-3">
-                  <Camera size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                  <p className="text-xs text-blue-800 leading-relaxed">
-                    <strong>How to take 360° photos:</strong> Use a Ricoh Theta,
-                    Insta360, or the free <strong>Google Street View</strong>{" "}
-                    app on your phone. Export as equirectangular JPG (2:1 ratio,
-                    e.g. 4096×2048).
-                  </p>
-                </div>
+                
 
                 {/* Status bar */}
                 <div className="flex items-center justify-between">
@@ -375,7 +364,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                       {/* Thumbnail */}
                       <div
                         onClick={() => roomRefs.current[room.id]?.click()}
-                        className="shrink-0 w-[88px] h-[60px] rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center cursor-pointer overflow-hidden relative gap-1 hover:border-blue-400 transition-colors"
+                        className="shrink-0 w-40 h-40 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center cursor-pointer overflow-hidden relative gap-1 hover:border-blue-400 transition-colors"
                       >
                         {room.previewUrl ? (
                           <img

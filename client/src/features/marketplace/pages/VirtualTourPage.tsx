@@ -417,14 +417,14 @@ const VirtualTourPage = () => {
 
         {/* Room label */}
         <div className="absolute bottom-4 left-4 z-10 bg-black/60 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-lg pointer-events-none">
-          📍 {currentRoom?.roomName}
+          {currentRoom?.roomName}
         </div>
 
         {/* Controls hint */}
         <div className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg pointer-events-none space-y-1">
-          <p>🖱 Drag to look around</p>
-          <p>⚲ Scroll to zoom</p>
-          <p>📱 Swipe on mobile</p>
+          <p>Drag to look around</p>
+          <p>Scroll to zoom</p>
+          <p>Swipe on mobile</p>
         </div>
 
         {/* Room counter */}

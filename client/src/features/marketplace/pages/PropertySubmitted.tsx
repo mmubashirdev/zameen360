@@ -1,4 +1,4 @@
-// client/src/features/marketplace/pages/PropertySubmitted.tsx
+
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,7 +17,7 @@ import DashboardNavbar from "../components/DashboardNavbar";
 import Footer from "../components/Footer";
 import styles from "../styles/PropertySubmitted.module.css";
 
-// ✅ Confetti colors defined outside component
+// Confetti colors defined outside component
 const CONFETTI_COLORS = [
   "#2563eb",
   "#10b981",
@@ -27,7 +27,7 @@ const CONFETTI_COLORS = [
   "#ec4899",
 ];
 
-// ✅ Confetti item type
+// Confetti item type
 interface ConfettiItem {
   id: number;
   left: string;
@@ -36,7 +36,7 @@ interface ConfettiItem {
   backgroundColor: string;
 }
 
-// ✅ Generate confetti data ONCE using useMemo — never during render
+// Generate confetti data ONCE using useMemo — never during render
 const generateConfetti = (count: number): ConfettiItem[] =>
   Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -47,11 +47,14 @@ const generateConfetti = (count: number): ConfettiItem[] =>
       CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
   }));
 
-const PropertySubmitted: React.FC = () => {
+const PropertySubmitted = () => {
   const navigate = useNavigate();
   const [showConfetti, setShowConfetti] = useState(true);
 
-  // ✅ Generate once on mount — stable across re-renders
+  useEffect(()=>{
+    window.scrollTo({top: 0, behavior: "smooth"})
+  },[]);
+  // Generate once on mount — stable across re-renders
   const confettiItems = useMemo(() => generateConfetti(50), []);
 
   useEffect(() => {
@@ -114,7 +117,7 @@ const PropertySubmitted: React.FC = () => {
     <div className={styles.page}>
       <DashboardNavbar />
 
-      {/* ✅ Confetti — rendered from pre-generated stable data */}
+      {/* Confetti — rendered from pre-generated stable data */}
       {showConfetti && (
         <div className={styles.confettiContainer}>
           {confettiItems.map((item) => (
