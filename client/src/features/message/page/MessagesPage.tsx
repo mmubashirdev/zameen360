@@ -72,8 +72,8 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-[1500px] mx-auto px-6 py-6">
-        <div className="grid grid-cols-12 gap-5 h-[calc(100vh-120px)]">
+      <main className="max-w-375 mx-auto px-6 py-6" role="main">
+        <div className="grid grid-cols-12 gap-5 h-[calc(100vh-120px)]" role="presentation">
           
           {/* ── Sidebar ───────────────────────────────────────────────────── */}
           <div className="col-span-3">

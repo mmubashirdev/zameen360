@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { useUser } from './UserContext';
 
 interface Props {
@@ -14,14 +15,48 @@ interface FormData {
   whatsappNumber: string;
   address: string;
   gender: string;
-  dateOfBirth: string;
 }
+
+type FormErrors = Partial<Record<keyof FormData, string>>;
+
+// Zod validation schema for seller profile
+const sellerProfileSchema = z.object({
+  fullName: z.string()
+    .min(2, 'Full name must be at least 2 characters')
+    .max(50, 'Full name must not exceed 50 characters')
+    .regex(/^[a-zA-Z\s]*$/, 'Full name can only contain letters and spaces'),
+  phone: z.string()
+    .refine((val) => !val || /^\d{11}$/.test(val.replace(/\s/g, '')), 'Phone number must be exactly 11 digits')
+    .optional()
+    .or(z.literal('')),
+  whatsappNumber: z.string()
+    .refine((val) => !val || /^\d{11}$/.test(val.replace(/\s/g, '')), 'WhatsApp number must be exactly 11 digits')
+    .optional()
+    .or(z.literal('')),
+  city: z.string()
+    .refine((val) => !val || val.length > 0, 'Please select a city')
+    .optional()
+    .or(z.literal('')),
+  address: z.string()
+    .max(100, 'Address must not exceed 100 characters')
+    .optional()
+    .or(z.literal('')),
+  gender: z.string()
+    .refine((val) => !val || ['MALE', 'FEMALE', 'OTHER'].includes(val), 'Invalid gender selection')
+    .optional()
+    .or(z.literal('')),
+  bio: z.string()
+    .max(500, 'Bio must not exceed 500 characters')
+    .optional()
+    .or(z.literal('')),
+});
 
 const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
   const { user, updateUser } = useUser();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
@@ -31,10 +66,8 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
     whatsappNumber: '',
     address: '',
     gender: '',
-    dateOfBirth: '',
   });
 
-  // Jab modal khule, current user data load karo
   useEffect(() => {
     if (user && open) {
       setFormData({
@@ -45,10 +78,10 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
         whatsappNumber: user.whatsappNumber || '',
         address: user.address || '',
         gender: user.gender || '',
-        dateOfBirth: '',
       });
       setError(null);
       setSuccess(false);
+      setFieldErrors({});
     }
   }, [user, open]);
 
@@ -56,29 +89,52 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error for this field when user starts typing
+    if (fieldErrors[field as keyof FormData]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field as keyof FormData];
+        return newErrors;
+      });
+    }
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
       setError(null);
+      setFieldErrors({});
 
-      // Sirf woh fields bhejo jo filled hain
+      // Validate using Zod schema
+      const validationResult = sellerProfileSchema.safeParse(formData);
+
+      if (!validationResult.success) {
+        const errors: FormErrors = {};
+        validationResult.error.issues.forEach((error: any) => {
+          const field = error.path[0] as keyof FormData;
+          if (field) {
+            errors[field] = error.message;
+          }
+        });
+        setFieldErrors(errors);
+        setError('Please fix the errors above');
+        return;
+      }
+
+      // Only send fields that have values
       const dataToSend: any = {};
       if (formData.fullName) dataToSend.fullName = formData.fullName;
       if (formData.phone) dataToSend.phone = formData.phone;
       if (formData.city) dataToSend.city = formData.city;
-      if (formData.bio !== undefined) dataToSend.bio = formData.bio;
+      if (formData.bio) dataToSend.bio = formData.bio;
       if (formData.whatsappNumber) dataToSend.whatsappNumber = formData.whatsappNumber;
       if (formData.address) dataToSend.address = formData.address;
       if (formData.gender) dataToSend.gender = formData.gender;
-      if (formData.dateOfBirth) dataToSend.dateOfBirth = formData.dateOfBirth;
 
       await updateUser(dataToSend);
 
       setSuccess(true);
       
-      // 1.5 second baad modal close ho jaye
       setTimeout(() => {
         onClose();
         setSuccess(false);
@@ -99,7 +155,7 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
       <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10">
@@ -147,8 +203,20 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
               value={formData.fullName}
               onChange={(e) => handleChange('fullName', e.target.value)}
               placeholder="Enter your full name"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent ${
+                fieldErrors.fullName 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             />
+            {fieldErrors.fullName && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.fullName}
+              </p>
+            )}
           </div>
 
           {/* Phone */}
@@ -157,12 +225,25 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
               Phone Number
             </label>
             <input
-              type="tel"
+              type="text"
+              inputMode="numeric"
               value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
+              onChange={(e) => handleChange('phone', e.target.value.replace(/[^\d]/g, ''))}
               placeholder="+92 300 1234567"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent ${
+                fieldErrors.phone 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             />
+            {fieldErrors.phone && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.phone}
+              </p>
+            )}
           </div>
 
           {/* WhatsApp */}
@@ -171,12 +252,25 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
               WhatsApp Number
             </label>
             <input
-              type="tel"
+              type="text"
+              inputMode="numeric"
               value={formData.whatsappNumber}
-              onChange={(e) => handleChange('whatsappNumber', e.target.value)}
+              onChange={(e) => handleChange('whatsappNumber', e.target.value.replace(/[^\d]/g, ''))}
               placeholder="+92 300 1234567"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent ${
+                fieldErrors.whatsappNumber 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             />
+            {fieldErrors.whatsappNumber && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.whatsappNumber}
+              </p>
+            )}
           </div>
 
           {/* City Dropdown */}
@@ -187,13 +281,25 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
             <select
               value={formData.city}
               onChange={(e) => handleChange('city', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent ${
+                fieldErrors.city 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             >
               <option value="">Select City</option>
               {cities.map((city) => (
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
+            {fieldErrors.city && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.city}
+              </p>
+            )}
           </div>
 
           {/* Address */}
@@ -206,8 +312,20 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
               value={formData.address}
               onChange={(e) => handleChange('address', e.target.value)}
               placeholder="House #, Street, Area"
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent ${
+                fieldErrors.address 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             />
+            {fieldErrors.address && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.address}
+              </p>
+            )}
           </div>
 
           {/* Gender */}
@@ -218,26 +336,25 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
             <select
               value={formData.gender}
               onChange={(e) => handleChange('gender', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent ${
+                fieldErrors.gender 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             >
               <option value="">Select Gender</option>
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
               <option value="OTHER">Other</option>
             </select>
-          </div>
-
-          {/* Date of Birth */}
-          <div>
-            <label className="block text-[12px] font-semibold text-gray-700 mb-1">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+            {fieldErrors.gender && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.gender}
+              </p>
+            )}
           </div>
 
           {/* Bio / About Me */}
@@ -250,8 +367,20 @@ const EditProfileModal: React.FC<Props> = ({ open, onClose }) => {
               onChange={(e) => handleChange('bio', e.target.value)}
               rows={3}
               placeholder="Tell us about yourself..."
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className={`w-full bg-gray-50 border rounded-lg px-3 py-2 text-[13px] text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                fieldErrors.bio 
+                  ? 'border-red-500 focus:ring-red-500' 
+                  : 'border-gray-200 focus:ring-blue-500'
+              }`}
             />
+            {fieldErrors.bio && (
+              <p className="mt-1 text-[11px] text-red-600 flex items-center gap-1">
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18.101 12.93a1 1 0 00-1.414-1.414L10 16.586l-6.687-6.687a1 1 0 00-1.414 1.414l7.778 7.778a1.5 1.5 0 002.04.017l8.404-8.42z" clipRule="evenodd" />
+                </svg>
+                {fieldErrors.bio}
+              </p>
+            )}
           </div>
 
           {/* Email (read-only) */}

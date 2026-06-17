@@ -64,7 +64,7 @@ const LegalLayout: React.FC<LegalLayoutProps> = ({
       <DashboardNavbar />
 
       {/* HERO HEADER */}
-      <div className="bg-gradient-to-br from-blue-50 to-white border-b border-gray-200">
+      <div className="bg-linear-to-br from-blue-50 to-white border-b border-gray-200" role="region">
         <div className="max-w-5xl mx-auto px-6 py-12 text-center">
           <div className="inline-block bg-[#EEF4FF] text-[#1A73E8] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">
             Legal Documents

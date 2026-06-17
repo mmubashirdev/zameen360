@@ -28,7 +28,7 @@ const PropertyDetails = () => {
     return (
       <div className="bg-gray-50 min-h-screen">
         <DashboardNavbar />
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 py-6 pt-24">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6 bg-white rounded-xl p-6">
               <div className="w-full h-80 bg-gray-200 rounded-xl animate-pulse" />
@@ -61,7 +61,7 @@ const PropertyDetails = () => {
     return (
       <div className="bg-gray-50 min-h-screen">
         <DashboardNavbar />
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <div className="max-w-7xl mx-auto px-4 pt-24 pb-20 text-center">
           <div className="bg-white rounded-xl p-12 shadow-sm max-w-md mx-auto">
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
               Property Not Found
@@ -82,61 +82,63 @@ const PropertyDetails = () => {
 
   if (!property) return null;
 
-  // console.log("Property panoramas:", property.panoramas);
-  // console.log("hasTour:", hasTour);
-  // console.log("panoramaRooms:", panoramaRooms);
-
-  // ✅ Map panoramas — pass to VirtualTourPage via route state
-  const panoramaRooms: PanoramaRoom[] = (property?.panoramas || []).map(
-    (p: any) => ({
-      roomName: p.roomName,
-      imageUrl: p.imageUrl,
-      hotspots: p.hotspots || [],
-    }),
-  );
+  // ✅ Map panoramas - safely handle missing property
+  const panoramaRooms: PanoramaRoom[] = (
+    (property as any)?.panoramas || []
+  ).map((p: any) => ({
+    roomName: p.roomName,
+    imageUrl: p.imageUrl,
+    hotspots: p.hotspots || [],
+  }));
 
   const hasTour = panoramaRooms.length > 0;
+
+  const launchVirtualTour = () => {
+    navigate(`/property/${property.id}/virtual-tour`, {
+      state: {
+        panoramas: panoramaRooms,
+        propertyTitle: property.title,
+      },
+    });
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <DashboardNavbar />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <Breadcrumbs
-          city={property.city}
-          propertyType={property.propertyType}
-          title={property.title}
-        />
+      {/* pt-20 pushes content below the fixed navbar (~80px height) */}
+      <main className="max-w-7xl mx-auto px-4 pb-6 pt-20 mt-5">
+        {/* Breadcrumbs + Virtual Tour Button */}
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <Breadcrumbs
+            city={property.city}
+            propertyType={property.propertyType}
+            title={property.title}
+          />
+
+          {/* 🌐 Virtual Tour Button */}
+          <button
+            onClick={launchVirtualTour}
+            disabled={!hasTour}
+            className={`px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md transition-all ${
+              hasTour
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg cursor-pointer"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            title={
+              hasTour
+                ? "View 360° Virtual Tour"
+                : "Virtual tour not available for this property"
+            }
+          >
+            🌐 Take 360° Virtual Tour
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ==================== LEFT SIDE ==================== */}
           <div className="lg:col-span-2 space-y-6 bg-white rounded-xl p-6">
-            {/* ✅ Photos + 360° Tour button */}
-            <div>
-              {hasTour && (
-                <div className="flex justify-end mb-4">
-                  <button
-                    onClick={() =>
-                      navigate(`/property/${property.id}/virtual-tour`, {
-                        state: {
-                          panoramas: panoramaRooms,
-                          propertyTitle: property.title,
-                        },
-                      })
-                    }
-                    className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-linear-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all flex items-center gap-2 shadow-md"
-                  >
-                    3D View
-                  </button>
-                </div>
-              )}
-
-              {/* ✅ Single gallery — never duplicated */}
-              <PropertyGallery
-                images={property.images}
-                title={property.title}
-              />
-            </div>
+            <PropertyGallery images={property.images} title={property.title} />
 
             <PropertyOverview
               title={property.title}

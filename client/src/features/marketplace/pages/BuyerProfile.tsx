@@ -41,7 +41,7 @@ const BuyerProfile: React.FC = () => {
       <DashboardNavbar />
       <BuyerSidebar />
 
-      <main className="ml-[224px] mr-[20px] pt-[34px]">
+      <main className="ml-56 mr-5 pt-17">
         <div className="p-5 space-y-4">
           <BuyerProfileBanner />
         </div>

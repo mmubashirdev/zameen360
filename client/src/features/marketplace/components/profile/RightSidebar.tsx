@@ -2,7 +2,7 @@ import React from 'react';
 
 const RightSidebar: React.FC = () => {
   return (
-    <aside className="w-[280px] fixed right-0 top-[64px] bottom-0 overflow-y-auto p-4 space-y-4 bg-gray-50">
+    <aside className="w-70 fixed right-0 top-17 bottom-0 overflow-y-auto p-4 space-y-4 bg-gray-50" role="complementary">
       {/* Profile Performance */}
       <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
         <h3 className="text-[14px] font-bold text-gray-900 mb-3">Profile Performance</h3>
