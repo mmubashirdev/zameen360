@@ -470,23 +470,7 @@ const AuthenticatedNavbar = () => {
                     <span>My Profile</span>
                   </button>
 
-                  {/* My Listings (sellers only) */}
-                  {userRole === "SELLER" && (
-                    <button
-                      className={styles.authDropdownItem}
-                      onClick={() => {
-                        navigate("/my-listings");
-                        setMenuOpen(false);
-                      }}
-                    >
-                      <List
-                        size={16}
-                        strokeWidth={2}
-                        className={styles.dropdownItemIcon}
-                      />
-                      <span>My Listings</span>
-                    </button>
-                  )}
+
 
                   {/* Saved Properties (buyers only) */}
                   {userRole === "BUYER" && (

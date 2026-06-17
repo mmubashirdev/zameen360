@@ -10,7 +10,11 @@
   height: 72px;
   background: #ffffff;
   box-shadow: 0 2px 16px rgba(0, 64, 160, 0.08);
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 1000;
   animation: slideDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -330,7 +334,11 @@
   height: 68px;
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 64, 160, 0.06);
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 1000;
   gap: 16px;
   animation: slideDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;

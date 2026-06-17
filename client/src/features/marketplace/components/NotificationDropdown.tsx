@@ -1,4 +1,4 @@
-import { MessageCircle, ShieldCheck, Mail, ArrowRight, CheckCheck } from "lucide-react";
+import { MessageCircle, ArrowRight, CheckCheck } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -235,7 +235,7 @@ const NotificationDropdown = ({
       </div>
 
       {/* ── Notification List ───────────────────────────────────────────────── */}
-      <div className="max-h-[480px] overflow-y-auto">
+      <div className="max-h-120 overflow-y-auto">
         
         {/* Loading skeleton */}
         {loading ? (

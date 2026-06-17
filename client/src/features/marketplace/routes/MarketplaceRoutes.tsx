@@ -8,7 +8,6 @@ import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/ContactUs";
 import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
-import MyListings from "../pages/MyListings";
 import BuyerProfile from "../pages/BuyerProfile";
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
@@ -35,10 +34,6 @@ const marketplaceRoutes = [
   {
     path: "/buyer-profile", // ⬅️ NEW ROUTE
     element: <BuyerProfile />,
-  },
-  {
-    path: "/my-listings",
-    element: <MyListings />,
   },
   {
     path: "/post-property",

@@ -18,15 +18,6 @@ const QuickActionsCard: React.FC = () => {
           Add Property
         </button>
         <button
-          onClick={() => navigate('/my-listings')}
-          className="w-full bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 text-[12.5px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Boost Listing
-        </button>
-        <button
           onClick={() => navigate('/upgrade-plan')}
           className="w-full bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 text-[12.5px] font-medium py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
         >

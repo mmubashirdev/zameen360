@@ -330,7 +330,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   // ─── Empty state ─────────────────────────────────────────────────────────────
   if (!conversationId && !newConversationContext) {
     return (
-      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[88vh] w-[930px] items-center justify-center gap-3">
+      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[88vh] w-232.5 items-center justify-center gap-3">
         <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
           <Send className="w-7 h-7 text-blue-400" />
         </div>
@@ -352,7 +352,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   return (
     <>
       {/* ── Main Chat Container ─────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[90vh] w-[930px] overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[90vh] w-232.5 overflow-hidden">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
@@ -446,7 +446,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                       >
                         <img
                           src={msg.mediaUrl}
-                          className="max-w-[260px] max-h-[280px] w-full object-cover block"
+                          className="max-w-65 max-h-70 w-full object-cover block"
                         />
                       </div>
                       <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
@@ -458,7 +458,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                   ) : msg.isVoice ? (
                     /* ── Voice bubble ── */
                     <>
-                      <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 flex items-center gap-3 min-w-[240px]">
+                      <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 flex items-center gap-3 min-w-60">
                         <button className="bg-white border border-blue-400 text-blue-500 p-2 rounded-full shrink-0 flex items-center justify-center">
                           <Play className="w-3.5 h-3.5 fill-blue-500" />
                         </button>
@@ -486,7 +486,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                             : "bg-gray-50 border border-gray-100 text-gray-800 rounded-bl-sm"
                         }`}
                       >
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">{msg.text}</p>
                       </div>
                       <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
                         <span className="text-[11px] text-gray-400">{formatTime(msg.createdAt)}</span>
@@ -608,7 +608,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
               <img
                 src={selectedImages[previewIndex]?.localUrl}
                 alt={`Preview ${previewIndex + 1}`}
-                className="max-w-full max-h-[340px] object-contain rounded-xl"
+                className="max-w-full max-h-85 object-contain rounded-xl"
               />
 
               {/* Prev / Next arrows */}

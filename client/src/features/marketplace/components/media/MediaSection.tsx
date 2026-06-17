@@ -35,14 +35,15 @@ const validate360Image = (
     img.onload = () => {
       URL.revokeObjectURL(url);
       const ratio = img.width / img.height;
-      if (Math.abs(ratio - 2) > 0.15) {
-        resolve({
-          valid: false,
-          error: `Must be 2:1 ratio (e.g. 4096×2048). Got ${img.width}×${img.height}.`,
-        });
-      } else {
-        resolve({ valid: true });
-      }
+
+if (ratio < 1.5 || ratio > 4.5) {
+  resolve({
+    valid: false,
+    error: `Image ratio too extreme (${ratio.toFixed(1)}:1). Use a panoramic or 360° photo.`,
+  });
+} else {
+  resolve({ valid: true });
+}
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
