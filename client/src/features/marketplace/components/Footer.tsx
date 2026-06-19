@@ -7,7 +7,6 @@ function Footer() {
   const [developer] = useState("Mubashir");
   return (
     <footer className={styles.footerWrapper}>
-    
       <div className={styles.ctaSection}>
         <div className={styles.ctaContainer}>
           <div className={styles.ctaContent}>
@@ -35,7 +34,6 @@ function Footer() {
         </div>
       </div>
 
-      
       <div className={styles.mainFooter}>
         <div className={styles.container}>
           {/* Brand & Contact Column */}
@@ -85,7 +83,6 @@ function Footer() {
             </div>
           </div>
 
-          
           {footerColumnsData.map((column, index) => (
             <div className={styles.linkCol} key={index}>
               <h3 className={styles.colTitle}>{column.title}</h3>
@@ -119,7 +116,11 @@ function Footer() {
             <a href="#" className={styles.socialIcon} aria-label="Instagram">
               <i className="fa-brands fa-instagram"></i>
             </a>
-            <a href="#" className={styles.socialIcon} aria-label="LinkedIn">
+            <a
+              href="https://www.linkedin.com/in/muhammadmubashirr/"
+              className={styles.socialIcon}
+              aria-label="LinkedIn"
+            >
               <i className="fa-brands fa-linkedin-in"></i>
             </a>
           </div>

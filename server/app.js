@@ -164,6 +164,6 @@ app.use((err, req, res, next) => {
 // ─── Start Server (app.listen → httpServer.listen) ───────────────────────────
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
-  console.log(`Zameen 360 running on http://localhost:${PORT}`);
+  console.log(`Zameen 360 running on http://0.0.0.0:${PORT}`);
   console.log(`Socket.IO ready`);
 });

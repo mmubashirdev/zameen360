@@ -9,6 +9,11 @@ const cloudinary = require("../configs/cloudinary");
  */
 const uploadToCloudinary = (buffer, folder = "zameen360/properties") => {
   return new Promise((resolve, reject) => {
+
+    if (!buffer || !Buffer.isBuffer(buffer) || buffer.length === 0) {
+      return reject(new Error("Invalid or empty buffer provided"));
+    }
+    
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,

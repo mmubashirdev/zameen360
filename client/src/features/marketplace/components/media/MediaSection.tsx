@@ -7,18 +7,12 @@ interface MediaSectionProps {
 }
 
 const MediaSection: React.FC<MediaSectionProps> = ({ onDataChange }) => {
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [tourLink, setTourLink] = useState('');
+ 
   const [floorPlan, setFloorPlan] = useState<string | null>(null);
 
   const videoRef = useRef<HTMLInputElement>(null);
   const floorRef = useRef<HTMLInputElement>(null);
 
-  const handleYoutubeUrlChange = useCallback((url: string) => {
-    setYoutubeUrl(url);
-    onDataChange?.({ videoUrl: url });
-  }, [onDataChange]);
 
   const handleFloorPlanChange = useCallback((file: File | undefined): void => {
     if (!file) return;
@@ -30,10 +24,6 @@ const MediaSection: React.FC<MediaSectionProps> = ({ onDataChange }) => {
     onDataChange?.({ floorPlan: url });
   }, [floorPlan, onDataChange]);
 
-  const getYouTubeEmbed = (url: string): string => {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?/]+)/);
-    return match ? `https://www.youtube.com/embed/${match[1]}` : '';
-  };
 
   return (
     <div className={styles.row}>
@@ -48,7 +38,6 @@ const MediaSection: React.FC<MediaSectionProps> = ({ onDataChange }) => {
             <br />
           </div>
         </div>
-        {videoFile && <p className={styles.fileName}>Selected: {videoFile.name}</p>}
        
       </div>
 

@@ -20,8 +20,34 @@ const PropertyDetails = () => {
     <div className="bg-gray-50 min-h-screen">
       <DashboardNavbar />
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <Breadcrumbs />
+      {/* pt-20 pushes content below the fixed navbar (~80px height) */}
+      <main className="max-w-7xl mx-auto px-4 pb-6 pt-20 mt-5">
+        {/* Breadcrumbs + Virtual Tour Button */}
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+          <Breadcrumbs
+            city={property.city}
+            propertyType={property.propertyType}
+            title={property.title}
+          />
+
+          {/* 🌐 Virtual Tour Button */}
+          <button
+            onClick={launchVirtualTour}
+            disabled={!hasTour}
+            className={`px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md transition-all ${
+              hasTour
+                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg cursor-pointer"
+                : "bg-gray-200 text-gray-500 cursor-not-allowed"
+            }`}
+            title={
+              hasTour
+                ? "View 360° Virtual Tour"
+                : "Virtual tour not available for this property"
+            }
+          >
+            Take 3D Virtual Tour
+          </button>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT SIDE */}
