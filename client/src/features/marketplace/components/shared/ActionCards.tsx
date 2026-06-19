@@ -20,7 +20,7 @@ const ActionCards = ({ title }: Props) => {
   };
 
   return (
-    <div className="bg-white rounded-xl p-4 border shadow-sm space-y-2">
+    <div className="bg-white rounded-xl p-4 border border-gray-300 shadow-sm space-y-2">
       <button onClick={() => setSaved(!saved)}
         className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg transition ${
           saved ? "bg-red-50 text-red-600" : "border border-gray-300 text-gray-700 hover:bg-gray-50"

@@ -33,13 +33,13 @@ function PropertiesCategories() {
         </div>
 
         <div>
-            <i className={`ri-home-4-fill ${styles.hello}`}></i>
+            <i className={`ri-building-2-fill ${styles.hello}`}></i>
             <h3>Villas</h3>
             <p>1,850+ Listings</p>
         </div>
 
         <div>
-             <i className={`ri-home-4-fill ${styles.hello}`}></i>
+             <i className={`ri-building-4-fill ${styles.hello}`}></i>
             <h3>Offices</h3>
             <p>820+ Listings</p>
         </div>

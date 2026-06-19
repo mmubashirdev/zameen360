@@ -41,7 +41,7 @@ const ProfileBanner: React.FC = () => {
       <div className="bg-blue-600 rounded-2xl overflow-hidden relative">
         <div className="p-6">
           <div className="flex gap-6 items-start animate-pulse">
-            <div className="w-[130px] h-[130px] rounded-full bg-blue-400"></div>
+            <div className="w-32.5 h-32.5 rounded-full bg-blue-400"></div>
             <div className="flex-1 space-y-3">
               <div className="h-7 bg-blue-400 rounded w-48"></div>
               <div className="h-4 bg-blue-400 rounded w-64"></div>
@@ -79,10 +79,10 @@ const ProfileBanner: React.FC = () => {
         <div className="p-6">
           <div className="flex gap-6 items-start">
             {/* AVATAR */}
-            <div className="relative flex-shrink-0">
+            <div className="relative shrink-0">
               <div
                 onClick={handleImageClick}
-                className="w-[130px] h-[130px] rounded-full bg-gray-300 cursor-pointer overflow-hidden border-4 border-white shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center"
+                className="w-32.5 h-32.5 rounded-full bg-gray-300 cursor-pointer overflow-hidden border-4 border-white shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center"
               >
                 {user.profilePicture ? (
                   <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
@@ -122,7 +122,7 @@ const ProfileBanner: React.FC = () => {
             </div>
 
             {/* Name & Info Column */}
-            <div className="text-white flex-shrink-0">
+            <div className="text-white shrink-0">
               <div className="flex items-center gap-2 mb-1">
                 <h1 className="text-[26px] font-bold">{user.fullName}</h1>
                 <span className="bg-yellow-400 text-yellow-900 text-[10.5px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
@@ -157,7 +157,7 @@ const ProfileBanner: React.FC = () => {
             </div>
 
             {/* About Me */}
-            <div className="text-white flex-1 max-w-[280px]">
+            <div className="text-white flex-1 max-w-70">
               <p className="text-[12px] leading-relaxed mb-3"></p>
               <div className="space-y-1 text-[12px]">
                 <p><span className="font-semibold">Languages:</span> Urdu, English, Punjabi</p>

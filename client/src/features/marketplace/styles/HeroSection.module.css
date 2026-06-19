@@ -6,6 +6,7 @@
   position: relative;
   overflow: visible; /* ← CRITICAL: was overflow:hidden, blocked dropdown */
   font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  margin-top: 67px;
 }
 
 .heroInner {

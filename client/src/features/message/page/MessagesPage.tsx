@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MessagesSidebar from "../components/MessagesSidebar";
 import ChatWindow from "../components/ChatWindow";
-import PropertyDetailsSidebar from "../components/PropertyDetailsSidebar";
 
 interface NewConversationContext {
   sellerId: number;
@@ -11,42 +10,72 @@ interface NewConversationContext {
   sellerAvatar?: string;
 }
 
+// All possible navigation states coming into this page
+interface LocationState {
+  sellerId?: number;
+  propertyId?: number;
+  sellerName?: string;
+  sellerAvatar?: string;
+  openConversationId?: number; // ← from notification click
+}
+
 const MessagesPage = () => {
-  const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    number | null
+  >(null);
   const [newConversationContext, setNewConversationContext] =
     useState<NewConversationContext | null>(null);
-  // Incrementing this tells MessagesSidebar to refetch its list
   const [sidebarRefreshTrigger, setSidebarRefreshTrigger] = useState(0);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Read navigation state once on mount, then clear it so refresh doesn't re-trigger
+  // ─── Read navigation state once on mount ────────────────────────────────────
   useEffect(() => {
-    const state = location.state as NewConversationContext | null;
-    if (state?.sellerId) {
-      setNewConversationContext(state);
+    const state = location.state as LocationState | null;
+
+    if (state?.openConversationId) {
+      // Came from notification click → open that conversation directly
+      setSelectedConversationId(state.openConversationId);
+      // Clear state so refresh doesn't re-trigger
+      navigate(location.pathname, { replace: true, state: null });
+    } else if (state?.sellerId) {
+      // Came from property page → start or resume a conversation
+      setNewConversationContext({
+        sellerId: state.sellerId,
+        propertyId: state.propertyId!,
+        sellerName: state.sellerName,
+        sellerAvatar: state.sellerAvatar,
+      });
       navigate(location.pathname, { replace: true, state: null });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ─── Handlers ───────────────────────────────────────────────────────────────
+  // Called by ChatWindow once the first message in a new conversation is sent
   const handleConversationCreated = (id: number) => {
     setSelectedConversationId(id);
-    setNewConversationContext(null); // exit "new conversation" mode
-    setSidebarRefreshTrigger((n) => n + 1); // make sidebar refetch
+    setNewConversationContext(null);
+    // Tell sidebar to refetch its list
+    setSidebarRefreshTrigger((n) => n + 1);
   };
 
+  // Called by MessagesSidebar when user clicks a conversation row
   const handleSelectConversation = (id: number) => {
     setSelectedConversationId(id);
+    // Exit "new conversation" mode if active
     if (newConversationContext) setNewConversationContext(null);
+    // Tell the notification bell to refresh its count
+    window.dispatchEvent(new CustomEvent("messages_marked_read"));
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-[1500px] mx-auto px-6 py-6">
-        <div className="grid grid-cols-12 gap-5 h-[calc(100vh-120px)]">
-          {/* Left Sidebar - Conversations list */}
+      <main className="max-w-375 mx-auto px-6 py-6" role="main">
+        <div className="grid grid-cols-12 gap-5 h-[calc(100vh-120px)]" role="presentation">
+          
+          {/* ── Sidebar ───────────────────────────────────────────────────── */}
           <div className="col-span-3">
             <MessagesSidebar
               selectedConversationId={selectedConversationId}
@@ -56,7 +85,7 @@ const MessagesPage = () => {
             />
           </div>
 
-          {/* Center - Chat Window */}
+          {/* ── Chat Window ───────────────────────────────────────────────── */}
           <div className="col-span-6">
             <ChatWindow
               conversationId={selectedConversationId}
@@ -65,10 +94,6 @@ const MessagesPage = () => {
             />
           </div>
 
-          {/* Right Sidebar - Property Details */}
-          <div className="col-span-3 overflow-y-auto">
-            <PropertyDetailsSidebar conversationId ={selectedConversationId} />
-          </div>
         </div>
       </main>
     </div>

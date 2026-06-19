@@ -6,9 +6,11 @@ import { useUnreadMessageCount } from '@features/message/hooks/useUnreadMessageC
 interface NavItem {
   label: string;
   to: string;
-  badge?: number;
+  badge?: number | undefined;
   icon: React.ReactNode;
 }
+
+type NavItemWithBadge = NavItem & { badge: number | undefined };
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -25,59 +27,14 @@ const Sidebar: React.FC = () => {
         </svg>
       ),
     },
-    {
-      label: 'My Listings',
-      to: '/my-listings',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Analytics',
-      to: '/analytics',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Leads & Inquiries',
-      to: '/leads',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Visit Schedule',
-      to: '/visit-schedule',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
+
     {
       label: 'Messages',
       to: '/messages',
-      badge: unreadMessageCount,
+      badge: unreadMessageCount ?? 0,
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      ),
-    },
-    {
-      label: 'Earnings & Payments',
-      to: '/earnings',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9" strokeWidth={2} />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.5 9.5c-.5-1-1.5-1.5-3-1.5-2 0-3 1-3 2s1 1.5 3 2 3 1 3 2-1 2-3 2-2.5-.5-3-1.5M12 6v12" />
         </svg>
       ),
     },
@@ -112,46 +69,34 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-full w-56 bg-white border-r border-gray-200 flex flex-col z-50">
-      {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-gray-100">
-        <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center shrink-0">
-          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-          </svg>
-        </div>
-        <div>
-          <h1 className="text-lg font-bold text-gray-800 leading-tight">
-            Zameen <span className="text-blue-600">360</span>
-          </h1>
-          <p className="text-xs text-gray-400">Seller Panel</p>
-        </div>
-      </div>
-
+    <div className="fixed left-0 top-17 h-[calc(100vh-68px)] w-56 bg-white border-r border-gray-200 flex flex-col z-50">
       {/* Navigation */}
-      <nav className="flex-1 mt-3 px-3 space-y-0.5 overflow-y-auto">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/profile'}
-            className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-blue-50 text-blue-600 shadow-sm'
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
-              }`
-            }
-          >
-            {item.icon}
-            <span className="whitespace-nowrap flex-1">{item.label}</span>
-            {item.badge > 0 && (
-              <span className="bg-blue-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                {item.badge}
-              </span>
-            )}
-          </NavLink>
-        ))}
+      <nav className="flex-1 px-3 py-3 space-y-0.5 overflow-y-auto">
+        {navItems.map((item) => {
+          const badgeCount: number = (item.badge ?? 0) as number;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/profile'}
+              className={({ isActive }) =>
+                `w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-blue-50 text-blue-600 shadow-sm'
+                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+                }`
+              }
+            >
+              {item.icon}
+              <span className="whitespace-nowrap flex-1">{item.label}</span>
+              {badgeCount > 0 && (
+                <span className="bg-blue-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {badgeCount}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Sign Out */}

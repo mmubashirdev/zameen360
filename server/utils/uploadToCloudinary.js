@@ -1,74 +1,77 @@
 // server/utils/uploadToCloudinary.js
 const cloudinary = require("../configs/cloudinary");
+const fs = require("fs");
 
-/**
- * Upload a single buffer to Cloudinary
- * @param {Buffer} buffer - File buffer from multer memoryStorage
- * @param {string} folder - Cloudinary folder name
- * @returns {Promise<string>} - Secure URL of uploaded image
- */
+// Upload from buffer (memoryStorage)
 const uploadToCloudinary = (buffer, folder = "zameen360/properties") => {
   return new Promise((resolve, reject) => {
-
     if (!buffer || !Buffer.isBuffer(buffer) || buffer.length === 0) {
       return reject(new Error("Invalid or empty buffer provided"));
     }
-    
     const stream = cloudinary.uploader.upload_stream(
       {
         folder,
         resource_type: "image",
-        transformation: [
-          { quality: "auto:good" }, // Auto compress
-          { fetch_format: "auto" }, // Auto format (webp on modern browsers)
-        ],
+        transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
       },
       (error, result) => {
-        if (error) {
+        if (error)
           reject(new Error(`Cloudinary upload failed: ${error.message}`));
-        } else {
-          resolve(result.secure_url);
-        }
+        else resolve(result.secure_url);
       },
     );
-
-    stream.end(buffer);
+    stream.end(Buffer.from(buffer));
   });
 };
 
-/**
- * Upload multiple buffers to Cloudinary
- * @param {Express.Multer.File[]} files - Array of multer files
- * @param {string} folder - Cloudinary folder name
- * @returns {Promise<string[]>} - Array of secure URLs
- */
+// ✅ Upload from file path (diskStorage) — NEEDED for panoramas
+const uploadToCloudinaryFromPath = (
+  filePath,
+  folder = "zameen360/properties",
+) => {
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(filePath)) {
+      return reject(new Error(`File not found: ${filePath}`));
+    }
+
+    cloudinary.uploader.upload(
+      filePath,
+      {
+        folder,
+        resource_type: "image",
+        transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
+      },
+      (error, result) => {
+        // Always delete temp file after upload
+        try {
+          fs.unlinkSync(filePath);
+        } catch {
+          /* ignore */
+        }
+
+        if (error)
+          reject(new Error(`Cloudinary upload failed: ${error.message}`));
+        else resolve(result.secure_url);
+      },
+    );
+  });
+};
+
 const uploadMultipleToCloudinary = async (
   files,
   folder = "zameen360/properties",
 ) => {
-  const uploadPromises = files.map((file) =>
-    uploadToCloudinary(file.buffer, folder),
-  );
-  return Promise.all(uploadPromises);
+  return Promise.all(files.map((f) => uploadToCloudinary(f.buffer, folder)));
 };
 
-/**
- * Delete image from Cloudinary by URL
- * @param {string} url - Cloudinary secure URL
- */
 const deleteFromCloudinary = async (url) => {
   try {
-    // Extract public_id from URL
-    // URL format: https://res.cloudinary.com/cloud_name/image/upload/v123/folder/filename.jpg
+    if (!url || !url.includes("cloudinary.com")) return;
     const parts = url.split("/");
     const uploadIndex = parts.indexOf("upload");
     if (uploadIndex === -1) return;
-
-    // Remove version (v123) if present
     const pathParts = parts.slice(uploadIndex + 1);
     if (pathParts[0].startsWith("v")) pathParts.shift();
-
-    // Remove file extension
     const publicId = pathParts.join("/").replace(/\.[^/.]+$/, "");
     await cloudinary.uploader.destroy(publicId);
   } catch (err) {
@@ -76,8 +79,10 @@ const deleteFromCloudinary = async (url) => {
   }
 };
 
+// ✅ Must export ALL functions
 module.exports = {
   uploadToCloudinary,
+  uploadToCloudinaryFromPath,
   uploadMultipleToCloudinary,
   deleteFromCloudinary,
 };

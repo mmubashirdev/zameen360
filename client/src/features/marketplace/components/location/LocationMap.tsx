@@ -19,7 +19,7 @@ const LocationMap = ({ address, city, locality }: Props) => {
         <MapPin className="w-5 h-5 text-blue-600 mt-0.5" />
         <p className="text-sm text-gray-700">{fullAddress}</p>
       </div>
-      <div className="rounded-xl overflow-hidden border h-80">
+      <div className="rounded-xl overflow-hidden border border-gray-300 h-80">
         <iframe
           src={mapUrl}
           width="100%"

@@ -1,5 +1,5 @@
 // client/src/features/marketplace/routes/Marketplace.routes.tsx
-import PropertyDetails from "../pages/propertyDetail";
+import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
 import ProfilePage from "../pages/profile";
@@ -8,14 +8,15 @@ import AboutPage from "../pages/Aboutus";
 import ContactUsPage from "../pages/ContactUs";
 import SupportPage from "../pages/Support";
 import Rent from "../rent/pages/Rent";
-import MyListings from "../pages/MyListings";
-import BuyerProfile from "../pages/BuyerProfile";  
+import BuyerProfile from "../pages/BuyerProfile";
 import MediaAndDetail from "../pages/MediaAndDetail";
 import ReviewSubmit from "../pages/ReviewSubmit";
 import PropertySubmitted from "../pages/PropertySubmitted";
 import MessagesPage from "@features/message/page/MessagesPage";
+import TermsOfService from "../components/term&policy/Termsofservice";
+import PrivacyPolicy from "../components/term&policy/Privacypolicy";
 
-
+import VirtualTourPage from "../../marketplace/pages/VirtualTourPage";
 
 const marketplaceRoutes = [
   {
@@ -31,12 +32,8 @@ const marketplaceRoutes = [
     element: <ProfilePage />,
   },
   {
-    path: "/buyer-profile",        // ⬅️ NEW ROUTE
+    path: "/buyer-profile", // ⬅️ NEW ROUTE
     element: <BuyerProfile />,
-  },
-  {
-    path: "/my-listings",
-    element: <MyListings />,
   },
   {
     path: "/post-property",
@@ -74,7 +71,7 @@ const marketplaceRoutes = [
     path: "/contact-us",
     element: <ContactUsPage />,
   },
- 
+
   {
     path: "/messages",
     element: <MessagesPage />,
@@ -82,7 +79,20 @@ const marketplaceRoutes = [
   {
     path: "/support",
     element: <SupportPage />,
-  }
+  },
+  {
+    path: "/property/:id/virtual-tour",
+    element: <VirtualTourPage />,
+  },
+  {
+    path: "/terms",
+    element: <TermsOfService />,
+  },
+
+  {
+    path: "/privacy",
+    element: <PrivacyPolicy />,
+  },
 ];
 
 export { marketplaceRoutes };

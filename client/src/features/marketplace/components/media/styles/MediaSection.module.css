@@ -1,6 +1,6 @@
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
   margin-bottom: 16px;
 }
@@ -9,6 +9,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 14px;
+  
 }
 .label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px; }
 .optional { color: #9e9e9e; font-weight: 400; }
@@ -44,3 +45,251 @@
 .fileName { font-size: 11px; color: #1E6FDF; margin-top: 6px; }
 .preview { width: 100%; height: 100px; margin-top: 8px; border: none; border-radius: 4px; }
 .floorImg { width: 100%; height: 100%; object-fit: contain; }
+
+
+/* Add these to your existing MediaSection.module.css */
+
+/* ── Tour section below the 3 cards ── */
+.tourSection {
+  background: white;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 12px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tourHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.tourTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 4px;
+}
+
+.tourSubtitle {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.tourClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+}
+.tourClose:hover { color: #374151; background: #f3f4f6; }
+
+.tourInfo {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  color: #1e40af;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.tourStatus {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.statusReady {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+  font-weight: 500;
+}
+
+.statusEmpty {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #f9fafb;
+  color: #9ca3af;
+  border: 1px solid #e5e7eb;
+  font-weight: 500;
+}
+
+.roomList { display: flex; flex-direction: column; gap: 10px; }
+
+.roomCard {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+}
+.roomValid { border-color: #bbf7d0; background: #f0fdf4; }
+.roomError { border-color: #fecaca; background: #fef2f2; }
+
+.roomThumb {
+  flex-shrink: 0;
+  width: 88px;
+  height: 60px;
+  border-radius: 8px;
+  border: 2px dashed #d1d5db;
+  background: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  gap: 4px;
+}
+.roomThumb:hover { border-color: #2563eb; }
+
+.thumbImg { width: 100%; height: 100%; object-fit: cover; }
+.thumbHint { font-size: 10px; color: #9ca3af; text-align: center; }
+.thumbBadge {
+  position: absolute;
+  top: 3px; right: 3px;
+  background: #16a34a;
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.roomDetails { flex: 1; min-width: 0; }
+
+.roomNameInput {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 3px 0;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.suggestions { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.suggestionBtn {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  color: #6b7280;
+  font-family: inherit;
+}
+.suggestionBtn:hover { border-color: #2563eb; color: #2563eb; }
+
+.roomErrorMsg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #dc2626;
+  margin-top: 6px;
+}
+.roomValidMsg { font-size: 11px; color: #16a34a; margin: 6px 0 0; }
+.roomHint     { font-size: 11px; color: #9ca3af; margin: 6px 0 0; }
+
+.removeRoom {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px;
+  border-radius: 6px;
+}
+.removeRoom:hover { color: #dc2626; background: #fef2f2; }
+
+.addRoomBtn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+}
+.addRoomBtn:hover { border-color: #2563eb; color: #2563eb; }
+
+.tourFootnote {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: center;
+  margin: 10px 0 0;
+}
+
+/* ── existing classes you may need to add ── */
+.urlInput {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.hint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 4px 0 0;
+}
+
+/* Add these to your existing MediaSection.module.css */
+
+.urlInput {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  margin-top: 8px;
+  box-sizing: border-box;
+}
+
+.hint {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 4px 0 0;
+}

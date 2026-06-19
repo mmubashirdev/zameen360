@@ -46,7 +46,7 @@ const SpecificationsTable = (props: Props) => {
   return (
     <div>
       <h2 className="text-lg font-semibold mb-3">Specifications</h2>
-      <div className="border rounded-xl overflow-hidden">
+      <div className="border border-gray-300 rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <tbody>
             {specs.map((spec, i) => (

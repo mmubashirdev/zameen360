@@ -1,5 +1,7 @@
 // src/components/LegalLayout.tsx
 import React, { useState, useEffect } from "react";
+import DashboardNavbar from "../DashboardNavbar";
+import Footer from "../Footer";
 
 interface Section {
   id: string;
@@ -59,29 +61,10 @@ const LegalLayout: React.FC<LegalLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* TOP NAVBAR */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">🏠</span>
-            <h1 className="text-xl font-extrabold text-gray-900">
-              Zameen <span className="text-[#1A73E8]">360</span>
-            </h1>
-          </div>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-            <a href="/" className="hover:text-[#1A73E8]">Home</a>
-            <a href="/buy" className="hover:text-[#1A73E8]">Buy</a>
-            <a href="/rent" className="hover:text-[#1A73E8]">Rent</a>
-            <a href="/contact" className="hover:text-[#1A73E8]">Contact</a>
-          </div>
-          <button className="bg-[#1A73E8] text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-[#1565C0] transition">
-            Post Property
-          </button>
-        </div>
-      </nav>
+      <DashboardNavbar />
 
       {/* HERO HEADER */}
-      <div className="bg-gradient-to-br from-blue-50 to-white border-b border-gray-200">
+      <div className="bg-linear-to-br from-blue-50 to-white border-b border-gray-200" role="region">
         <div className="max-w-5xl mx-auto px-6 py-12 text-center">
           <div className="inline-block bg-[#EEF4FF] text-[#1A73E8] text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full mb-4">
             Legal Documents
@@ -128,11 +111,10 @@ const LegalLayout: React.FC<LegalLayoutProps> = ({
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <p className="text-xs text-gray-500 mb-2">Questions?</p>
                 <a
-                  href="mailto:legal@zameen360.com"
+                  href="mailto:adminzameen360@gmail.com"
                   className="text-sm font-semibold text-[#1A73E8] hover:underline"
                 >
-                  legal@zameen360.com
-                </a>
+                     adminzameen360@gmail.com                </a>
               </div>
             </div>
           </aside>
@@ -150,10 +132,10 @@ const LegalLayout: React.FC<LegalLayoutProps> = ({
                   understood, and agreed to these terms. If you have any
                   questions, please contact us at{" "}
                   <a
-                    href="mailto:legal@zameen360.com"
+                    href="mailto:adminzameen360@gmail.com"
                     className="text-[#1A73E8] font-semibold hover:underline"
                   >
-                    legal@zameen360.com
+                     adminzameen360@gmail.com
                   </a>
                 </p>
               </div>
@@ -174,30 +156,7 @@ const LegalLayout: React.FC<LegalLayoutProps> = ({
       )}
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-white py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h3 className="text-lg font-bold mb-2">
-            🏠 Zameen <span className="text-[#1A73E8]">360</span>
-          </h3>
-          <p className="text-sm text-gray-400 mb-4">
-            3D Property Experience Platform
-          </p>
-          <div className="flex justify-center gap-6 text-sm text-gray-400">
-            <a href="/terms" className="hover:text-white">
-              Terms of Service
-            </a>
-            <a href="/privacy" className="hover:text-white">
-              Privacy Policy
-            </a>
-            <a href="/contact" className="hover:text-white">
-              Contact
-            </a>
-          </div>
-          <p className="text-xs text-gray-500 mt-4">
-            © 2025 Zameen 360. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

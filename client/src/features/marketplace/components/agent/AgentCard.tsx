@@ -49,7 +49,7 @@ const AgentCard = ({ user, propertyId }: Props) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl p-4 border shadow-sm">
+      <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
         <h3 className="font-semibold text-gray-800 mb-3">Contact Agent</h3>
 
         <div className="flex items-center gap-3 mb-4">

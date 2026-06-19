@@ -41,20 +41,18 @@ interface ImageItem {
 const DEFAULT_AVATAR =
   "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
 
-const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversationContext, onConversationCreated }) => {
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Images selected for sending — shown in preview modal
   const [selectedImages, setSelectedImages] = useState<ImageItem[]>([]);
-  const [previewIndex, setPreviewIndex] = useState(0); // which image is focused in modal
+  const [previewIndex, setPreviewIndex] = useState(0);
   const [imageError, setImageError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
-  // Lightbox for already-sent images in chat
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -113,7 +111,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
 
     socket.on("connect_error", (err: Error) => console.error("Socket error:", err.message));
 
-    // ── Status Update
     const onStatusUpdate = (data: { userId: number; isOnline: boolean; lastActiveAt?: string }) => {
       setUserStatuses((prev) => ({
         ...prev,
@@ -167,7 +164,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   // ─── Image picker ─────────────────────────────────────────────────────────────
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    e.target.value = ""; // reset so same files can be reselected
+    e.target.value = "";
     if (!files.length) return;
 
     setImageError(null);
@@ -203,9 +200,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
     setSending(true);
     setImageError(null);
 
-    // Keep local URLs for optimistic bubbles before cancelling preview
     const toSend = [...selectedImages];
-    cancelImages(); // close modal immediately — optimistic bubbles show below
+    cancelImages();
 
     let firstConvId: number | null = conversationId;
 
@@ -213,7 +209,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
       const img = toSend[i];
       const tempId = -(Date.now() + i);
 
-      // Optimistic bubble
       setMessages((prev) => [
         ...prev,
         {
@@ -229,7 +224,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
       scrollToBottom();
 
       try {
-        // Upload file
         const formData = new FormData();
         formData.append("media", img.file);
         const uploadResult: any = await axiosInstance.post("/messages/upload-media", formData);
@@ -238,7 +232,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
 
         const { mediaUrl, mediaType } = uploadResult.data;
 
-        // Persist message
         const payload: any = { mediaUrl, mediaType, text: "" };
         if (firstConvId) {
           payload.conversationId = firstConvId;
@@ -337,7 +330,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   // ─── Empty state ─────────────────────────────────────────────────────────────
   if (!conversationId && !newConversationContext) {
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl flex flex-col h-[90vh] items-center justify-center gap-3">
+      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[88vh] w-232.5 items-center justify-center gap-3">
         <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
           <Send className="w-7 h-7 text-blue-400" />
         </div>
@@ -354,19 +347,26 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   const otherUserId = otherUserMsg?.sender?.id || newConversationContext?.sellerId;
   const status = otherUserId ? userStatuses[otherUserId] : null;
   const isOnline = status ? status.isOnline : (otherUserMsg?.sender as any)?.isOnline || false;
-  // Fall back to sender's lastActiveAt from fetchMessages if not in userStatuses
   const lastActiveAt = status?.lastActiveAt || otherUserMsg?.sender?.lastActiveAt || null;
 
   return (
     <>
-      <div className="bg-white border border-gray-200 rounded-2xl flex flex-col h-[90vh]">
+      {/* ── Main Chat Container ─────────────────────────────────────────────── */}
+      <div className="bg-white border border-gray-200 rounded-4xl flex flex-col h-[90vh] w-232.5 overflow-hidden">
 
         {/* ── Header ─────────────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <img src={chatAvatar} alt={chatName} onError={handleAvatarError} className="w-11 h-11 rounded-full object-cover" />
-              {isOnline && <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />}
+              <img
+                src={chatAvatar}
+                alt={chatName}
+                onError={handleAvatarError}
+                className="w-11 h-11 rounded-full object-cover"
+              />
+              {isOnline && (
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+              )}
             </div>
             <div>
               <h3 className="font-bold text-gray-900">{chatName}</h3>
@@ -376,15 +376,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"><Phone className="w-4 h-4" /></button>
-            <button className="p-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"><Video className="w-4 h-4" /></button>
-            <button className="p-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"><Info className="w-4 h-4" /></button>
-            <button className="p-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"><MoreVertical className="w-4 h-4" /></button>
+            <button className="p-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+              <Phone className="w-4 h-4" />
+            </button>
+            <button className="p-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+              <Video className="w-4 h-4" />
+            </button>
+            <button className="p-2.5 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+              <Info className="w-4 h-4" />
+            </button>
+            <button className="p-2.5 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+              <MoreVertical className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
         {/* ── Messages ───────────────────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-5 bg-white">
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-5 bg-white min-h-0">
           <div className="text-center mb-2">
             <span className="text-xs text-gray-400 font-medium">Today</span>
           </div>
@@ -393,7 +401,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
             <div className="space-y-4 py-4">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className={`flex gap-2 ${i % 2 === 0 ? "justify-start" : "justify-end"}`}>
-                  {i % 2 === 0 && <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse shrink-0" />}
+                  {i % 2 === 0 && (
+                    <div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse shrink-0" />
+                  )}
                   <div className={`h-12 bg-gray-200 rounded-2xl animate-pulse ${i % 2 === 0 ? "w-64" : "w-56"}`} />
                 </div>
               ))}
@@ -406,26 +416,37 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
             </div>
           ) : (
             messages.map((msg) => (
-              <div key={msg.id} className={`flex gap-3 items-start ${msg.isSender ? "justify-end" : "justify-start"}`}>
+              <div
+                key={msg.id}
+                className={`flex gap-3 items-end ${msg.isSender ? "justify-end" : "justify-start"}`}
+              >
+                {/* Other user avatar */}
                 {!msg.isSender && (
                   <div className="relative shrink-0">
-                    <img src={msg.avatar || DEFAULT_AVATAR} alt="avatar" onError={handleAvatarError} className="w-10 h-10 rounded-full object-cover" />
+                    <img
+                      src={msg.avatar || DEFAULT_AVATAR}
+                      alt="avatar"
+                      onError={handleAvatarError}
+                      className="w-9 h-9 rounded-full object-cover"
+                    />
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
                   </div>
                 )}
 
-                <div className={`max-w-[70%] flex flex-col ${msg.isSender ? "items-end" : "items-start"}`}>
-                  {/* Image bubble */}
+                <div className={`max-w-[65%] flex flex-col ${msg.isSender ? "items-end" : "items-start"}`}>
+
+                  {/* ── Image bubble ── */}
                   {msg.mediaType === "image" && msg.mediaUrl ? (
                     <>
                       <div
-                        className={`rounded-2xl overflow-hidden cursor-pointer border ${msg.isSender ? "border-blue-200" : "border-gray-100"}`}
+                        className={`rounded-2xl overflow-hidden cursor-pointer border transition-opacity hover:opacity-90 ${
+                          msg.isSender ? "border-blue-200" : "border-gray-100"
+                        }`}
                         onClick={() => setLightboxUrl(msg.mediaUrl!)}
                       >
                         <img
                           src={msg.mediaUrl}
-                          // alt="Shared image"
-                          className="max-w-[260px] max-h-[280px] object-cover block hover:opacity-90 transition-opacity"
+                          className="max-w-65 max-h-70 w-full object-cover block"
                         />
                       </div>
                       <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
@@ -433,27 +454,39 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                         {msg.isSender && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
                       </div>
                     </>
+
                   ) : msg.isVoice ? (
-                    /* Voice bubble */
+                    /* ── Voice bubble ── */
                     <>
-                      <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 flex items-center gap-3 min-w-[240px]">
+                      <div className="bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 flex items-center gap-3 min-w-60">
                         <button className="bg-white border border-blue-400 text-blue-500 p-2 rounded-full shrink-0 flex items-center justify-center">
                           <Play className="w-3.5 h-3.5 fill-blue-500" />
                         </button>
                         <div className="flex-1 flex items-center gap-0.5">
                           {[...Array(24)].map((_, i) => (
-                            <div key={i} className="w-0.5 bg-blue-300 rounded-full" style={{ height: `${Math.random() * 16 + 4}px` }} />
+                            <div
+                              key={i}
+                              className="w-0.5 bg-blue-300 rounded-full"
+                              style={{ height: `${Math.random() * 16 + 4}px` }}
+                            />
                           ))}
                         </div>
                         <span className="text-xs text-gray-600 font-medium">{msg.voiceDuration || "0:15"}</span>
                       </div>
                       <span className="text-[11px] text-gray-400 mt-1 px-1">{formatTime(msg.createdAt)}</span>
                     </>
+
                   ) : (
-                    /* Text bubble */
+                    /* ── Text bubble ── */
                     <>
-                      <div className={`px-4 py-3 rounded-2xl ${msg.isSender ? "bg-blue-500 text-white" : "bg-gray-50 border border-gray-100 text-gray-800"}`}>
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      <div
+                        className={`px-4 py-3 rounded-2xl ${
+                          msg.isSender
+                            ? "bg-blue-500 text-white rounded-br-sm"
+                            : "bg-gray-50 border border-gray-100 text-gray-800 rounded-bl-sm"
+                        }`}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word">{msg.text}</p>
                       </div>
                       <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
                         <span className="text-[11px] text-gray-400">{formatTime(msg.createdAt)}</span>
@@ -462,6 +495,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                     </>
                   )}
                 </div>
+
+                {/* Sender avatar (optional — shown on right for sender) */}
+                {msg.isSender && (
+                  <div className="relative shrink-0">
+                    <img
+                      src={currentUser?.profilePicture || DEFAULT_AVATAR}
+                      alt="you"
+                      onError={handleAvatarError}
+                      className="w-9 h-9 rounded-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -470,7 +515,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
 
         {/* ── Error bar ──────────────────────────────────────────────────────── */}
         {imageError && (
-          <div className="mx-4 mb-2 bg-red-50 border border-red-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+          <div className="mx-4 mb-1 bg-red-50 border border-red-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2 shrink-0">
             <p className="text-xs text-red-600 font-medium">{imageError}</p>
             <button onClick={() => setImageError(null)} className="text-red-400 hover:text-red-600 shrink-0">
               <X className="w-3.5 h-3.5" />
@@ -479,8 +524,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
         )}
 
         {/* ── Input bar ──────────────────────────────────────────────────────── */}
-        <div className="p-4 border-t border-gray-100">
-          {/* Hidden file input — images only, multiple */}
+        <div className="px-4 py-4 border-t border-gray-100 shrink-0">
+          {/* Hidden file input */}
           <input
             ref={imageInputRef}
             type="file"
@@ -492,7 +537,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
 
           <div className="flex items-center gap-3">
             <div className="flex-1 flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-2.5 gap-2 focus-within:border-blue-300 focus-within:bg-white transition-colors">
-              <button className="text-gray-400 hover:text-gray-600 shrink-0"><Smile className="w-5 h-5" /></button>
+              <button className="text-gray-400 hover:text-gray-600 shrink-0">
+                <Smile className="w-5 h-5" />
+              </button>
+
               <input
                 type="text"
                 value={messageInput}
@@ -501,7 +549,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                 placeholder="Type a message..."
                 className="flex-1 bg-transparent text-sm placeholder-gray-400 focus:outline-none min-w-0"
               />
-              <button className="text-gray-400 hover:text-gray-600 shrink-0"><Paperclip className="w-5 h-5" /></button>
+
+              <button className="text-gray-400 hover:text-gray-600 shrink-0">
+                <Paperclip className="w-5 h-5" />
+              </button>
+
               {/* Camera → opens image picker */}
               <button
                 onClick={() => imageInputRef.current?.click()}
@@ -514,9 +566,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                 )}
               </button>
             </div>
+
             <button
               onClick={handleSendMessage}
-              className="bg-blue-500 hover:bg-blue-600 active:scale-95 text-white p-3 rounded-full flex items-center justify-center transition-all shadow-sm"
+              className="bg-blue-500 hover:bg-blue-600 active:scale-95 text-white p-3 rounded-full flex items-center justify-center transition-all shadow-sm shrink-0"
             >
               {messageInput.trim() ? <Send className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
@@ -527,10 +580,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
       {/* ═══ Image Preview Modal ═══════════════════════════════════════════════ */}
       {selectedImages.length > 0 && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col" style={{ maxHeight: "90vh" }}>
-
+          <div
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col"
+            style={{ maxHeight: "90vh" }}
+          >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
               <div>
                 <h3 className="font-bold text-gray-900">Send Images</h3>
                 <p className="text-xs text-gray-400 mt-0.5">
@@ -546,11 +601,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
             </div>
 
             {/* Main preview */}
-            <div className="relative flex-1 bg-gray-50 flex items-center justify-center" style={{ minHeight: 280, maxHeight: 360 }}>
+            <div
+              className="relative flex-1 bg-gray-50 flex items-center justify-center overflow-hidden"
+              style={{ minHeight: 280, maxHeight: 360 }}
+            >
               <img
                 src={selectedImages[previewIndex]?.localUrl}
                 alt={`Preview ${previewIndex + 1}`}
-                className="max-w-full max-h-[340px] object-contain rounded-xl"
+                className="max-w-full max-h-85 object-contain rounded-xl"
               />
 
               {/* Prev / Next arrows */}
@@ -583,17 +641,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
 
             {/* Thumbnail strip */}
             {selectedImages.length > 1 && (
-              <div className="flex gap-2 px-5 py-3 overflow-x-auto border-t border-gray-100 bg-white">
+              <div className="flex gap-2 px-5 py-3 overflow-x-auto border-t border-gray-100 bg-white shrink-0">
                 {selectedImages.map((img, idx) => (
                   <div
                     key={idx}
                     className={`relative shrink-0 w-14 h-14 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                      idx === previewIndex ? "border-blue-500 shadow-md" : "border-transparent hover:border-gray-300"
+                      idx === previewIndex
+                        ? "border-blue-500 shadow-md"
+                        : "border-transparent hover:border-gray-300"
                     }`}
                     onClick={() => setPreviewIndex(idx)}
                   >
                     <img src={img.localUrl} alt="" className="w-full h-full object-cover" />
-                    {/* Remove individual image */}
                     <button
                       onClick={(e) => { e.stopPropagation(); removeImage(idx); }}
                       className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
@@ -613,9 +672,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
             )}
 
             {/* Modal footer */}
-            <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between gap-3 bg-white">
+            <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between gap-3 bg-white shrink-0">
               <div className="text-xs text-gray-400">
-                Each image must be under <span className="font-semibold text-gray-600">5 MB</span>
+                Each image must be under{" "}
+                <span className="font-semibold text-gray-600">5 MB</span>
               </div>
               <div className="flex gap-2">
                 <button

@@ -10,8 +10,9 @@ import type { PropertyData } from "../components/context/PropertyContext";
 import styles from "../components/media/styles/ReviewSubmit.module.css";
 import Map from "../components/media/Map";
 import { reverseGeocodeLatLng } from "../utils/geocoding";
+import FormLoader from "../../../shared/components/FormLoader";
+import Loader from "../../../shared/Loader";
 
-// ⭐ Props for step navigation (from CreatePropertyPost)
 interface ReviewSubmitProps {
   onBack?: () => void;
   onEditStep?: (step: number) => void;
@@ -49,35 +50,98 @@ const Row = ({ label, value }: RowProps) => (
 
 const propertyConfig = {
   House: {
-    show: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: [] as string[],
   },
   Apartment: {
-    show: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: [] as string[],
   },
   Villa: {
-    show: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: [] as string[],
   },
   "Plot / Land": {
     show: ["facingDirection", "possession"],
-    hide: ["bedrooms", "bathrooms", "floors", "parking", "yearBuilt", "furnishing"],
+    hide: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "yearBuilt",
+      "furnishing",
+    ],
   },
   Agricultural: {
     show: [] as string[],
-    hide: ["bedrooms", "bathrooms", "floors", "parking", "facingDirection", "yearBuilt", "furnishing"],
+    hide: [
+      "bedrooms",
+      "bathrooms",
+      "floors",
+      "parking",
+      "facingDirection",
+      "yearBuilt",
+      "furnishing",
+    ],
   },
   Commercial: {
-    show: ["floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: ["bedrooms", "bathrooms"],
   },
   Shop: {
-    show: ["floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: ["bedrooms", "bathrooms"],
   },
   Office: {
-    show: ["floors", "parking", "facingDirection", "possession", "yearBuilt", "furnishing"],
+    show: [
+      "floors",
+      "parking",
+      "facingDirection",
+      "possession",
+      "yearBuilt",
+      "furnishing",
+    ],
     hide: ["bedrooms", "bathrooms"],
   },
   Warehouse: {
@@ -87,6 +151,9 @@ const propertyConfig = {
 };
 
 const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
+  const [publishing, setPublishing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState("");
   const navigate = useNavigate();
   const { data, updateData, resetData } = useProperty();
   const { token, isAuthenticated } = useAuthContext();
@@ -97,14 +164,20 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
 
   const handleMapUpdate = async (lat: number, lng: number) => {
     toast.loading("Updating location...", { id: "locUpdate" });
-    const result = await reverseGeocodeLatLng(lat, lng, data.city, data.locality, data.address);
+    const result = await reverseGeocodeLatLng(
+      lat,
+      lng,
+      data.city,
+      data.locality,
+      data.address,
+    );
     if (result) {
       updateData({
         city: result.city,
         locality: result.locality,
         address: result.address,
         lat: result.lat,
-        lng: result.lng
+        lng: result.lng,
       });
       toast.success("Location updated successfully!", { id: "locUpdate" });
     } else {
@@ -156,7 +229,6 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
     }
   };
 
-  // ⭐ Publish handler - submit to backend
   const handlePublish = async () => {
     if (!agree1 || !agree2) {
       toast.error("Please accept the required terms");
@@ -174,17 +246,43 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       navigate("/login");
       return;
     }
-
+    setPublishing(true);
+    setPhase("Uploading images...");
+    setProgress(20);
     setLoading(true);
     try {
+      // ── Step 1: Create property (images only) ─────────────────────────────
       const formData = new FormData();
 
       const textFields: (keyof PropertyData)[] = [
-        "purpose", "propertyType", "title", "description", "areaSize", "areaUnit",
-        "bedrooms", "bathrooms", "floors", "parking", "yearBuilt", "furnishing",
-        "possession", "facing", "price", "downPayment", "monthlyInstallment",
-        "duration", "monthlyRent", "securityDeposit", "advanceMonths",
-        "city", "locality", "address", "videoUrl", "floorPlan", "lat", "lng"
+        "purpose",
+        "propertyType",
+        "title",
+        "description",
+        "areaSize",
+        "areaUnit",
+        "bedrooms",
+        "bathrooms",
+        "floors",
+        "parking",
+        "yearBuilt",
+        "furnishing",
+        "possession",
+        "facing",
+        "price",
+        "downPayment",
+        "monthlyInstallment",
+        "duration",
+        "monthlyRent",
+        "securityDeposit",
+        "advanceMonths",
+        "city",
+        "locality",
+        "address",
+        "videoUrl",
+        "floorPlan",
+        "lat",
+        "lng",
       ];
 
       textFields.forEach((key) => {
@@ -195,36 +293,87 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       });
 
       formData.append("negotiable", String(data.negotiable ?? false));
-      formData.append("installmentAvailable", String(data.installmentAvailable ?? false));
+      formData.append(
+        "installmentAvailable",
+        String(data.installmentAvailable ?? false),
+      );
       formData.append("amenities", JSON.stringify(data.amenities || []));
       formData.append("status", "pending");
 
+      // ✅ Only regular images here — NOT panoramas
       (data.imageFiles || []).forEach((img) => {
         if (img.file instanceof File && img.file.size > 0) {
           formData.append("images", img.file);
         }
       });
 
+      setPhase("Creating property...");
+      setProgress(50);
+
       const res = await fetch("http://localhost:5000/api/properties", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { Authorization: `Bearer ${authToken}` },
         body: formData,
       });
+
+      setPhase("Saving panoramas...");
+      setProgress(80);
 
       const result = await res.json();
 
       if (!res.ok || result.success === false) {
         throw new Error(
-          result.message || result.error || "Failed to publish property"
+          result.message || result.error || "Failed to publish property",
         );
       }
 
-      toast.success("Property submitted successfully!");
-      resetData(); // ⭐ Form clear after success
+      const propertyId = result.data?.id;
 
-      // ⭐ Navigate to PropertySubmitted page with property data
+      // ── Step 2: Upload panoramas separately (if any) ──────────────────────
+      // In ReviewSubmit.tsx — inside handlePublish, Step 2
+      if (data.panoramas && data.panoramas.length > 0 && propertyId) {
+        try {
+          const panoramaFormData = new FormData();
+          const roomNames: string[] = [];
+
+          // ✅ Changed type to match your Context's PanoramaItem
+          data.panoramas.forEach((p, index) => {
+            // ✅ Check if both file and roomName exist
+            if (p.file instanceof File && p.file.size > 0) {
+              panoramaFormData.append("panoramas", p.file);
+
+              // ✅ Provide fallback if roomName is undefined
+              const name = p.roomName || `Room ${index + 1}`;
+              roomNames.push(name);
+            }
+          });
+
+          // Only proceed if we actually appended files
+          if (roomNames.length > 0) {
+            panoramaFormData.append("roomNames", JSON.stringify(roomNames));
+
+            const panoramaRes = await fetch(
+              `http://localhost:5000/api/properties/${propertyId}/panoramas`,
+              {
+                method: "POST",
+                headers: { Authorization: `Bearer ${authToken}` },
+                body: panoramaFormData,
+              },
+            );
+
+            const panoramaResult = await panoramaRes.json();
+            console.log("Panorama upload result:", panoramaResult);
+          }
+        } catch (panoramaErr) {
+          console.warn("Panorama upload error:", panoramaErr);
+        }
+      }
+
+      setProgress(100);
+      setPublishing(false);
+      toast.success("Property submitted successfully!");
+      resetData();
+
       navigate("/property-submitted", {
         state: {
           propertyId: result.data?.id,
@@ -238,11 +387,11 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       toast.error(message);
     } finally {
       setLoading(false);
+      setPublishing(false);
     }
   };
 
   return (
-    // ⭐ Direct form return - parent (CreatePropertyPost) handles navbar/heading
     <div className={styles.form}>
       {/* ============ A. Basic Information ============ */}
       <Section title="A. Basic Information" onEdit={handleEditBasic}>
@@ -397,7 +546,14 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
         </div>
         <Row label="Address" value={data.address} />
         {data.lat && data.lng ? (
-          <div style={{ marginTop: '10px', height: '400px', overflow: 'hidden', borderRadius: '8px' }}>
+          <div
+            style={{
+              marginTop: "10px",
+              height: "400px",
+              overflow: "hidden",
+              borderRadius: "8px",
+            }}
+          >
             <Map lat={data.lat} lng={data.lng} onMapClick={handleMapUpdate} />
           </div>
         ) : (
@@ -476,9 +632,20 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
           disabled={loading}
           type="button"
         >
-          <Rocket size={16} />{" "}
-          {loading ? "Publishing..." : "Publish Property"}
+          <Rocket size={16} /> {loading ? "Publishing..." : "Publish Property"}
         </button>
+        {publishing && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl px-8 py-6 min-w-400px">
+              <Loader
+                variant="bar"
+                progress={progress}
+                message={phase}
+                color="#2563eb"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

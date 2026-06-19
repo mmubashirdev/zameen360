@@ -17,6 +17,7 @@ import {
   Heart,
 } from "lucide-react";
 import NotificationDropdown from "../components/NotificationDropdown";
+import socket from "@shared/lib/socket";
 import axiosInstance from "@shared/lib/axios";
 
 // ─── Custom hook: real-time unread message count ──────────────────────────────
@@ -86,7 +87,6 @@ const AuthenticatedNavbar = () => {
     storedUser.fullName ||
     "User";
 
-  // ⭐ Profile image from CURRENT context (always latest)
   const profileImage =
     sellerProfile?.profilePicture ||
     buyerProfile?.profilePicture ||
@@ -100,17 +100,22 @@ const AuthenticatedNavbar = () => {
     storedUser.email ||
     "";
 
+  // ─── UI state ───────────────────────────────────────────────────────────────
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notificationOpen, setNotificationOpen] = useState(false);
 
+  // ─── Real unread count ──────────────────────────────────────────────────────
+  const { unreadCount, setUnreadCount } = useUnreadCount(authUser);
+
+  // ─── Refs ───────────────────────────────────────────────────────────────────
   const avatarRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const notificationRef = useRef<HTMLDivElement | null>(null);
 
-  // Sync profile image to localStorage whenever it changes
+  // ─── Sync profile image to localStorage ────────────────────────────────────
   useEffect(() => {
     if (profileImage) {
       const currentStored = JSON.parse(
@@ -123,6 +128,7 @@ const AuthenticatedNavbar = () => {
     }
   }, [profileImage]);
 
+  // ─── Outside click handler ──────────────────────────────────────────────────
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
       if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
@@ -142,24 +148,27 @@ const AuthenticatedNavbar = () => {
     return () => document.removeEventListener("mousedown", handleOutside);
   }, []);
 
+  // ─── Focus search input when opened ────────────────────────────────────────
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
 
+  // ─── Escape key handler ─────────────────────────────────────────────────────
   useEffect(() => {
     function handleEsc(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setSearchOpen(false);
         setSearchQuery("");
-        setNotificationOpen(false); // ✅ NEW
+        setNotificationOpen(false);
       }
     }
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, []);
 
+  // ─── Handlers ───────────────────────────────────────────────────────────────
   const handleLogout = useCallback(() => {
     logout();
     localStorage.removeItem("zameen360_token");
@@ -206,9 +215,25 @@ const AuthenticatedNavbar = () => {
     }
   };
 
+  // ─── Notification handlers ──────────────────────────────────────────────────
+  const handleNotificationOpen = () => {
+    setNotificationOpen((prev) => !prev);
+  };
+
+  const handleMarkAllRead = () => {
+    setUnreadCount(0);
+    setNotificationOpen(false);
+  };
+
+  const handleViewAll = () => {
+    navigate("/messages");
+    setNotificationOpen(false);
+  };
+
   return (
     <>
       <nav className={`${styles.authenticatedNavbar} navbar-main`}>
+        {/* ── Logo ─────────────────────────────────────────────────────────── */}
         <div className={styles.authNavLeft}>
           <Link to="/" className={styles.authLogoLink}>
             <div className={styles.authLogo}>
@@ -222,6 +247,7 @@ const AuthenticatedNavbar = () => {
           </Link>
         </div>
 
+        {/* ── Nav Links ────────────────────────────────────────────────────── */}
         <ul
           className={`${styles.authNavLinks} ${
             searchOpen ? styles.authNavLinksHidden : ""
@@ -233,7 +259,7 @@ const AuthenticatedNavbar = () => {
             { to: "/rent", label: "Rent" },
             { to: "/projects", label: "Projects" },
             { to: "/about-us", label: "About Us" },
-            { to: "/contact-us", label: "Contact" },
+            { to: "/contact-us", label: "Contact Us" },
           ].map(({ to, label }) => (
             <li key={to}>
               <NavLink
@@ -251,16 +277,21 @@ const AuthenticatedNavbar = () => {
           ))}
         </ul>
 
+        {/* ── Right Side ───────────────────────────────────────────────────── */}
         <div className={styles.authNavRight}>
+          {/* Post Property button (sellers only) */}
           {userRole === "SELLER" && (
             <button
-              className={`${styles.authPostBtn} ${searchOpen ? styles.authPostBtnHidden : ""}`}
+              className={`${styles.authPostBtn} ${
+                searchOpen ? styles.authPostBtnHidden : ""
+              }`}
               onClick={handlePostPropertyClick}
             >
               + Post Property
             </button>
           )}
 
+          {/* ── Search ───────────────────────────────────────────────────── */}
           <div className={styles.searchContainer} ref={searchRef}>
             <div
               className={`${styles.searchWrapper} ${
@@ -310,34 +341,36 @@ const AuthenticatedNavbar = () => {
             </div>
           </div>
 
-          {/* ************* notification ************ ////// */}
+          {/* ── Notification Bell ─────────────────────────────────────────── */}
           <div className={styles.notificationContainer} ref={notificationRef}>
             <button
               className={styles.authIconBtn}
               title="Notifications"
-              onClick={() => setNotificationOpen((prev) => !prev)}
+              onClick={handleNotificationOpen}
             >
               <Bell size={18} strokeWidth={2.2} />
             </button>
-            <span className={styles.notificationBadge}>3</span>
 
+            {/* Real unread badge — only shown when count > 0 */}
+            {unreadCount > 0 && (
+              <span className={styles.notificationBadge}>
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+
+            {/* Dropdown */}
             {notificationOpen && (
               <NotificationDropdown
                 onClose={() => setNotificationOpen(false)}
-                onMarkAllRead={() => {
-                  // keep your logic here if needed
-                  console.log("Mark all as read");
-                }}
-                onViewAll={() => {
-                  navigate("/notifications");
-                  setNotificationOpen(false);
-                }}
+                onMarkAllRead={handleMarkAllRead}
+                onViewAll={handleViewAll}
               />
             )}
           </div>
 
           <div className={styles.authNavDivider} />
 
+          {/* ── Avatar / Profile Menu ─────────────────────────────────────── */}
           <div className={styles.authAvatarContainer} ref={avatarRef}>
             <button
               className={`${styles.authAvatarBtn} ${
@@ -377,6 +410,7 @@ const AuthenticatedNavbar = () => {
                   onClick={() => setMenuOpen(false)}
                 />
                 <div className={styles.authDropdownMenu}>
+                  {/* User info header */}
                   <div className={styles.dropdownUserInfo}>
                     {profileImage ? (
                       <img
@@ -409,8 +443,10 @@ const AuthenticatedNavbar = () => {
                       )}
                     </div>
                   </div>
+
                   <div className={styles.dropdownDivider} />
 
+                  {/* My Profile */}
                   <button
                     className={styles.authDropdownItem}
                     onClick={handleProfileClick}
@@ -441,6 +477,7 @@ const AuthenticatedNavbar = () => {
                     </button>
                   )}
 
+                  {/* Settings */}
                   <button
                     className={styles.authDropdownItem}
                     onClick={() => {
@@ -455,7 +492,10 @@ const AuthenticatedNavbar = () => {
                     />
                     <span>Settings</span>
                   </button>
+
                   <div className={styles.dropdownDivider} />
+
+                  {/* Logout */}
                   <button
                     className={`${styles.authDropdownItem} ${styles.authDropdownLogout}`}
                     onClick={() => {
@@ -477,6 +517,7 @@ const AuthenticatedNavbar = () => {
         </div>
       </nav>
 
+      {/* Search overlay */}
       {searchOpen && (
         <div
           className={styles.searchOverlay}
@@ -487,6 +528,7 @@ const AuthenticatedNavbar = () => {
   );
 };
 
+// ─── Unauthenticated Navbar ───────────────────────────────────────────────────
 const UnauthenticatedNavbar = () => {
   const navigate = useNavigate();
   return (
@@ -536,6 +578,7 @@ const UnauthenticatedNavbar = () => {
   );
 };
 
+// ─── Export ───────────────────────────────────────────────────────────────────
 function DashboardNavbar() {
   const { isAuthenticated } = useAuthContext();
   return isAuthenticated ? <AuthenticatedNavbar /> : <UnauthenticatedNavbar />;

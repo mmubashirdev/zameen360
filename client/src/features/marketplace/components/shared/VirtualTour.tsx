@@ -18,6 +18,8 @@ interface VirtualTourProps {
   rooms: PanoramaRoom[];
 }
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 const SPHERE_RADIUS = 500;
 const FOV = 75;
 const MIN_FOV = 30;
