@@ -134,7 +134,7 @@ const PropertySubmitted: React.FC = () => {
 
       <main className={styles.main}>
         {/* ── Hero Section ── */}
-        <div className={styles.hero}>
+        <div className={`${styles.hero} pt-20`}>
           <div className={styles.iconCircle}>
             <div className={styles.iconInner}>
               <Clock size={40} color="#2563eb" />

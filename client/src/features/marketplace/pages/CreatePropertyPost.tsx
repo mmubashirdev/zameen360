@@ -101,7 +101,7 @@ const CreatePropertyPost = () => {
       <main className={styles.main}>
         <div className={styles.heading}>
           <h1>Post Your Property</h1>
-          <p>Fill in the details below to list your property</p>
+          <p className="pt-10">Fill in the details below to list your property</p>
         </div>
 
         <ProgressSteps currentStep={step} />
