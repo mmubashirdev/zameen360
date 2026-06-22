@@ -14,6 +14,7 @@ interface Hotspot {
   id: string;
   type?: string;
   label: string;
+  sourceRoomIndex?: number;
   targetRoomIndex: number;
   phi: number;
   theta: number;
@@ -50,8 +51,30 @@ const VirtualTourPage = () => {
   const lat = useRef(0);
   const currentFov = useRef(75);
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
+  const moveIntervalRef = useRef<number | null>(null);
 
   const currentRoom = rooms[currentRoomIndex];
+
+  const moveView = (dx: number, dy: number) => {
+    lon.current += dx;
+    lat.current = Math.max(-85, Math.min(85, lat.current + dy));
+  };
+
+  const startContinuousMove = (dx: number, dy: number) => {
+    moveView(dx, dy);
+    if (moveIntervalRef.current !== null) return;
+
+    moveIntervalRef.current = window.setInterval(() => {
+      moveView(dx, dy);
+    }, 16);
+  };
+
+  const stopContinuousMove = () => {
+    if (moveIntervalRef.current !== null) {
+      window.clearInterval(moveIntervalRef.current);
+      moveIntervalRef.current = null;
+    }
+  };
 
   const clearHotspots = () => {
     if (!sceneRef.current) return;
@@ -394,6 +417,7 @@ const VirtualTourPage = () => {
   useEffect(() => {
     return () => {
       cancelAnimationFrame(animFrameRef.current);
+      stopContinuousMove();
       if (sphereRef.current) {
         sphereRef.current.geometry.dispose();
         const mat = sphereRef.current.material as THREE.MeshBasicMaterial;
@@ -554,6 +578,60 @@ const VirtualTourPage = () => {
             Room {currentRoomIndex + 1} / {rooms.length}
           </div>
         )}
+
+        <div className="absolute left-4 bottom-16 z-10 select-none">
+          <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-black/55 backdrop-blur-sm p-2 shadow-lg">
+            <div />
+            <button
+              type="button"
+              aria-label="Move up"
+              onPointerDown={() => startContinuousMove(0, 1.6)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              ↑
+            </button>
+            <div />
+            <button
+              type="button"
+              aria-label="Move left"
+              onPointerDown={() => startContinuousMove(-1.6, 0)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              ←
+            </button>
+            <div className="h-10 w-10" />
+            <button
+              type="button"
+              aria-label="Move right"
+              onPointerDown={() => startContinuousMove(1.6, 0)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              →
+            </button>
+            <div />
+            <button
+              type="button"
+              aria-label="Move down"
+              onPointerDown={() => startContinuousMove(0, -1.6)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              ↓
+            </button>
+            <div />
+          </div>
+        </div>
 
         {/* Prev / Next arrows */}
         {rooms.length > 1 && (

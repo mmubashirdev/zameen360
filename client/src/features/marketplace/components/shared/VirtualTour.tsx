@@ -5,6 +5,7 @@ export interface Hotspot {
   id: string;
   type: string;
   label: string;
+  sourceRoomIndex?: number;
   targetRoomIndex: number;
   phi: number;
   theta: number;
@@ -43,6 +44,7 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
   const lat = useRef(0);
   const currentFov = useRef(FOV);
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
+  const moveIntervalRef = useRef<number | null>(null);
 
   const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,6 +52,30 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
   const [sceneReady, setSceneReady] = useState(false);
 
   const currentRoom = rooms?.[currentRoomIndex];
+
+  const moveView = useCallback((dx: number, dy: number) => {
+    lon.current += dx;
+    lat.current = Math.max(-85, Math.min(85, lat.current + dy));
+  }, []);
+
+  const startContinuousMove = useCallback(
+    (dx: number, dy: number) => {
+      moveView(dx, dy);
+      if (moveIntervalRef.current !== null) return;
+
+      moveIntervalRef.current = window.setInterval(() => {
+        moveView(dx, dy);
+      }, 16);
+    },
+    [moveView],
+  );
+
+  const stopContinuousMove = useCallback(() => {
+    if (moveIntervalRef.current !== null) {
+      window.clearInterval(moveIntervalRef.current);
+      moveIntervalRef.current = null;
+    }
+  }, []);
 
   // ─── Build hotspot meshes (called when room changes) ─────────────────────
   const buildHotspots = useCallback((hotspots: Hotspot[]) => {
@@ -347,6 +373,7 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
   useEffect(() => {
     return () => {
       cancelAnimationFrame(animFrameRef.current);
+      stopContinuousMove();
       rendererRef.current?.dispose();
       if (mountRef.current && rendererRef.current?.domElement) {
         try {
@@ -417,6 +444,60 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
 
         <div className="absolute bottom-4 right-4 z-10 bg-black/40 text-white text-xs px-2.5 py-1 rounded-lg pointer-events-none">
           Room {currentRoomIndex + 1} / {rooms.length}
+        </div>
+
+        <div className="absolute left-4 bottom-16 z-10 select-none">
+          <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-black/55 backdrop-blur-sm p-2 shadow-lg">
+            <div />
+            <button
+              type="button"
+              aria-label="Move up"
+              onPointerDown={() => startContinuousMove(0, 1.6)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              ↑
+            </button>
+            <div />
+            <button
+              type="button"
+              aria-label="Move left"
+              onPointerDown={() => startContinuousMove(-1.6, 0)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              ←
+            </button>
+            <div className="h-10 w-10" />
+            <button
+              type="button"
+              aria-label="Move right"
+              onPointerDown={() => startContinuousMove(1.6, 0)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              →
+            </button>
+            <div />
+            <button
+              type="button"
+              aria-label="Move down"
+              onPointerDown={() => startContinuousMove(0, -1.6)}
+              onPointerUp={stopContinuousMove}
+              onPointerLeave={stopContinuousMove}
+              onPointerCancel={stopContinuousMove}
+              className="h-10 w-10 rounded-full bg-white/10 text-white text-lg font-semibold hover:bg-white/20 active:bg-white/25"
+            >
+              ↓
+            </button>
+            <div />
+          </div>
         </div>
       </div>
 
