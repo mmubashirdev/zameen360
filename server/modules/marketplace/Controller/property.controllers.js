@@ -95,6 +95,7 @@ exports.panorama = async (req, res) => {
     const propertyId = parseInt(req.params.id);
     const files = req.files || [];
     const roomNames = JSON.parse(req.body.roomNames || "[]");
+     const hotspotsArray = JSON.parse(req.body.hotspots || "[]");
 
     if (isNaN(propertyId)) {
       return res
@@ -113,6 +114,7 @@ exports.panorama = async (req, res) => {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const roomName = roomNames[i] || `Room ${i + 1}`;
+       const hotspots = hotspotsArray[i] || []; 
 
       // ✅ Use the CORRECT function — uploadToCloudinaryFromPath
       const imageUrl = await uploadToCloudinaryFromPath(

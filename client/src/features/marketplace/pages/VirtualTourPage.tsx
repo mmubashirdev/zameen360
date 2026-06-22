@@ -1,5 +1,4 @@
-// client/src/features/marketplace/pages/VirtualTourPage.tsx
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import * as THREE from "three";
 import { ArrowLeft, Maximize, Minimize, RotateCcw } from "lucide-react";
@@ -347,16 +346,12 @@ const VirtualTourPage = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            className="rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
           >
             <ArrowLeft size={20} />
           </button>
           <div>
             <h1 className="text-white font-bold text-sm">{propertyTitle}</h1>
-            <p className="text-gray-400 text-xs">
-              360° Virtual Tour • {rooms.length} Room
-              {rooms.length > 1 ? "s" : ""}
-            </p>
           </div>
         </div>
 

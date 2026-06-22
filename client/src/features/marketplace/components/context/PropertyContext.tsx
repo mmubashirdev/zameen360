@@ -126,8 +126,8 @@ export const PropertyProvider = ({ children }: { children: ReactNode }) => {
       if (!data.city) newErrors.city = "City is required";
       if (!data.locality) newErrors.locality = "Locality is required";
       if (!data.address) newErrors.address = "Address is required";
-      if (!data.imageFiles || data.imageFiles.length === 0) {
-        newErrors.imageFiles = "At least 1 image is required";
+      if (!data.imageFiles || data.imageFiles.length < 5) {
+        newErrors.imageFiles = "At least 5 images are required";
       }
     }
 

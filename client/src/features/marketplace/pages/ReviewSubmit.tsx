@@ -345,13 +345,14 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
               // ✅ Provide fallback if roomName is undefined
               const name = p.roomName || `Room ${index + 1}`;
               roomNames.push(name);
+               hotspotsArray.push((p as any).hotspots || []);
             }
           });
-
+          
           // Only proceed if we actually appended files
           if (roomNames.length > 0) {
             panoramaFormData.append("roomNames", JSON.stringify(roomNames));
-
+            panoramaFormData.append("hotspots", JSON.stringify(hotspotsArray));  
             const panoramaRes = await fetch(
               `http://localhost:5000/api/properties/${propertyId}/panoramas`,
               {
