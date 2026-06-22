@@ -257,7 +257,7 @@ const AuthenticatedNavbar = () => {
             { to: "/", label: "Home" },
             { to: "/buy", label: "Buy" },
             { to: "/rent", label: "Rent" },
-            { to: "/projects", label: "Projects" },
+            { to: "/Societies", label: "Societies" },
             { to: "/about-us", label: "About Us" },
             { to: "/contact-us", label: "Contact Us" },
           ].map(({ to, label }) => (
