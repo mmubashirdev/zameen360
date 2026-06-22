@@ -7,6 +7,16 @@ import DashboardNavbar from "../components/DashboardNavbar";
 interface PanoramaRoom {
   roomName: string;
   imageUrl: string;
+  hotspots?: Hotspot[];
+}
+
+interface Hotspot {
+  id: string;
+  type?: string;
+  label: string;
+  targetRoomIndex: number;
+  phi: number;
+  theta: number;
 }
 
 const VirtualTourPage = () => {
@@ -27,10 +37,14 @@ const VirtualTourPage = () => {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const sphereRef = useRef<THREE.Mesh | null>(null);
+  const hotspotMeshesRef = useRef<THREE.Object3D[]>([]);
   const animFrameRef = useRef<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const raycasterRef = useRef(new THREE.Raycaster());
+  const mouseRef = useRef(new THREE.Vector2());
 
   const isDragging = useRef(false);
+  const dragMoved = useRef(false);
   const prevMousePos = useRef({ x: 0, y: 0 });
   const lon = useRef(0);
   const lat = useRef(0);
@@ -38,6 +52,71 @@ const VirtualTourPage = () => {
   const lastTouch = useRef<{ x: number; y: number } | null>(null);
 
   const currentRoom = rooms[currentRoomIndex];
+
+  const clearHotspots = () => {
+    if (!sceneRef.current) return;
+    hotspotMeshesRef.current.forEach((mesh) => {
+      sceneRef.current?.remove(mesh);
+      if (mesh instanceof THREE.Group) {
+        mesh.children.forEach((child) => {
+          const childMesh = child as THREE.Mesh;
+          childMesh.geometry?.dispose();
+          if (Array.isArray(childMesh.material)) {
+            childMesh.material.forEach((mat) => mat.dispose());
+          } else {
+            childMesh.material?.dispose();
+          }
+        });
+      }
+    });
+    hotspotMeshesRef.current = [];
+  };
+
+  const buildHotspots = (hotspots: Hotspot[] = []) => {
+    if (!sceneRef.current) return;
+    clearHotspots();
+
+    hotspots.forEach((hotspot) => {
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(15, 23, 32),
+        new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.85,
+        }),
+      );
+
+      const hitArea = new THREE.Mesh(
+        new THREE.CircleGeometry(42, 32),
+        new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      );
+
+      const group = new THREE.Group();
+      group.add(ring);
+      group.add(hitArea);
+
+      const radius = 480;
+      const x = radius * Math.sin(hotspot.phi) * Math.cos(hotspot.theta);
+      const y = radius * Math.cos(hotspot.phi);
+      const z = radius * Math.sin(hotspot.phi) * Math.sin(hotspot.theta);
+
+      group.position.set(x, y, z);
+      group.lookAt(0, 0, 0);
+      group.userData = {
+        label: hotspot.label,
+        targetRoomIndex: hotspot.targetRoomIndex,
+      };
+
+      sceneRef.current.add(group);
+      hotspotMeshesRef.current.push(group);
+    });
+  };
 
   // ─── Fetch rooms ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -62,6 +141,7 @@ const VirtualTourPage = () => {
             result.data.panoramas.map((p: any) => ({
               roomName: p.roomName,
               imageUrl: p.imageUrl,
+              hotspots: Array.isArray(p.hotspots) ? p.hotspots : [],
             })),
           );
           setPropertyTitle(result.data.title || "Property Tour");
@@ -136,6 +216,12 @@ const VirtualTourPage = () => {
         );
 
         rendererRef.current.render(sceneRef.current, cameraRef.current);
+
+        const t = Date.now() * 0.003;
+        hotspotMeshesRef.current.forEach((group, index) => {
+          const ring = group.children[0];
+          if (ring) ring.scale.setScalar(1 + 0.18 * Math.sin(t + index));
+        });
       };
       animate();
 
@@ -174,6 +260,7 @@ const VirtualTourPage = () => {
         }
         lon.current = 0;
         lat.current = 0;
+        buildHotspots(currentRoom.hotspots || []);
         setIsLoading(false);
       },
       (progress) => {
@@ -210,18 +297,55 @@ const VirtualTourPage = () => {
 
     const onMouseDown = (e: MouseEvent) => {
       isDragging.current = true;
+      dragMoved.current = false;
       prevMousePos.current = { x: e.clientX, y: e.clientY };
     };
 
     const onMouseMove = (e: MouseEvent) => {
+      if (!mountRef.current || !cameraRef.current) return;
+
+      const rect = mountRef.current.getBoundingClientRect();
+      mouseRef.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseRef.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+      const hits = raycasterRef.current.intersectObjects(
+        hotspotMeshesRef.current,
+        true,
+      );
+      el.style.cursor = hits.length > 0 ? "pointer" : "grab";
+
       if (!isDragging.current) return;
-      lon.current -= (e.clientX - prevMousePos.current.x) * 0.2;
-      lat.current -= (e.clientY - prevMousePos.current.y) * 0.2;
+      const dx = e.clientX - prevMousePos.current.x;
+      const dy = e.clientY - prevMousePos.current.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved.current = true;
+
+      lon.current -= dx * 0.2;
+      lat.current -= dy * 0.2;
       prevMousePos.current = { x: e.clientX, y: e.clientY };
     };
 
-    const onMouseUp = () => {
+    const onMouseUp = (e: MouseEvent) => {
       isDragging.current = false;
+      if (dragMoved.current || !mountRef.current || !cameraRef.current) return;
+
+      const rect = mountRef.current.getBoundingClientRect();
+      mouseRef.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseRef.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
+      const hits = raycasterRef.current.intersectObjects(
+        hotspotMeshesRef.current,
+        true,
+      );
+
+      const hotspotGroup = hits[0]?.object.parent;
+      const targetIndex = hotspotGroup?.userData?.targetRoomIndex;
+      if (
+        typeof targetIndex === "number" &&
+        targetIndex >= 0 &&
+        targetIndex < rooms.length
+      ) {
+        setCurrentRoomIndex(targetIndex);
+      }
     };
 
     const onWheel = (e: WheelEvent) => {
@@ -276,6 +400,7 @@ const VirtualTourPage = () => {
         if (mat.map) mat.map.dispose();
         mat.dispose();
       }
+      clearHotspots();
       rendererRef.current?.dispose();
       if (mountRef.current && rendererRef.current?.domElement) {
         try {
@@ -418,6 +543,7 @@ const VirtualTourPage = () => {
         {/* Controls hint */}
         <div className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg pointer-events-none space-y-1">
           <p>Drag to look around</p>
+          <p>Click hotspots to move</p>
           <p>Scroll to zoom</p>
           <p>Swipe on mobile</p>
         </div>

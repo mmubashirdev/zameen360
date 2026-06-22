@@ -200,7 +200,7 @@ const HotspotEditor = ({
       const ringGeo = new THREE.RingGeometry(14, 18, 32);
 
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: 0xff0000,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.9,

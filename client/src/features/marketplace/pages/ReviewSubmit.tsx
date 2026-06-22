@@ -335,6 +335,7 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
         try {
           const panoramaFormData = new FormData();
           const roomNames: string[] = [];
+          const hotspotsArray: unknown[][] = [];
 
           // ✅ Changed type to match your Context's PanoramaItem
           data.panoramas.forEach((p, index) => {
@@ -345,14 +346,14 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
               // ✅ Provide fallback if roomName is undefined
               const name = p.roomName || `Room ${index + 1}`;
               roomNames.push(name);
-               hotspotsArray.push((p as any).hotspots || []);
+              hotspotsArray.push((p as any).hotspots || []);
             }
           });
-          
+
           // Only proceed if we actually appended files
           if (roomNames.length > 0) {
             panoramaFormData.append("roomNames", JSON.stringify(roomNames));
-            panoramaFormData.append("hotspots", JSON.stringify(hotspotsArray));  
+            panoramaFormData.append("hotspots", JSON.stringify(hotspotsArray));
             const panoramaRes = await fetch(
               `http://localhost:5000/api/properties/${propertyId}/panoramas`,
               {
@@ -364,9 +365,23 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
 
             const panoramaResult = await panoramaRes.json();
             console.log("Panorama upload result:", panoramaResult);
+
+            if (!panoramaRes.ok || panoramaResult.success === false) {
+              throw new Error(
+                panoramaResult.message ||
+                  panoramaResult.error ||
+                  "Failed to upload panoramas",
+              );
+            }
           }
         } catch (panoramaErr) {
           console.warn("Panorama upload error:", panoramaErr);
+          const message =
+            panoramaErr instanceof Error
+              ? panoramaErr.message
+              : "Property was created, but panoramas failed to upload.";
+          toast.error(message);
+          throw panoramaErr;
         }
       }
 

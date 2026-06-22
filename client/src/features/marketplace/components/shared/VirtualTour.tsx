@@ -63,26 +63,26 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
       // Glowing outer ring
       const ringGeo = new THREE.RingGeometry(15, 22, 32);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x60a5fa,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.6,
-      });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-
-      // Inner solid dot
-      const dotGeo = new THREE.CircleGeometry(10, 32);
-      const dotMat = new THREE.MeshBasicMaterial({
         color: 0xffffff,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.95,
+        opacity: 0.85,
       });
-      const dot = new THREE.Mesh(dotGeo, dotMat);
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+
+      const hitArea = new THREE.Mesh(
+        new THREE.CircleGeometry(40, 32),
+        new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      );
 
       const group = new THREE.Group();
       group.add(ring);
-      group.add(dot);
+      group.add(hitArea);
 
       // Position on sphere surface (slightly inside)
       const radius = SPHERE_RADIUS * 0.95;
@@ -92,19 +92,14 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
       group.position.set(x, y, z);
       group.lookAt(0, 0, 0);
 
-      (dot as any).userData = {
-        hotspotIndex: i,
-        label: hotspot.label,
-        targetRoomIndex: hotspot.targetRoomIndex,
-      };
-      (ring as any).userData = {
+      group.userData = {
         hotspotIndex: i,
         label: hotspot.label,
         targetRoomIndex: hotspot.targetRoomIndex,
       };
 
       sceneRef.current!.add(group);
-      hotspotMeshes.current.push(dot, ring);
+      hotspotMeshes.current.push(group);
     });
   }, []);
 
@@ -188,10 +183,10 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
         // Pulse hotspot rings
         const t = Date.now() * 0.003;
         hotspotMeshes.current.forEach((m, i) => {
-          if (i % 2 === 0) {
-            // rings only (every other mesh)
+          const ring = m.children[0] as THREE.Mesh | undefined;
+          if (ring) {
             const scale = 1 + 0.2 * Math.sin(t + i);
-            m.scale.setScalar(scale);
+            ring.scale.setScalar(scale);
           }
         });
 
@@ -249,7 +244,10 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
       mouseRef.current.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
       raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
-      const hits = raycasterRef.current.intersectObjects(hotspotMeshes.current);
+      const hits = raycasterRef.current.intersectObjects(
+        hotspotMeshes.current,
+        true,
+      );
 
       if (hits.length > 0) {
         const label = hits[0].object.userData?.label;
@@ -285,10 +283,13 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
         raycasterRef.current.setFromCamera(mouseRef.current, cameraRef.current);
         const hits = raycasterRef.current.intersectObjects(
           hotspotMeshes.current,
+          true,
         );
 
         if (hits.length > 0) {
-          const targetIndex = hits[0].object.userData?.targetRoomIndex;
+          const targetIndex =
+            hits[0].object.parent?.userData?.targetRoomIndex ??
+            hits[0].object.userData?.targetRoomIndex;
           if (typeof targetIndex === "number") {
             setCurrentRoomIndex(targetIndex);
           }
