@@ -122,7 +122,7 @@ const PropertyDetails = () => {
             disabled={!hasTour}
             className={`px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md transition-all ${
               hasTour
-                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg cursor-pointer"
+                ? "bg-linear-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg cursor-pointer"
                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
             }`}
             title={

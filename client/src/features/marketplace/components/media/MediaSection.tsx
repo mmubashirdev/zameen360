@@ -1,8 +1,15 @@
 import { useRef, useState, useCallback } from "react";
-import { Camera, X, Plus, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Camera,
+  X,
+  Plus,
+  AlertCircle,
+  CheckCircle2,
+  MapPin,
+} from "lucide-react";
 import styles from "./styles/MediaSection.module.css";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import HotspotEditor from "../../components/PostProperty/HotspotEditor";
+import type { Hotspot } from "../../components/PostProperty/HotspotEditor";
 
 interface PanoramaRoom {
   id: string;
@@ -11,6 +18,7 @@ interface PanoramaRoom {
   previewUrl: string | null;
   isValid: boolean;
   error: string | null;
+  hotspots: Hotspot[]; // ✅ Added hotspots to type
 }
 
 interface MediaSectionProps {
@@ -18,12 +26,10 @@ interface MediaSectionProps {
     data: Partial<{
       videoUrl: string;
       floorPlan: string;
-      panoramas: { roomName: string; file: File }[];
+      panoramas: { roomName: string; file: File; hotspots: Hotspot[] }[];
     }>,
   ) => void;
 }
-
-// ─── Validate 2:1 equirectangular ratio ──────────────────────────────────────
 
 const validate360Image = (
   file: File,
@@ -34,7 +40,6 @@ const validate360Image = (
     img.onload = () => {
       URL.revokeObjectURL(url);
       const ratio = img.width / img.height;
-
       if (ratio < 1.5 || ratio > 4.5) {
         resolve({
           valid: false,
@@ -64,14 +69,14 @@ const ROOM_SUGGESTIONS = [
   "Garage",
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 const MediaSection = ({ onDataChange }: MediaSectionProps) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [floorPlan, setFloorPlan] = useState<string | null>(null);
+  const [editingRoomHotspots, setEditingRoomHotspots] = useState<{
+    roomId: string;
+  } | null>(null);
 
-  // 3D tour state
   const [tourOpen, setTourOpen] = useState(false);
   const [panoramaRooms, setPanoramaRooms] = useState<PanoramaRoom[]>([
     {
@@ -81,6 +86,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
       previewUrl: null,
       isValid: false,
       error: null,
+      hotspots: [], // ✅ Initialize
     },
   ]);
 
@@ -88,13 +94,15 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
   const floorRef = useRef<HTMLInputElement>(null);
   const roomRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
-  // ─── Notify parent ────────────────────────────────────────────────────────
-
   const notifyParent = useCallback(
     (rooms: PanoramaRoom[], vidUrl: string, fpUrl: string | null) => {
       const validRooms = rooms
         .filter((r) => r.file && r.isValid)
-        .map((r) => ({ roomName: r.roomName, file: r.file! }));
+        .map((r) => ({
+          roomName: r.roomName,
+          file: r.file!,
+          hotspots: r.hotspots || [],
+        }));
 
       onDataChange?.({
         videoUrl: vidUrl || undefined,
@@ -105,8 +113,6 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
     [onDataChange],
   );
 
-  // ─── Video handlers ───────────────────────────────────────────────────────
-
   const handleYoutubeUrlChange = useCallback(
     (url: string) => {
       setYoutubeUrl(url);
@@ -114,8 +120,6 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
     },
     [panoramaRooms, floorPlan, notifyParent],
   );
-
-  // ─── Floor plan handler ───────────────────────────────────────────────────
 
   const handleFloorPlanChange = useCallback(
     (file: File | undefined): void => {
@@ -127,8 +131,6 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
     },
     [floorPlan, panoramaRooms, youtubeUrl, notifyParent],
   );
-
-  // ─── Panorama handlers ────────────────────────────────────────────────────
 
   const handlePanoramaFile = async (roomId: string, file: File | null) => {
     if (!file) return;
@@ -179,6 +181,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
         previewUrl: null,
         isValid: false,
         error: null,
+        hotspots: [],
       },
     ]);
   };
@@ -193,44 +196,25 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
     });
   };
 
+  const handleSaveHotspots = (roomId: string, hotspots: Hotspot[]) => {
+    setPanoramaRooms((prev) => {
+      const next = prev.map((r) => (r.id === roomId ? { ...r, hotspots } : r));
+      notifyParent(next, youtubeUrl, floorPlan);
+      return next;
+    });
+    setEditingRoomHotspots(null);
+  };
+
   const validRoomCount = panoramaRooms.filter((r) => r.isValid).length;
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+  // Get the room being edited
+  const editingRoom = editingRoomHotspots
+    ? panoramaRooms.find((r) => r.id === editingRoomHotspots.roomId)
+    : null;
 
   return (
     <>
-      <div className={`${styles.card} mb-4 h-40`}>
-        <label className={styles.label}>
-          3D Virtual Tour <span className={styles.optional}>(Optional)</span>
-        </label>
-        <div
-          className={`${styles.uploadBox}`}
-          onClick={() => setTourOpen(true)}
-          style={{
-            cursor: "pointer",
-            borderColor: validRoomCount > 0 ? "#16a34a" : undefined,
-          }}
-        >
-          <div
-            className={styles.icon}
-            style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}
-          >
-            3D
-          </div>
-          <div style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}>
-            {validRoomCount > 0
-              ? `${validRoomCount} room${validRoomCount !== 1 ? "s" : ""} uploaded`
-              : "Upload 360° Room Photos"}
-          </div>
-        </div>
-        {validRoomCount > 0 && (
-          <p className={styles.fileName}>
-            ✓ {validRoomCount} room{validRoomCount > 1 ? "s" : ""} ready for
-            virtual tour
-          </p>
-        )}
-      </div>
-      {/* ✅ Original 3-card row — unchanged */}
+      {/* ✅ Single 3-card row */}
       <div className={styles.row}>
         {/* Card 1: Video */}
         <div className={styles.card}>
@@ -257,6 +241,38 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
             hidden
             onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
           />
+        </div>
+
+        {/* Card 2: 3D Virtual Tour */}
+        <div className={styles.card}>
+          <label className={styles.label}>
+            3D Virtual Tour <span className={styles.optional}>(Optional)</span>
+          </label>
+          <div
+            className={styles.uploadBox}
+            onClick={() => setTourOpen(true)}
+            style={{
+              cursor: "pointer",
+              borderColor: validRoomCount > 0 ? "#16a34a" : undefined,
+            }}
+          >
+            <div
+              className={styles.icon}
+              style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}
+            >
+              3D
+            </div>
+            <div style={{ color: validRoomCount > 0 ? "#16a34a" : undefined }}>
+              {validRoomCount > 0
+                ? `${validRoomCount} room${validRoomCount !== 1 ? "s" : ""} uploaded`
+                : "Upload 360° Room Photos"}
+            </div>
+          </div>
+          {validRoomCount > 0 && (
+            <p className={styles.fileName}>
+              ✓ {validRoomCount} room{validRoomCount > 1 ? "s" : ""} ready
+            </p>
+          )}
         </div>
 
         {/* Card 3: Floor Plan */}
@@ -291,22 +307,20 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
         </div>
       </div>
 
-      {/* ✅ Modal popup with backdrop blur */}
+      {/* ✅ 360° Upload Modal */}
       {tourOpen && (
         <>
-          {/* Backdrop */}
           <div
             className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
             onClick={() => setTourOpen(false)}
           />
 
-          {/* Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
               className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
+              {/* Header */}
               <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -314,23 +328,20 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                     360° Virtual Tour
                   </h3>
                   <p className="text-xs text-gray-500 mt-1">
-                    Upload equirectangular photos (2:1 ratio) for each room
+                    Upload panorama for each room, then add navigation hotspots
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setTourOpen(false)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              {/* Scrollable Content */}
+              {/* Content */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-                {/* Info banner */}
-
-                {/* Status bar */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-gray-700">
                     Rooms ({panoramaRooms.length}/10)
@@ -343,12 +354,11 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                     }`}
                   >
                     {validRoomCount > 0
-                      ? `✓ ${validRoomCount} room${validRoomCount > 1 ? "s" : ""} ready`
+                      ? `✓ ${validRoomCount} ready`
                       : "No rooms uploaded yet"}
                   </span>
                 </div>
 
-                {/* Room list */}
                 <div className="space-y-3">
                   {panoramaRooms.map((room) => (
                     <div
@@ -364,7 +374,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                       {/* Thumbnail */}
                       <div
                         onClick={() => roomRefs.current[room.id]?.click()}
-                        className="shrink-0 w-40 h-40 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center cursor-pointer overflow-hidden relative gap-1 hover:border-blue-400 transition-colors"
+                        className="shrink-0 w-24 h-16 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center cursor-pointer overflow-hidden relative hover:border-blue-400"
                       >
                         {room.previewUrl ? (
                           <img
@@ -412,6 +422,22 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                           placeholder="Room name"
                           className="w-full border-0 border-b border-gray-200 focus:border-blue-500 outline-none pb-1 text-sm font-semibold bg-transparent mb-2"
                         />
+
+                        {/* ✅ Place Hotspots button */}
+                        {room.isValid && room.previewUrl && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingRoomHotspots({ roomId: room.id })
+                            }
+                            className="mb-2 px-3 py-1.5 text-xs bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 flex items-center gap-1.5 font-medium"
+                          >
+                            <MapPin size={12} />
+                            Place Navigation Hotspots (
+                            {room.hotspots?.length || 0})
+                          </button>
+                        )}
+
                         <div className="flex flex-wrap gap-1">
                           {ROOM_SUGGESTIONS.filter(
                             (s) =>
@@ -425,12 +451,13 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                                 key={s}
                                 type="button"
                                 onClick={() => handleRoomNameChange(room.id, s)}
-                                className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                                className="text-[11px] px-2 py-0.5 rounded-full border border-gray-200 bg-white text-gray-500 hover:border-blue-400 hover:text-blue-600"
                               >
                                 {s}
                               </button>
                             ))}
                         </div>
+
                         {room.error && (
                           <p className="flex items-center gap-1 mt-2 text-[11px] text-red-600">
                             <AlertCircle size={12} /> {room.error}
@@ -438,12 +465,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                         )}
                         {room.isValid && (
                           <p className="text-[11px] text-green-600 mt-1.5">
-                            ✓ Valid 360° image — will appear in virtual tour
-                          </p>
-                        )}
-                        {!room.file && !room.error && (
-                          <p className="text-[11px] text-gray-400 mt-1.5">
-                            Upload a 360° equirectangular image for this room
+                            ✓ Valid 360° image
                           </p>
                         )}
                       </div>
@@ -453,7 +475,7 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                         <button
                           type="button"
                           onClick={() => removeRoom(room.id)}
-                          className="shrink-0 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                          className="shrink-0 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-md"
                         >
                           <X size={14} />
                         </button>
@@ -462,46 +484,48 @@ const MediaSection = ({ onDataChange }: MediaSectionProps) => {
                   ))}
                 </div>
 
-                {/* Add room */}
                 {panoramaRooms.length < 10 && (
                   <button
                     type="button"
                     onClick={addRoom}
-                    className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 flex items-center justify-center gap-2 hover:border-blue-400 hover:text-blue-600 transition-colors"
+                    className="w-full py-2.5 border-2 border-dashed border-gray-300 rounded-xl text-sm text-gray-500 flex items-center justify-center gap-2 hover:border-blue-400 hover:text-blue-600"
                   >
                     <Plus size={15} /> Add Another Room
                   </button>
                 )}
               </div>
 
-              {/* Modal Footer */}
+              {/* Footer */}
               <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
                 <p className="text-[11px] text-gray-400">
-                  Max 10 rooms • Max 20 MB each • 2:1 ratio required
+                  Max 10 rooms • 20 MB each
                 </p>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setTourOpen(false)}
-                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setTourOpen(false)}
-                    className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-1.5"
-                  >
-                    <CheckCircle2 size={15} />
-                    {validRoomCount > 0
-                      ? `Save ${validRoomCount} Room${validRoomCount > 1 ? "s" : ""}`
-                      : "Done"}
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setTourOpen(false)}
+                  className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5"
+                >
+                  <CheckCircle2 size={15} /> Done
+                </button>
               </div>
             </div>
           </div>
         </>
+      )}
+
+      {/* ✅ HotspotEditor — rendered at ROOT level, not nested in modal */}
+      {editingRoom && editingRoom.previewUrl && (
+        <HotspotEditor
+          imageUrl={editingRoom.previewUrl}
+          roomName={editingRoom.roomName}
+          allRooms={panoramaRooms.map((r) => ({ roomName: r.roomName }))}
+          currentRoomIndex={panoramaRooms.findIndex(
+            (r) => r.id === editingRoom.id,
+          )}
+          existingHotspots={editingRoom.hotspots || []}
+          onSave={(hotspots) => handleSaveHotspots(editingRoom.id, hotspots)}
+          onClose={() => setEditingRoomHotspots(null)}
+        />
       )}
     </>
   );

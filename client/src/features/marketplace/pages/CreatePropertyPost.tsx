@@ -61,7 +61,7 @@ const CreatePropertyPost = () => {
   }
 
   const handleNext = () => {
-    const isValid = validate(step);
+    const isValid = step === 2 || validate(step);
 
     if (!isValid) {
       const firstErrorKey = Object.keys(errors)[0];

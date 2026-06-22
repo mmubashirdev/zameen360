@@ -1,6 +1,7 @@
 // client/src/features/marketplace/pages/MediaAndDetail.tsx
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import ImageUpload from "../components/media/ImageUpload";
 import MediaSection from "../components/media/MediaSection";
 import LocationSection from "../components/media/LocationSection";
@@ -17,6 +18,7 @@ interface MediaAndDetailProps {
 
 const MediaAndDetail: React.FC<MediaAndDetailProps> = ({ onNext, onBack }) => {
   const { data, updateData } = useProperty();
+  const navigate = useNavigate();
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [coverId, setCoverId] = useState<string | null>(null);
 
@@ -89,16 +91,22 @@ const MediaAndDetail: React.FC<MediaAndDetailProps> = ({ onNext, onBack }) => {
       return;
     }
 
-    // All good - proceed to next step
+    // All good - proceed to next step or route fallback
     if (onNext) {
       onNext();
+      return;
     }
+
+    navigate("/review");
   };
 
   const handleBack = () => {
     if (onBack) {
       onBack();
+      return;
     }
+
+    navigate("/post-property");
   };
 
   return (
