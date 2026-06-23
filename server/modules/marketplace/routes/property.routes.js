@@ -49,6 +49,10 @@ router.post(
   propertyController.panorama,
 );
 
+// ── REVIEWS ──────────────────────────────────────────────────────────────────
+router.get("/:id/reviews", propertyController.getPropertyReviews);
+router.post("/:id/reviews", propertyController.createPropertyReview);
+
 // ── ADMIN ─────────────────────────────────────────────────────────────────────
 router.get("/admin/stats", propertyController.getDashboardStats);
 router.get("/admin/all", propertyController.getAdminProperties);

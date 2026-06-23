@@ -41,6 +41,12 @@ const toBool = (val) => {
   return false;
 };
 
+const clampRating = (value) => {
+  const rating = Number(value);
+  if (Number.isNaN(rating)) return null;
+  return Math.min(5, Math.max(1, Math.round(rating)));
+};
+
 const serializeBigInt = (obj) => {
   return JSON.parse(
     JSON.stringify(obj, (_, value) =>
@@ -589,6 +595,163 @@ exports.getPropertyById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch property",
+      error: err.message,
+    });
+  }
+};
+
+exports.getPropertyReviews = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
+    }
+
+    const property = await prisma.property.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!property) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+    }
+
+    const reviews = await prisma.propertyReview.findMany({
+      where: { propertyId: id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: {
+          select: { id: true, fullName: true, profilePicture: true },
+        },
+      },
+    });
+
+    const serializedReviews = serializeBigInt(reviews).map((review) => ({
+      ...review,
+      displayName: review.name || review.user?.fullName || "Guest",
+      avatar:
+        review.user?.profilePicture ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name || review.user?.fullName || "Guest")}&background=2563eb&color=fff`,
+    }));
+
+    const totalReviews = serializedReviews.length;
+    const averageRating = totalReviews
+      ? Number(
+          (
+            serializedReviews.reduce((sum, review) => sum + Number(review.rating), 0) /
+            totalReviews
+          ).toFixed(1),
+        )
+      : 0;
+
+    const ratingBreakdown = [5, 4, 3, 2, 1].map((stars) => ({
+      stars,
+      count: serializedReviews.filter((review) => Number(review.rating) === stars).length,
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        reviews: serializedReviews,
+        summary: {
+          totalReviews,
+          averageRating,
+          ratingBreakdown,
+        },
+      },
+    });
+  } catch (err) {
+    console.error("GET PROPERTY REVIEWS ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch property reviews",
+      error: err.message,
+    });
+  }
+};
+
+exports.createPropertyReview = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid property ID" });
+    }
+
+    const { name, email, rating, comment } = req.body || {};
+    const trimmedName = String(name || "").trim();
+    const trimmedEmail = String(email || "").trim();
+    const trimmedComment = String(comment || "").trim();
+    const normalizedRating = clampRating(rating);
+
+    if (!trimmedName) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Name is required" });
+    }
+
+    if (!trimmedComment) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Comment is required" });
+    }
+
+    if (!normalizedRating) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Rating must be between 1 and 5" });
+    }
+
+    const property = await prisma.property.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!property) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+    }
+
+    const userId = req.user?.id ?? req.user?.userId ?? null;
+
+    const review = await prisma.propertyReview.create({
+      data: {
+        propertyId: id,
+        userId: userId ? Number(userId) : null,
+        name: trimmedName,
+        email: trimmedEmail || null,
+        rating: normalizedRating,
+        comment: trimmedComment,
+      },
+      include: {
+        user: {
+          select: { id: true, fullName: true, profilePicture: true },
+        },
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Review submitted successfully",
+      data: serializeBigInt({
+        ...review,
+        displayName: review.name || review.user?.fullName || "Guest",
+        avatar:
+          review.user?.profilePicture ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(review.name || review.user?.fullName || "Guest")}&background=2563eb&color=fff`,
+      }),
+    });
+  } catch (err) {
+    console.error("CREATE PROPERTY REVIEW ERROR:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit review",
       error: err.message,
     });
   }

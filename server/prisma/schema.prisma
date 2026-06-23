@@ -69,6 +69,7 @@ model User {
   sellerConversations Conversation[] @relation("SellerConversations")
   sentMessages        Message[]      @relation("SentMessages")
   societyVerifications SocietyVerification[]
+  propertyReviews     PropertyReview[]
   @@map("users")
 }
 model UserProfile {
@@ -197,12 +198,33 @@ model Property {
   user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   conversations        Conversation[]
   panoramas            Panorama[]
+  reviews              PropertyReview[]
   @@index([city])
   @@index([purpose])
   @@index([propertyType])
   @@index([price])
   @@index([latitude, longitude])
   @@map("properties")
+}
+
+model PropertyReview {
+  id        Int      @id @default(autoincrement())
+  propertyId Int     @map("property_id")
+  userId    Int?     @map("user_id")
+  name      String
+  email     String?
+  rating    Int
+  comment   String
+  isVerified Boolean @default(false) @map("is_verified")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  property  Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([propertyId])
+  @@index([rating])
+  @@map("property_reviews")
 }
 
 model Panorama {

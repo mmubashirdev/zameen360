@@ -9,6 +9,7 @@ import DashboardNavbar from "../../components/DashboardNavbar";
 // ✅ AFTER
 import { useSocket } from "../../components/hooks/usehook";
 import type { PropertyEventData } from "../../components/hooks/usehook";
+import axiosInstance from "../../../../shared/lib/axios";
 import {
   canonicalizeAmenity,
   canonicalizePropertyType,
@@ -31,6 +32,7 @@ interface Property {
   amenities: string[];
   images: string[];
   status: string;
+  userId?: number | null;
 }
 
 interface StoredUser {
@@ -70,6 +72,8 @@ const RentPage = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [rentFrequency, setRentFrequency] = useState("");
   const [furnishing, setFurnishing] = useState("");
+  const [societyLookup, setSocietyLookup] = useState<Record<number, number>>({});
+  const [societyLookupLoaded, setSocietyLookupLoaded] = useState(false);
 
   const [sections, setSections] = useState({
     type: true, location: true, price: true,
@@ -131,6 +135,34 @@ const RentPage = () => {
       unsub2();
     };
   }, [on]);
+
+  const loadSocietyLookup = useCallback(async () => {
+    try {
+      const response = await axiosInstance.get("/schemes/public");
+      const societies = Array.isArray(response.data?.societies)
+        ? response.data.societies
+        : [];
+
+      const lookup = societies.reduce((acc: Record<number, number>, society: any) => {
+        if (society?.userId != null && society?.id != null) {
+          acc[Number(society.userId)] = Number(society.id);
+        }
+        return acc;
+      }, {});
+
+      setSocietyLookup(lookup);
+      setSocietyLookupLoaded(true);
+      return lookup;
+    } catch (error) {
+      console.error("Failed to load society lookup:", error);
+      setSocietyLookupLoaded(true);
+      return {};
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSocietyLookup();
+  }, [loadSocietyLookup]);
 
   // ── Read URL params on mount ──────────────────────────────────────
   useEffect(() => {
@@ -276,7 +308,27 @@ const RentPage = () => {
     return new Intl.NumberFormat("en-IN").format(Number(p));
   };
 
-  const handleSeeMore = (id: number) => navigate(`/property/${id}`);
+  const handleSeeMore = async (property: Property) => {
+    const ownerId = property.userId != null ? Number(property.userId) : null;
+    const mappedSocietyId =
+      ownerId != null ? societyLookup[ownerId] : undefined;
+
+    if (mappedSocietyId) {
+      navigate(`/societies/${mappedSocietyId}`);
+      return;
+    }
+
+    if (ownerId != null && !societyLookupLoaded) {
+      const lookup = await loadSocietyLookup();
+      const resolvedSocietyId = lookup[ownerId];
+      if (resolvedSocietyId) {
+        navigate(`/societies/${resolvedSocietyId}`);
+        return;
+      }
+    }
+
+    navigate(`/property/${property.id}`);
+  };
 
   return (
     <div className={styles.page}>
@@ -656,7 +708,7 @@ const RentPage = () => {
             ) : (
               <div className={styles.grid}>
                 {properties.map((p) => (
-                  <div key={p.id} className={styles.card} onClick={() => handleSeeMore(p.id)}>
+                  <div key={p.id} className={styles.card} onClick={() => void handleSeeMore(p)}>
                     <div className={styles.imageWrap}>
                       <img
                         src={p.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"}
@@ -690,7 +742,7 @@ const RentPage = () => {
                         )}
                       </div>
                       <button className={styles.seeMoreBtn}
-                        onClick={(e) => { e.stopPropagation(); handleSeeMore(p.id); }}>
+                        onClick={(e) => { e.stopPropagation(); void handleSeeMore(p); }}>
                         See More Details →
                       </button>
                     </div>
