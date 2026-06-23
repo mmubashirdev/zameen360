@@ -57,6 +57,13 @@ router.put(
   schemeController.updateApplication
 );
 
+router.patch(
+  "/applications/:id/cover",
+  authenticate,
+  upload.single("coverImage"),
+  schemeController.updateSocietyCover
+);
+
 router.post(
   "/setup-password",
   schemeController.setupSocietyOwnerPassword

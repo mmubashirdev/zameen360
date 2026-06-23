@@ -1,13 +1,57 @@
 // Testimonials.tsx
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getFeaturedReviews } from "@features/review/api/reviewApi";
+import type { FeaturedReview } from "@features/review/types";
 import { testimonialsData } from "../data/testimonialData";
 import type { Testimonial } from "../data/testimonialData";
 import styles from "../styles/Testimonials.module.css";
 
 function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [featuredReviews, setFeaturedReviews] = useState<FeaturedReview[]>([]);
   const itemsPerPage = 3;
-  const maxIndex = testimonialsData.length - itemsPerPage;
+
+  useEffect(() => {
+    let active = true;
+
+    getFeaturedReviews()
+      .then((reviews) => {
+        if (active) setFeaturedReviews(reviews);
+      })
+      .catch(() => {
+        if (active) setFeaturedReviews([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const clients = useMemo<Testimonial[]>(() => {
+    if (featuredReviews.length === 0) return testimonialsData;
+
+    return featuredReviews.map((review, index) => ({
+      id: review.id,
+      name: review.user.fullName,
+      location:
+        review.property?.locality ||
+        review.property?.city ||
+        review.user.city ||
+        "Zameen 360 Client",
+      review: review.message,
+      rating: review.rating,
+      avatar:
+        review.user.profilePicture ||
+        testimonialsData[index % testimonialsData.length].avatar,
+    }));
+  }, [featuredReviews]);
+
+  const testimonialClients = clients.slice(0, 3);
+  const maxIndex = Math.max(0, testimonialClients.length - itemsPerPage);
+
+  useEffect(() => {
+    setCurrentIndex((index) => Math.min(index, maxIndex));
+  }, [maxIndex]);
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
@@ -36,7 +80,7 @@ function Testimonials() {
               className={styles.track}
               style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
             >
-              {testimonialsData.map((client: Testimonial) => (
+              {testimonialClients.map((client: Testimonial) => (
                 <div className={styles.card} key={client.id}>
                   {/* Top: profile (avatar and name/location) */}
                   <div className={styles.profile}>

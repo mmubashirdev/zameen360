@@ -31,7 +31,7 @@ const TopHeader: React.FC = () => {
           { label: 'Home', path: '/' },
           { label: 'Buy', path: '/buy' },
           { label: 'Rent', path: '/rent' },
-          { label: 'Societies', path: '/Societies' },
+          { label: 'Societies', path: '/societies' },
           { label: 'About Us', path: '/about-us' },
           { label: 'Contact Us', path: '/contact-us' },
         ].map((link) => (

@@ -470,7 +470,7 @@ exports.getPublicSocietyById = async (req, res) => {
         status: "APPROVED"
       },
       include: {
-        user: { select: { id: true, fullName: true, email: true, phone: true } }
+        user: { select: { id: true, fullName: true, email: true, phone: true, profilePicture: true } }
       }
     });
 
@@ -508,5 +508,45 @@ exports.getPublicSocietyById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching public society:", error);
     res.status(500).json({ success: false, message: "Failed to fetch society" });
+  }
+};
+
+// OWNER: Update public society cover image
+exports.updateSocietyCover = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Cover image is required" });
+    }
+
+    if (!req.file.mimetype?.startsWith("image/")) {
+      return res.status(400).json({ success: false, message: "Only image files are allowed for the cover" });
+    }
+
+    const society = await prisma.societyVerification.findUnique({
+      where: { id: Number(id) },
+      select: { id: true, userId: true },
+    });
+
+    if (!society) {
+      return res.status(404).json({ success: false, message: "Society not found" });
+    }
+
+    if (society.userId !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Only the society owner can update the cover image" });
+    }
+
+    const coverImage = await uploadToCloudinary(req.file.buffer, "zameen360/schemes/covers");
+
+    const updated = await prisma.societyVerification.update({
+      where: { id: Number(id) },
+      data: { coverImage },
+    });
+
+    res.status(200).json({ success: true, coverImage, society: updated });
+  } catch (error) {
+    console.error("Error updating society cover:", error);
+    res.status(500).json({ success: false, message: "Failed to update cover image" });
   }
 };

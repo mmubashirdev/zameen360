@@ -1,7 +1,7 @@
 
 import DashboardNavbar from '@features/marketplace/components/DashboardNavbar';
 import Footer from '@features/marketplace/components/Footer';
-import Schemes from '../components/Schemes';
+import Schemes  from '../components/Schemes';
 
 const SchemesPage = () => {
   return (
