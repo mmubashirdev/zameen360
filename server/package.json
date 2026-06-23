@@ -23,6 +23,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@google/genai": "^2.9.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^5.22.0",
     "@reduxjs/toolkit": "^2.11.2",

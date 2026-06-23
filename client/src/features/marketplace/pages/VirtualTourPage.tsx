@@ -580,7 +580,7 @@ const VirtualTourPage = () => {
         )}
 
         <div className="absolute left-4 bottom-16 z-10 select-none">
-          <div className="grid grid-cols-3 gap-1.5 rounded-2xl bg-black/55 backdrop-blur-sm p-2 shadow-lg">
+          <div className="grid h-20 w-20 place-items-center grid-cols-3 rounded-full bg-black/55 backdrop-blur-sm p-3 shadow-lg sm:h-34 sm:w-34">
             <div />
             <button
               type="button"
