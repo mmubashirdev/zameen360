@@ -17,6 +17,8 @@ import TermsOfService from "../components/term&policy/Termsofservice";
 import PrivacyPolicy from "../components/term&policy/Privacypolicy";
 import VirtualTourPage from "../../marketplace/pages/VirtualTourPage";
 import SchemesPage from "@features/schemes/pages/SchemesPage";
+import VerifySocietyPage from "@features/schemes/pages/VerifySocietyPage";
+import SocietyProfile from "@features/schemes/pages/SocietyProfile";
 
 const marketplaceRoutes = [
   {
@@ -96,6 +98,14 @@ const marketplaceRoutes = [
   {
     path: "/Societies",
     element: <SchemesPage />,
+  },
+  {
+    path: "/societies/:id",
+    element: <SocietyProfile />,
+  },
+  {
+    path: "/verify-society",
+    element: <VerifySocietyPage />,
   },
 ];
 

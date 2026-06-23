@@ -1,6 +1,6 @@
 // ─── User & Role Types ────────────────────────────────────────────────────────
 
-export type UserRole = "BUYER" | "SELLER" | "ADMIN";
+export type UserRole = "BUYER" | "SELLER" | "SOCIETY_OWNER" | "ADMIN";
 
 export interface User {
   id?: string;

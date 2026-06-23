@@ -36,7 +36,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchUser = useCallback(async () => {
     if (authLoading) return;
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -47,21 +47,20 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         return;
       }
 
-      // Only fetch if user is SELLER
-      if (authUser.role !== 'SELLER') {
-        console.log("⏭️ Skipping seller fetch - user is", authUser.role);
+      const userRole = String(authUser.role || "").toUpperCase();
+      const canUseSellerProfile = userRole === "SELLER" || userRole === "SOCIETY_OWNER";
+
+      if (!canUseSellerProfile) {
         setUser(null);
         setLoading(false);
         return;
       }
 
-      console.log("🔍 Fetching seller profile...");
       const data = await getSellerProfile();
-      console.log("✅ Seller data:", data);
       setUser(data);
     } catch (err: any) {
-      console.log("⚠️ Seller profile fetch skipped");
       setUser(null);
+      setError(err.response?.data?.message || err.message || "Failed to load profile");
     } finally {
       setLoading(false);
     }

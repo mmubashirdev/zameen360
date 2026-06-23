@@ -50,13 +50,13 @@ const CreatePropertyPost = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && user && user.role !== 'SELLER') {
-      toast.error("Only sellers can post properties. Please switch your account to Seller.");
+    if (!isLoading && user && user.role !== 'SELLER' && user.role !== 'SOCIETY_OWNER') {
+      toast.error("Only sellers and society owners can post properties. Please switch your account.");
       navigate("/profile");
     }
   }, [user, isLoading, navigate]);
 
-  if (isLoading || (user && user.role !== 'SELLER')) {
+  if (isLoading || (user && user.role !== 'SELLER' && user.role !== 'SOCIETY_OWNER')) {
     return null; // or a loading spinner
   }
 

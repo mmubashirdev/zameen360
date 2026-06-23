@@ -663,9 +663,176 @@ const sendPasswordResetEmail = async (to, otp) => {
   return await sendEmail(to, "Reset Your Password - Zameen 360", html);
 };
 
+// ============================================
+// 🏢 SOCIETY REGISTRATION RECEIVED EMAIL
+// ============================================
+const sendSocietyRegistrationEmail = async (to) => {
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#F3F4F6;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3F4F6;padding:40px 20px;">
+      <tr>
+        <td align="center">
+          <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#FAFAFA;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+            <tr><td style="background:#1A73E8;height:6px;"></td></tr>
+            <tr>
+              <td style="padding:40px 50px 25px;text-align:center;background:#FAFAFA;">
+                <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:10px;"><span style="font-size:40px;">🏠</span></td>
+                    <td style="vertical-align:middle;">
+                      <h1 style="color:#0F172A;margin:0;font-size:38px;font-weight:800;letter-spacing:-0.5px;">Zameen <span style="color:#1A73E8;">360</span></h1>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 50px;"><div style="border-top:1px solid #E5E7EB;"></div></td>
+            </tr>
+            <tr>
+              <td style="padding:35px 50px 20px;text-align:center;background:#FAFAFA;">
+                <h2 style="color:#0F172A;margin:0 0 20px;font-size:32px;font-weight:800;">Registration Received</h2>
+                <p style="color:#4B5563;margin:0;font-size:15px;line-height:1.7;">
+                  We have received your Housing Society approval request and will review it within 24–48 hours.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:25px 50px 35px;background:#FAFAFA;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="50" style="vertical-align:top;padding-right:14px;"><span style="font-size:28px;color:#1A73E8;">🛡️</span></td>
+                    <td style="vertical-align:top;">
+                      <p style="color:#4B5563;margin:0;font-size:14px;line-height:1.6;">
+                        You will receive an update on this email address once our team completes the review.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#F3F4F6;padding:25px 50px;text-align:center;">
+                <p style="color:#6B7280;margin:0 0 18px;font-size:13px;">
+                  Need help? Contact us at <a href="mailto:support@zameen360.com" style="color:#1A73E8;text-decoration:underline;font-weight:600;">support@zameen360.com</a>
+                </p>
+                <p style="color:#6B7280;margin:0;font-size:12px;">© 2025 Zameen 360. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `;
+  return await sendEmail(to, "Housing Society Registration Received - Zameen 360", html);
+};
+
+// ============================================
+// ✅ SOCIETY APPROVAL EMAIL
+// ============================================
+const sendSocietyApprovalEmail = async (to, token) => {
+  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const activationLink = `${clientUrl}/society-setup-password?token=${token}`;
+  
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background-color:#F3F4F6;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F3F4F6;padding:40px 20px;">
+      <tr>
+        <td align="center">
+          <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;width:100%;background:#FAFAFA;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+            <tr><td style="background:#1A73E8;height:6px;"></td></tr>
+            <tr>
+              <td style="padding:40px 50px 25px;text-align:center;background:#FAFAFA;">
+                <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:10px;"><span style="font-size:40px;">🏠</span></td>
+                    <td style="vertical-align:middle;">
+                      <h1 style="color:#0F172A;margin:0;font-size:38px;font-weight:800;letter-spacing:-0.5px;">Zameen <span style="color:#1A73E8;">360</span></h1>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 50px;"><div style="border-top:1px solid #E5E7EB;"></div></td>
+            </tr>
+            <tr>
+              <td style="padding:35px 50px 20px;text-align:center;background:#FAFAFA;">
+                <h2 style="color:#0F172A;margin:0 0 20px;font-size:32px;font-weight:800;">Society Approved! 🎉</h2>
+                <p style="color:#4B5563;margin:0;font-size:15px;line-height:1.7;">
+                  Congratulations! Your Housing Society approval request has been reviewed and approved.
+                  Please click the button below to set your password and access your Society Owner Dashboard.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 50px 30px;text-align:center;background:#FAFAFA;">
+                <a href="${activationLink}" style="
+                  display:inline-block;
+                  background:#1A73E8;
+                  color:#ffffff;
+                  text-decoration:none;
+                  padding:14px 40px;
+                  border-radius:10px;
+                  font-size:15px;
+                  font-weight:700;
+                ">
+                  Setup Your Password →
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:25px 50px 35px;background:#FAFAFA;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td width="50" style="vertical-align:top;padding-right:14px;"><span style="font-size:28px;color:#1A73E8;">🛡️</span></td>
+                    <td style="vertical-align:top;">
+                      <p style="color:#4B5563;margin:0;font-size:14px;line-height:1.6;">
+                        For your security, do not share this link with anyone.
+                        This link is exclusively for your account setup.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#F3F4F6;padding:25px 50px;text-align:center;">
+                <p style="color:#6B7280;margin:0 0 18px;font-size:13px;">
+                  Need help? Contact us at <a href="mailto:support@zameen360.com" style="color:#1A73E8;text-decoration:underline;font-weight:600;">support@zameen360.com</a>
+                </p>
+                <p style="color:#6B7280;margin:0;font-size:12px;">© 2025 Zameen 360. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+  </html>
+  `;
+  return await sendEmail(to, "Housing Society Approved - Zameen 360", html);
+};
+
 module.exports = {
   sendEmail,
   sendOTPEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
+  sendSocietyRegistrationEmail,
+  sendSocietyApprovalEmail,
 };
