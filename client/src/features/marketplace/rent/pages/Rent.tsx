@@ -9,6 +9,11 @@ import DashboardNavbar from "../../components/DashboardNavbar";
 // ✅ AFTER
 import { useSocket } from "../../components/hooks/usehook";
 import type { PropertyEventData } from "../../components/hooks/usehook";
+import {
+  canonicalizeAmenity,
+  canonicalizePropertyType,
+  parseSearchQuery,
+} from "../../utils/aiSearchParser";
 import styles from "../../components/media/styles/Buy.module.css";
 
 interface Property {
@@ -52,6 +57,7 @@ const RentPage = () => {
   const [search, setSearch] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [city, setCity] = useState("");
+  const [locality, setLocality] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [minBeds, setMinBeds] = useState("");
@@ -140,7 +146,7 @@ const RentPage = () => {
     if (urlPropertyType) setPropertyType(urlPropertyType);
     if (urlMinPrice) setMinPrice(urlMinPrice);
     if (urlMaxPrice) setMaxPrice(urlMaxPrice);
-    if (urlLocality && !urlSearch) setSearch(urlLocality);
+    if (urlLocality) setLocality(urlLocality);
 
     // Defer so React batches state updates before fetch runs
     setTimeout(() => setInitialLoad(false), 0);
@@ -154,6 +160,7 @@ const RentPage = () => {
       if (search) params.append("search", search);
       if (propertyType) params.append("propertyType", propertyType);
       if (city) params.append("city", city);
+      if (locality) params.append("locality", locality);
       if (minPrice) params.append("minPrice", minPrice);
       if (maxPrice) params.append("maxPrice", maxPrice);
       if (minBeds) params.append("minBeds", minBeds);
@@ -184,7 +191,7 @@ const RentPage = () => {
     }
   }, [
     search, propertyType, city,
-    minPrice, maxPrice, minBeds, maxBeds,
+    locality, minPrice, maxPrice, minBeds, maxBeds,
     minBaths, maxBaths, minArea, maxArea,
     areaUnit, selectedAmenities, rentFrequency, furnishing,
   ]);
@@ -198,7 +205,7 @@ const RentPage = () => {
 
   const handleReset = () => {
     setSearch(""); setPropertyType(""); setCity("");
-    setMinPrice(""); setMaxPrice(""); setMinBeds("");
+    setLocality(""); setMinPrice(""); setMaxPrice(""); setMinBeds("");
     setMaxBeds(""); setMinBaths(""); setMaxBaths("");
     setMinArea(""); setMaxArea(""); setAreaUnit("");
     setSelectedAmenities([]); setRentFrequency(""); setFurnishing("");
@@ -208,10 +215,61 @@ const RentPage = () => {
 
   const activeFilterCount = [
     propertyType, city, minPrice, maxPrice,
-    minBeds, maxBeds, minBaths, maxBaths,
+    locality, minBeds, maxBeds, minBaths, maxBaths,
     minArea, maxArea, areaUnit, rentFrequency, furnishing,
     ...selectedAmenities,
   ].filter(Boolean).length;
+
+  const applyParsedSearch = (filters: Awaited<ReturnType<typeof parseSearchQuery>>) => {
+    const parsedType = canonicalizePropertyType(
+      filters.propertyType || filters.type || "",
+    );
+
+    if (parsedType) {
+      setPropertyType(parsedType);
+    }
+
+    setCity(filters.city || "");
+    setLocality(filters.locality || filters.area || "");
+    setMinPrice(filters.minPrice ? String(filters.minPrice) : "");
+    setMaxPrice(filters.maxPrice ? String(filters.maxPrice) : "");
+
+    if (filters.bedrooms) {
+      setMinBeds(String(filters.bedrooms));
+      setMaxBeds(String(filters.bedrooms));
+    } else {
+      setMinBeds(filters.minBeds ? String(filters.minBeds) : "");
+      setMaxBeds(filters.maxBeds ? String(filters.maxBeds) : "");
+    }
+
+    const normalizedFeatures = (filters.features || [])
+      .map((feature) => canonicalizeAmenity(feature))
+      .filter(Boolean);
+    setSelectedAmenities(normalizedFeatures);
+
+    const normalizedLower = normalizedFeatures.map((f) => f.toLowerCase());
+    if (normalizedLower.includes("furnished")) setFurnishing("Furnished");
+    else if (normalizedLower.includes("semi-furnished")) setFurnishing("Semi-Furnished");
+    else if (normalizedLower.includes("unfurnished")) setFurnishing("Unfurnished");
+
+    setSearch(filters.search || "");
+  };
+
+  const handleAISearch = async () => {
+    if (!search.trim()) {
+      toast.error("Type a natural language search first");
+      return;
+    }
+
+    try {
+      const parsed = await parseSearchQuery(search.trim());
+      applyParsedSearch(parsed);
+      toast.success("Search interpreted by AI");
+    } catch (error) {
+      console.error("AI search parse failed:", error);
+      toast.error("Could not understand that search");
+    }
+  };
 
   const formatPrice = (p: string | number) => {
     if (!p) return "N/A";
@@ -290,6 +348,14 @@ const RentPage = () => {
                     <input className={styles.filterInput} type="text"
                       placeholder="Enter city name..." value={city}
                       onChange={(e) => setCity(e.target.value)} />
+                    <input
+                      className={styles.filterInput}
+                      type="text"
+                      placeholder="Area / locality"
+                      value={locality}
+                      onChange={(e) => setLocality(e.target.value)}
+                      style={{ marginTop: 8 }}
+                    />
                   </div>
                 )}
               </div>
@@ -501,11 +567,11 @@ const RentPage = () => {
               </button>
               <Search size={17} color="#94a3b8" />
               <input type="text"
-                placeholder="Search rental properties by title, city..."
+                placeholder="Try: 3 bed house in DHA Phase 6 under 2 crore with parking"
                 value={search} onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && fetchProperties()} />
-              <button className={styles.searchBtn} onClick={fetchProperties}>
-                <Search size={14} /> Search
+                onKeyDown={(e) => e.key === "Enter" && handleAISearch()} />
+              <button className={styles.searchBtn} onClick={handleAISearch}>
+                <Search size={14} /> AI Search
               </button>
             </div>
 
@@ -524,6 +590,11 @@ const RentPage = () => {
                 {city && (
                   <span className={styles.activeFilterTag} onClick={() => setCity("")}>
                     {city} <X size={10} />
+                  </span>
+                )}
+                {locality && (
+                  <span className={styles.activeFilterTag} onClick={() => setLocality("")}>
+                    {locality} <X size={10} />
                   </span>
                 )}
                 {(minPrice || maxPrice) && (

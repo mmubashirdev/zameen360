@@ -32,6 +32,7 @@ export interface Hotspot {
   id: string;
   type: HotspotType;
   label: string;
+  sourceRoomIndex?: number;
   targetRoomIndex: number;
   phi: number; // vertical angle
   theta: number; // horizontal angle
@@ -334,6 +335,7 @@ const HotspotEditor = ({
       id: `hs_${Date.now()}`,
       type,
       label,
+      sourceRoomIndex: currentRoomIndex,
       targetRoomIndex: targetIndex,
       phi: pendingHotspot.phi,
       theta: pendingHotspot.theta,
@@ -448,6 +450,7 @@ const HotspotEditor = ({
               ...editingHotspot,
               type,
               label,
+              sourceRoomIndex: currentRoomIndex,
               targetRoomIndex: targetIndex,
             })
           }
@@ -479,9 +482,21 @@ const HotspotConfigModal = ({
 }: ConfigModalProps) => {
   const [type, setType] = useState<HotspotType>(existing?.type || "doorknob");
   const [label, setLabel] = useState(existing?.label || "Enter Room");
-  const [targetIndex, setTargetIndex] = useState(
-    existing?.targetRoomIndex ?? 0,
-  );
+  const getDefaultTargetIndex = () => {
+    if (typeof existing?.targetRoomIndex === "number") {
+      return existing.targetRoomIndex;
+    }
+
+    const nextRoomIndex = currentRoomIndex + 1;
+    if (nextRoomIndex < allRooms.length) return nextRoomIndex;
+
+    const previousRoomIndex = currentRoomIndex - 1;
+    if (previousRoomIndex >= 0) return previousRoomIndex;
+
+    return 0;
+  };
+
+  const [targetIndex, setTargetIndex] = useState(getDefaultTargetIndex());
 
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
@@ -585,7 +600,23 @@ const HotspotConfigModal = ({
               Cancel
             </button>
             <button
-              onClick={() => onConfirm(type, label, targetIndex)}
+              onClick={() =>
+                onConfirm(
+                  type,
+                  label,
+                  targetIndex === currentRoomIndex
+                    ? (() => {
+                        const nextRoomIndex = currentRoomIndex + 1;
+                        if (nextRoomIndex < allRooms.length) {
+                          return nextRoomIndex;
+                        }
+
+                        const previousRoomIndex = currentRoomIndex - 1;
+                        return previousRoomIndex >= 0 ? previousRoomIndex : 0;
+                      })()
+                    : targetIndex,
+                )
+              }
               className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold flex items-center gap-1.5"
             >
               <Plus size={14} />

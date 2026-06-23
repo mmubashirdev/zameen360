@@ -1,5 +1,6 @@
 // client/src/features/marketplace/components/PostProperty/BasicInformation.tsx
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
+import toast from "react-hot-toast";
 import {
   Tag,
   Key,
@@ -17,12 +18,14 @@ import {
 } from "lucide-react";
 import styles from "../PostProperty/styles/BasicInformation.module.css";
 import { useProperty } from "../context/useProperty";
+import { generatePropertyDescription } from "../../utils/descriptionGenerator";
 
 // ✅ Fix 1: No import needed from schema here — validation
 //    is handled at the page level (CreatePropertyPost)
 
 const BasicInformation = () => {
-  const { data, updateData, errors } = useProperty(); // ✅ errors from context
+  const { data, updateData, errors, clearError } = useProperty(); // ✅ errors from context
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const purpose = data.purpose ?? "";
   const propertyType = data.propertyType ?? "";
@@ -49,6 +52,63 @@ const BasicInformation = () => {
     (newDescription: string) => updateData({ description: newDescription }),
     [updateData],
   );
+
+  const handleGenerateDescription = useCallback(async () => {
+    try {
+      setIsGenerating(true);
+      const generatedDescription = await generatePropertyDescription({
+        purpose,
+        propertyType,
+        title,
+        city: data.city,
+        locality: data.locality,
+        bedrooms: data.bedrooms,
+        bathrooms: data.bathrooms,
+        floors: data.floors,
+        parking: data.parking,
+        yearBuilt: data.yearBuilt,
+        furnishing: data.furnishing,
+        possession: data.possession,
+        facing: data.facing,
+        price: data.price,
+        areaSize: data.areaSize,
+        areaUnit: data.areaUnit,
+      });
+
+      if (!generatedDescription) {
+        toast.error("No description was generated. Please try again.");
+        return;
+      }
+
+      updateData({ description: generatedDescription });
+      clearError("description");
+      toast.success("Description generated successfully");
+    } catch (error) {
+      console.error("Failed to generate description:", error);
+      toast.error("Failed to generate description");
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [
+    clearError,
+    purpose,
+    propertyType,
+    title,
+    data.city,
+    data.locality,
+    data.bedrooms,
+    data.bathrooms,
+    data.floors,
+    data.parking,
+    data.yearBuilt,
+    data.furnishing,
+    data.possession,
+    data.facing,
+    data.price,
+    data.areaSize,
+    data.areaUnit,
+    updateData,
+  ]);
 
   const purposes = [
     { label: "Sell", icon: <Tag size={25} /> },
@@ -139,6 +199,14 @@ const BasicInformation = () => {
             value={description}
             onChange={(e) => handleDescriptionChange(e.target.value)}
           />
+          <button
+            type="button"
+            className="px-4 py-2 mt-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            onClick={handleGenerateDescription}
+            disabled={isGenerating}
+          >
+            {isGenerating ? "Generating..." : "Generate Description"}
+          </button>
           {/* ✅ Validation error for description */}
           {errors?.description && (
             <p className={styles.error}>{errors.description}</p>

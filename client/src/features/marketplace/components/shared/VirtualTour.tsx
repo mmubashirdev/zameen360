@@ -55,6 +55,11 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
   const buildHotspots = useCallback((hotspots: Hotspot[]) => {
     if (!sceneRef.current) return;
 
+    console.log(
+      "Building hotspots for room:",
+      currentRoom?.roomName,
+      currentRoom?.hotspots,
+    );
     // Remove old hotspots
     hotspotMeshes.current.forEach((m) => sceneRef.current!.remove(m));
     hotspotMeshes.current = [];
@@ -248,6 +253,10 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
         hotspotMeshes.current,
         true,
       );
+
+      const hotspotGroup = hits[0]?.object.parent;
+
+      console.log("Clicked hotspot:", hotspotGroup?.userData);
 
       if (hits.length > 0) {
         const label = hits[0].object.userData?.label;

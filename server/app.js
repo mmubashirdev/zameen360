@@ -18,6 +18,7 @@ const supportRoutes = require("./modules/support/routes/support.routes");
 const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
 const messageRoutes = require("./modules/message/routes/message.routes");
 const schemeRoutes = require("./modules/schemes/routes/scheme.routes");
+const aiRoutes = require("./modules/ai/routes/ai.routes")
 
 const app = express();
 
@@ -133,6 +134,8 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use("/api/ai", aiRoutes);
 
 ["uploads/profiles", "uploads/properties", "uploads/messages", "uploads/schemes"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
