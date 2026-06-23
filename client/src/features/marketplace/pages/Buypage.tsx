@@ -1,8 +1,17 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  Search, MapPin, Bed, Bath, Maximize, Heart,
-  SlidersHorizontal, X, ChevronDown, ChevronUp, RotateCcw,
+  Search,
+  MapPin,
+  Bed,
+  Bath,
+  Maximize,
+  Heart,
+  SlidersHorizontal,
+  X,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import DashboardNavbar from "../components/DashboardNavbar";
@@ -18,6 +27,8 @@ import {
 } from "../utils/aiSearchParser";
 import styles from "../../marketplace/components/media/styles/Buy.module.css";
 import SkeletonCard from "../../../shared/components/SkeletonCard";
+import debounce from "../../../shared/utils/debounce";
+type DebouncedSearchFn = ((value: string) => void) & { cancel: () => void };
 interface Property {
   id: number;
   title: string;
@@ -35,7 +46,6 @@ interface Property {
   status: string;
 }
 
-
 const Buy = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -49,6 +59,7 @@ const Buy = () => {
 
   // Filter states
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [purpose, setPurpose] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [city, setCity] = useState("");
@@ -63,27 +74,42 @@ const Buy = () => {
   const [maxArea, setMaxArea] = useState("");
   const [areaUnit, setAreaUnit] = useState("");
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const searchDebounceRef = useRef<DebouncedSearchFn | null>(null);
 
   const [sections, setSections] = useState({
-    purpose: true, type: true, location: true,
-    price: true, beds: true, baths: true,
-    area: true, amenities: false,
+    purpose: true,
+    type: true,
+    location: true,
+    price: true,
+    beds: true,
+    baths: true,
+    area: true,
+    amenities: false,
   });
 
   const toggleSection = (key: keyof typeof sections) =>
     setSections((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const amenitiesList = [
-    "Parking", "Swimming Pool", "Garden", "Gym",
-    "Elevator", "Security", "CCTV", "Balcony",
-    "Central AC", "Servant Quarter", "Solar Panels", "Furnished",
+    "Parking",
+    "Swimming Pool",
+    "Garden",
+    "Gym",
+    "Elevator",
+    "Security",
+    "CCTV",
+    "Balcony",
+    "Central AC",
+    "Servant Quarter",
+    "Solar Panels",
+    "Furnished",
   ];
 
   const toggleAmenity = (amenity: string) =>
     setSelectedAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((a) => a !== amenity)
-        : [...prev, amenity]
+        : [...prev, amenity],
     );
 
   // ── WebSocket — Live properties ───────────────────────────────────
@@ -93,7 +119,6 @@ const Buy = () => {
   });
 
   useEffect(() => {
-
     const handleApproved = (data: PropertyEventData) => {
       if (!data.property) return;
       const newProperty = data.property as Property;
@@ -137,6 +162,7 @@ const Buy = () => {
 
     if (urlCity) setCity(urlCity);
     if (urlSearch) setSearch(urlSearch);
+    if (urlSearch) setDebouncedSearch(urlSearch);
     if (urlPropertyType) setPropertyType(urlPropertyType);
     if (urlMinPrice) setMinPrice(urlMinPrice);
     if (urlMaxPrice) setMaxPrice(urlMaxPrice);
@@ -146,10 +172,24 @@ const Buy = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchProperties = useCallback(async () => {
+  useEffect(() => {
+    if (!searchDebounceRef.current) {
+      searchDebounceRef.current = debounce((value: string) => {
+        setDebouncedSearch(value);
+      }, 500);
+    }
+
+    searchDebounceRef.current(search);
+
+    return () => {
+      searchDebounceRef.current?.cancel();
+    };
+  }, [search]);
+
+  const fetchProperties = useCallback(async (searchTerm = debouncedSearch) => {
     try {
       const params = new URLSearchParams();
-      if (search) params.append("search", search);
+      if (searchTerm) params.append("search", searchTerm);
       params.append("purpose", purpose || "Sell");
       if (propertyType) params.append("propertyType", propertyType);
       if (city) params.append("city", city);
@@ -181,10 +221,21 @@ const Buy = () => {
       setProperties([]);
     }
   }, [
-    search, purpose, propertyType, city,
-    locality, minPrice, maxPrice, minBeds, maxBeds,
-    minBaths, maxBaths, minArea, maxArea,
-    areaUnit, selectedAmenities,
+    debouncedSearch,
+    purpose,
+    propertyType,
+    city,
+    locality,
+    minPrice,
+    maxPrice,
+    minBeds,
+    maxBeds,
+    minBaths,
+    maxBaths,
+    minArea,
+    maxArea,
+    areaUnit,
+    selectedAmenities,
   ]);
 
   useEffect(() => {
@@ -195,22 +246,47 @@ const Buy = () => {
   }, [fetchProperties, initialLoad]);
 
   const handleReset = () => {
-    setSearch(""); setPurpose(""); setPropertyType("");
-    setCity(""); setLocality(""); setMinPrice(""); setMaxPrice("");
-    setMinBeds(""); setMaxBeds(""); setMinBaths("");
-    setMaxBaths(""); setMinArea(""); setMaxArea("");
-    setAreaUnit(""); setSelectedAmenities([]);
+    setSearch("");
+    setPurpose("");
+    setPropertyType("");
+    setCity("");
+    setLocality("");
+    setMinPrice("");
+    setMaxPrice("");
+    setMinBeds("");
+    setMaxBeds("");
+    setMinBaths("");
+    setMaxBaths("");
+    setMinArea("");
+    setMaxArea("");
+    setAreaUnit("");
+    setSelectedAmenities([]);
+    setDebouncedSearch("");
+    searchDebounceRef.current?.cancel();
     navigate("/buy", { replace: true });
-    setTimeout(fetchProperties, 0);
+    setTimeout(() => fetchProperties(""), 0);
   };
 
   const activeFilterCount = [
-    purpose, propertyType, city, minPrice, maxPrice,
-    locality, minBeds, maxBeds, minBaths, maxBaths,
-    minArea, maxArea, areaUnit, ...selectedAmenities,
+    purpose,
+    propertyType,
+    city,
+    minPrice,
+    maxPrice,
+    locality,
+    minBeds,
+    maxBeds,
+    minBaths,
+    maxBaths,
+    minArea,
+    maxArea,
+    areaUnit,
+    ...selectedAmenities,
   ].filter(Boolean).length;
 
-  const applyParsedSearch = (filters: Awaited<ReturnType<typeof parseSearchQuery>>) => {
+  const applyParsedSearch = (
+    filters: Awaited<ReturnType<typeof parseSearchQuery>>,
+  ) => {
     const parsedType = canonicalizePropertyType(
       filters.propertyType || filters.type || "",
     );
@@ -280,16 +356,23 @@ const Buy = () => {
 
         <div className={styles.layoutWrapper}>
           {/* Sidebar */}
-          <aside className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}>
+          <aside
+            className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ""}`}
+          >
             <div className={styles.sidebarHeader}>
               <div className={styles.sidebarHeaderLeft}>
                 <SlidersHorizontal size={17} color="#2563eb" />
                 <h3>Filters</h3>
                 {activeFilterCount > 0 && (
-                  <span className={styles.filterBadge}>{activeFilterCount}</span>
+                  <span className={styles.filterBadge}>
+                    {activeFilterCount}
+                  </span>
                 )}
               </div>
-              <button className={styles.sidebarToggle} onClick={() => setSidebarOpen(false)}>
+              <button
+                className={styles.sidebarToggle}
+                onClick={() => setSidebarOpen(false)}
+              >
                 <X size={17} />
               </button>
             </div>
@@ -297,14 +380,24 @@ const Buy = () => {
             <div className={styles.sidebarBody}>
               {/* Purpose */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("purpose")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("purpose")}
+                >
                   <h4>Purpose</h4>
-                  {sections.purpose ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.purpose ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.purpose && (
                   <div className={styles.sectionContent}>
-                    <select className={styles.filterSelect} value={purpose}
-                      onChange={(e) => setPurpose(e.target.value)}>
+                    <select
+                      className={styles.filterSelect}
+                      value={purpose}
+                      onChange={(e) => setPurpose(e.target.value)}
+                    >
                       <option value="">All Purposes</option>
                       <option value="Sell">For Sell</option>
                       <option value="Lease">Lease</option>
@@ -315,14 +408,24 @@ const Buy = () => {
 
               {/* Property Type */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("type")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("type")}
+                >
                   <h4>Property Type</h4>
-                  {sections.type ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.type ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.type && (
                   <div className={styles.sectionContent}>
-                    <select className={styles.filterSelect} value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}>
+                    <select
+                      className={styles.filterSelect}
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                    >
                       <option value="">All Types</option>
                       <option value="House">House</option>
                       <option value="Apartment">Apartment</option>
@@ -340,15 +443,26 @@ const Buy = () => {
 
               {/* Location */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("location")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("location")}
+                >
                   <h4>Location</h4>
-                  {sections.location ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.location ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.location && (
                   <div className={styles.sectionContent}>
-                    <input className={styles.filterInput} type="text"
-                      placeholder="Enter city name..." value={city}
-                      onChange={(e) => setCity(e.target.value)} />
+                    <input
+                      className={styles.filterInput}
+                      type="text"
+                      placeholder="Enter city name..."
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    />
                     <input
                       className={styles.filterInput}
                       type="text"
@@ -363,20 +477,35 @@ const Buy = () => {
 
               {/* Price */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("price")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("price")}
+                >
                   <h4>Price Range (PKR)</h4>
-                  {sections.price ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.price ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.price && (
                   <div className={styles.sectionContent}>
                     <div className={styles.rangeRow}>
-                      <input className={styles.filterInput} type="number"
-                        placeholder="Min" value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)} />
+                      <input
+                        className={styles.filterInput}
+                        type="number"
+                        placeholder="Min"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                      />
                       <span>to</span>
-                      <input className={styles.filterInput} type="number"
-                        placeholder="Max" value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)} />
+                      <input
+                        className={styles.filterInput}
+                        type="number"
+                        placeholder="Max"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                      />
                     </div>
                   </div>
                 )}
@@ -384,18 +513,27 @@ const Buy = () => {
 
               {/* Beds */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("beds")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("beds")}
+                >
                   <h4>Bedrooms</h4>
-                  {sections.beds ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.beds ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.beds && (
                   <div className={styles.sectionContent}>
                     <label className={styles.filterLabel}>Minimum Beds</label>
                     <div className={styles.quickSelect}>
                       {["", "1", "2", "3", "4", "5", "6+"].map((val) => (
-                        <button key={`minbed-${val}`}
+                        <button
+                          key={`minbed-${val}`}
                           className={`${styles.quickBtn} ${minBeds === val ? styles.quickBtnActive : ""}`}
-                          onClick={() => setMinBeds(val)}>
+                          onClick={() => setMinBeds(val)}
+                        >
                           {val || "Any"}
                         </button>
                       ))}
@@ -404,9 +542,11 @@ const Buy = () => {
                       <label className={styles.filterLabel}>Maximum Beds</label>
                       <div className={styles.quickSelect}>
                         {["", "1", "2", "3", "4", "5", "6+"].map((val) => (
-                          <button key={`maxbed-${val}`}
+                          <button
+                            key={`maxbed-${val}`}
                             className={`${styles.quickBtn} ${maxBeds === val ? styles.quickBtnActive : ""}`}
-                            onClick={() => setMaxBeds(val)}>
+                            onClick={() => setMaxBeds(val)}
+                          >
                             {val || "Any"}
                           </button>
                         ))}
@@ -418,29 +558,42 @@ const Buy = () => {
 
               {/* Baths */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("baths")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("baths")}
+                >
                   <h4>Bathrooms</h4>
-                  {sections.baths ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.baths ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.baths && (
                   <div className={styles.sectionContent}>
                     <label className={styles.filterLabel}>Minimum Baths</label>
                     <div className={styles.quickSelect}>
                       {["", "1", "2", "3", "4", "5"].map((val) => (
-                        <button key={`minbath-${val}`}
+                        <button
+                          key={`minbath-${val}`}
                           className={`${styles.quickBtn} ${minBaths === val ? styles.quickBtnActive : ""}`}
-                          onClick={() => setMinBaths(val)}>
+                          onClick={() => setMinBaths(val)}
+                        >
                           {val || "Any"}
                         </button>
                       ))}
                     </div>
                     <div style={{ marginTop: 10 }}>
-                      <label className={styles.filterLabel}>Maximum Baths</label>
+                      <label className={styles.filterLabel}>
+                        Maximum Baths
+                      </label>
                       <div className={styles.quickSelect}>
                         {["", "1", "2", "3", "4", "5"].map((val) => (
-                          <button key={`maxbath-${val}`}
+                          <button
+                            key={`maxbath-${val}`}
                             className={`${styles.quickBtn} ${maxBaths === val ? styles.quickBtnActive : ""}`}
-                            onClick={() => setMaxBaths(val)}>
+                            onClick={() => setMaxBaths(val)}
+                          >
                             {val || "Any"}
                           </button>
                         ))}
@@ -452,15 +605,25 @@ const Buy = () => {
 
               {/* Area */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("area")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("area")}
+                >
                   <h4>Area Size</h4>
-                  {sections.area ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.area ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.area && (
                   <div className={styles.sectionContent}>
-                    <select className={styles.filterSelect} value={areaUnit}
+                    <select
+                      className={styles.filterSelect}
+                      value={areaUnit}
                       onChange={(e) => setAreaUnit(e.target.value)}
-                      style={{ marginBottom: 8 }}>
+                      style={{ marginBottom: 8 }}
+                    >
                       <option value="">Any Unit</option>
                       <option value="Marla">Marla</option>
                       <option value="Kanal">Kanal</option>
@@ -469,13 +632,21 @@ const Buy = () => {
                       <option value="Sq. M.">Sq. M.</option>
                     </select>
                     <div className={styles.rangeRow}>
-                      <input className={styles.filterInput} type="number"
-                        placeholder="Min" value={minArea}
-                        onChange={(e) => setMinArea(e.target.value)} />
+                      <input
+                        className={styles.filterInput}
+                        type="number"
+                        placeholder="Min"
+                        value={minArea}
+                        onChange={(e) => setMinArea(e.target.value)}
+                      />
                       <span>to</span>
-                      <input className={styles.filterInput} type="number"
-                        placeholder="Max" value={maxArea}
-                        onChange={(e) => setMaxArea(e.target.value)} />
+                      <input
+                        className={styles.filterInput}
+                        type="number"
+                        placeholder="Max"
+                        value={maxArea}
+                        onChange={(e) => setMaxArea(e.target.value)}
+                      />
                     </div>
                   </div>
                 )}
@@ -483,17 +654,26 @@ const Buy = () => {
 
               {/* Amenities */}
               <div className={styles.filterSection}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection("amenities")}>
+                <div
+                  className={styles.sectionHeader}
+                  onClick={() => toggleSection("amenities")}
+                >
                   <h4>Amenities</h4>
-                  {sections.amenities ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  {sections.amenities ? (
+                    <ChevronUp size={15} />
+                  ) : (
+                    <ChevronDown size={15} />
+                  )}
                 </div>
                 {sections.amenities && (
                   <div className={styles.sectionContent}>
                     <div className={styles.amenityGrid}>
                       {amenitiesList.map((amenity) => (
-                        <span key={amenity}
+                        <span
+                          key={amenity}
                           className={`${styles.amenityChip} ${selectedAmenities.includes(amenity) ? styles.amenityChipActive : ""}`}
-                          onClick={() => toggleAmenity(amenity)}>
+                          onClick={() => toggleAmenity(amenity)}
+                        >
                           {amenity}
                         </span>
                       ))}
@@ -504,8 +684,13 @@ const Buy = () => {
             </div>
 
             <div className={styles.sidebarActions}>
-              <button className={styles.applyBtn}
-                onClick={() => { fetchProperties(); setSidebarOpen(false); }}>
+              <button
+                className={styles.applyBtn}
+                onClick={() => {
+                  fetchProperties();
+                  setSidebarOpen(false);
+                }}
+              >
                 <Search size={14} /> Apply Filters
               </button>
               <button className={styles.resetBtn} onClick={handleReset}>
@@ -517,18 +702,25 @@ const Buy = () => {
           {/* Main Content */}
           <div className={styles.contentArea}>
             <div className={styles.topSearchBar}>
-              <button className={styles.mobileFilterToggle}
-                onClick={() => setSidebarOpen(true)}>
+              <button
+                className={styles.mobileFilterToggle}
+                onClick={() => setSidebarOpen(true)}
+              >
                 <SlidersHorizontal size={15} /> Filters
                 {activeFilterCount > 0 && (
-                  <span className={styles.filterBadge}>{activeFilterCount}</span>
+                  <span className={styles.filterBadge}>
+                    {activeFilterCount}
+                  </span>
                 )}
               </button>
               <Search size={17} color="#94a3b8" />
-              <input type="text"
+              <input
+                type="text"
                 placeholder="Try: 3 bed house in DHA Phase 6 under 2 crore with parking"
-                value={search} onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleAISearch()} />
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAISearch()}
+              />
               <button className={styles.searchBtn} onClick={handleAISearch}>
                 <Search size={14} /> AI Search
               </button>
@@ -536,50 +728,82 @@ const Buy = () => {
 
             <div className={styles.resultsHead}>
               <span>
-                {loading ? "Searching..." : `${properties.length} Properties Found`}
+                {loading
+                  ? "Searching..."
+                  : `${properties.length} Properties Found`}
               </span>
               <div className={styles.activeFilters}>
                 {purpose && (
-                  <span className={styles.activeFilterTag} onClick={() => setPurpose("")}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => setPurpose("")}
+                  >
                     {purpose} <X size={10} />
                   </span>
                 )}
                 {propertyType && (
-                  <span className={styles.activeFilterTag} onClick={() => setPropertyType("")}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => setPropertyType("")}
+                  >
                     {propertyType} <X size={10} />
                   </span>
                 )}
                 {city && (
-                  <span className={styles.activeFilterTag} onClick={() => setCity("")}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => setCity("")}
+                  >
                     {city} <X size={10} />
                   </span>
                 )}
                 {locality && (
-                  <span className={styles.activeFilterTag} onClick={() => setLocality("")}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => setLocality("")}
+                  >
                     {locality} <X size={10} />
                   </span>
                 )}
                 {(minPrice || maxPrice) && (
-                  <span className={styles.activeFilterTag}
-                    onClick={() => { setMinPrice(""); setMaxPrice(""); }}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => {
+                      setMinPrice("");
+                      setMaxPrice("");
+                    }}
+                  >
                     Price: {minPrice || "0"} – {maxPrice || "∞"} <X size={10} />
                   </span>
                 )}
                 {(minBeds || maxBeds) && (
-                  <span className={styles.activeFilterTag}
-                    onClick={() => { setMinBeds(""); setMaxBeds(""); }}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => {
+                      setMinBeds("");
+                      setMaxBeds("");
+                    }}
+                  >
                     Beds: {minBeds || "0"}–{maxBeds || "∞"} <X size={10} />
                   </span>
                 )}
                 {(minBaths || maxBaths) && (
-                  <span className={styles.activeFilterTag}
-                    onClick={() => { setMinBaths(""); setMaxBaths(""); }}>
+                  <span
+                    className={styles.activeFilterTag}
+                    onClick={() => {
+                      setMinBaths("");
+                      setMaxBaths("");
+                    }}
+                  >
                     Baths: {minBaths || "0"}–{maxBaths || "∞"} <X size={10} />
                   </span>
                 )}
                 {selectedAmenities.map((a) => (
-                  <span key={a} className={styles.activeFilterTag}
-                    onClick={() => toggleAmenity(a)}>
+                  <span
+                    key={a}
+                    className={styles.activeFilterTag}
+                    onClick={() => toggleAmenity(a)}
+                  >
                     {a} <X size={10} />
                   </span>
                 ))}
@@ -592,10 +816,18 @@ const Buy = () => {
                   <div key={i} className={styles.skeletonCard}>
                     <div className={styles.skeletonImage} />
                     <div className={styles.skeletonBody}>
-                      <div className={`${styles.skeletonLine} ${styles.skeletonW80} ${styles.skeletonH20}`} />
-                      <div className={`${styles.skeletonLine} ${styles.skeletonW60}`} />
-                      <div className={`${styles.skeletonLine} ${styles.skeletonW40} ${styles.skeletonH20}`} />
-                      <div className={`${styles.skeletonLine} ${styles.skeletonW80}`} />
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonW80} ${styles.skeletonH20}`}
+                      />
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonW60}`}
+                      />
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonW40} ${styles.skeletonH20}`}
+                      />
+                      <div
+                        className={`${styles.skeletonLine} ${styles.skeletonW80}`}
+                      />
                     </div>
                   </div>
                 ))}
@@ -603,41 +835,74 @@ const Buy = () => {
             ) : properties.length === 0 ? (
               <div className={styles.emptyState}>
                 <p>No properties found</p>
-                <small>Try adjusting your filters or post your first property!</small>
+                <small>
+                  Try adjusting your filters or post your first property!
+                </small>
               </div>
             ) : (
               <div className={styles.grid}>
                 {properties.map((p) => (
-                  <div key={p.id} className={styles.card} onClick={() => handleSeeMore(p.id)}>
+                  <div
+                    key={p.id}
+                    className={styles.card}
+                    onClick={() => handleSeeMore(p.id)}
+                  >
                     <div className={styles.imageWrap}>
                       <img
-                        src={p.images?.[0] || "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"}
-                        alt={p.title} />
+                        src={
+                          p.images?.[0] ||
+                          "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400"
+                        }
+                        alt={p.title}
+                      />
                       <span className={styles.tag}>For {p.purpose}</span>
-                      <Heart className={styles.heart} size={18}
-                        onClick={(e) => e.stopPropagation()} />
+                      <Heart
+                        className={styles.heart}
+                        size={18}
+                        onClick={(e) => e.stopPropagation()}
+                      />
                     </div>
                     <div className={styles.cardBody}>
                       <h4 className={styles.propTitle}>{p.title}</h4>
                       <div className={styles.location}>
                         <MapPin size={13} /> {p.locality}, {p.city}
                       </div>
-                      <div className={styles.price}>PKR {formatPrice(p.price)}</div>
+                      <div className={styles.price}>
+                        PKR {formatPrice(p.price)}
+                      </div>
                       <div className={styles.specs}>
-                        <div><Bed size={15} /><span>{p.bedrooms} Beds</span></div>
-                        <div><Bath size={15} /><span>{p.bathrooms} Baths</span></div>
-                        <div><Maximize size={15} /><span>{p.areaSize} {p.areaUnit}</span></div>
+                        <div>
+                          <Bed size={15} />
+                          <span>{p.bedrooms} Beds</span>
+                        </div>
+                        <div>
+                          <Bath size={15} />
+                          <span>{p.bathrooms} Baths</span>
+                        </div>
+                        <div>
+                          <Maximize size={15} />
+                          <span>
+                            {p.areaSize} {p.areaUnit}
+                          </span>
+                        </div>
                       </div>
                       <div className={styles.chips}>
                         {(p.amenities || []).slice(0, 3).map((a, i) => (
                           <span key={i}>{a}</span>
                         ))}
                         {(p.amenities || []).length > 3 && (
-                          <span className={styles.more}>+{p.amenities.length - 3} more</span>
+                          <span className={styles.more}>
+                            +{p.amenities.length - 3} more
+                          </span>
                         )}
                       </div>
-                      <button className={styles.seeMoreBtn}
-                        onClick={(e) => { e.stopPropagation(); handleSeeMore(p.id); }}>
+                      <button
+                        className={styles.seeMoreBtn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSeeMore(p.id);
+                        }}
+                      >
                         See More Details →
                       </button>
                     </div>

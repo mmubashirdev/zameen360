@@ -68,7 +68,7 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
       // Glowing outer ring
       const ringGeo = new THREE.RingGeometry(15, 22, 32);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
+        color: 0xff0000,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.85,
@@ -121,7 +121,7 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
           const mat = sphereRef.current.material as THREE.MeshBasicMaterial;
           if (mat.map) mat.map.dispose();
           mat.map = texture;
-          mat.color.set(0xffffff);
+          mat.color.set(0xff0000);
           mat.needsUpdate = true;
         }
         setIsLoading(false);
@@ -164,7 +164,7 @@ const VirtualTour = ({ rooms }: VirtualTourProps) => {
       // Sphere (inside-out)
       const geometry = new THREE.SphereGeometry(SPHERE_RADIUS, 60, 40);
       geometry.scale(-1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({ color: 0x222222 });
+      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
       const sphere = new THREE.Mesh(geometry, material);
       scene.add(sphere);
       sphereRef.current = sphere;

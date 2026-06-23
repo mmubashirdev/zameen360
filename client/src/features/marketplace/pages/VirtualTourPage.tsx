@@ -103,7 +103,7 @@ const VirtualTourPage = () => {
       const ring = new THREE.Mesh(
         new THREE.RingGeometry(15, 23, 32),
         new THREE.MeshBasicMaterial({
-          color: 0xffffff,
+          color: 0xff0000,
           side: THREE.DoubleSide,
           transparent: true,
           opacity: 0.85,
@@ -278,7 +278,7 @@ const VirtualTourPage = () => {
           // Dispose old texture
           if (mat.map) mat.map.dispose();
           mat.map = texture;
-          mat.color.set(0xffffff); // ✅ Reset color to white so texture shows properly
+          mat.color.set(0xffffff); // Keep the panorama neutral; hotspot rings stay red
           mat.needsUpdate = true;
         }
         lon.current = 0;
