@@ -59,7 +59,7 @@ const ProfileBanner: React.FC = () => {
       <div className="bg-blue-600 rounded-2xl overflow-hidden relative">
         <div className="p-6 text-center text-white">
           <p className="text-lg font-semibold">
-            {error || 'Please login as a seller to view profile'}
+            {error || 'Please login to view profile'}
           </p>
         </div>
         <div className="bg-white px-6 py-4 h-16"></div>
@@ -133,7 +133,9 @@ const ProfileBanner: React.FC = () => {
                 </span>
               </div>
               <p className="text-[13px] mb-3">
-                {user.isVerified ? 'Verified Real Estate Seller' : 'Real Estate Seller'}
+                {user.role === 'SOCIETY_OWNER'
+                  ? (user.isVerified ? 'Verified Housing Society Owner' : 'Housing Society Owner')
+                  : (user.isVerified ? 'Verified Real Estate Seller' : 'Real Estate Seller')}
               </p>
               <p className="text-[14px] font-semibold mb-3">
                 {user.bio || `${user.fullName}'s Properties`}

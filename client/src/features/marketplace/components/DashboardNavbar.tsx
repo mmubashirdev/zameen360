@@ -198,6 +198,8 @@ const AuthenticatedNavbar = () => {
   const handleProfileClick = () => {
     if (userRole === "BUYER") {
       navigate("/buyer-profile");
+    } else if (userRole === "SOCIETY_OWNER") {
+      navigate("/profile");
     } else {
       navigate("/profile");
     }
@@ -257,7 +259,7 @@ const AuthenticatedNavbar = () => {
             { to: "/", label: "Home" },
             { to: "/buy", label: "Buy" },
             { to: "/rent", label: "Rent" },
-            { to: "/projects", label: "Projects" },
+            { to: "/Societies", label: "Societies" },
             { to: "/about-us", label: "About Us" },
             { to: "/contact-us", label: "Contact Us" },
           ].map(({ to, label }) => (
@@ -279,8 +281,8 @@ const AuthenticatedNavbar = () => {
 
         {/* ── Right Side ───────────────────────────────────────────────────── */}
         <div className={styles.authNavRight}>
-          {/* Post Property button (sellers only) */}
-          {userRole === "SELLER" && (
+          {/* Post Property button (sellers & society owners) */}
+          {(userRole === "SELLER" || userRole === "SOCIETY_OWNER") && (
             <button
               className={`${styles.authPostBtn} ${
                 searchOpen ? styles.authPostBtnHidden : ""
@@ -431,14 +433,18 @@ const AuthenticatedNavbar = () => {
                           style={{
                             fontSize: "10px",
                             color:
-                              userRole === "SELLER" ? "#f59e0b" : "#10b981",
+                              userRole === "SELLER" 
+                                ? "#f59e0b" 
+                                : userRole === "SOCIETY_OWNER"
+                                ? "#8b5cf6"
+                                : "#10b981",
                             fontWeight: "bold",
                             textTransform: "uppercase",
                             display: "block",
                             marginTop: "2px",
                           }}
                         >
-                          {userRole}
+                          {userRole === "SOCIETY_OWNER" ? "SOCIETY OWNER" : userRole}
                         </span>
                       )}
                     </div>
@@ -545,8 +551,7 @@ const UnauthenticatedNavbar = () => {
           { to: "/", label: "Home" },
           { to: "/buy", label: "Buy" },
           { to: "/rent", label: "Rent" },
-          { to: "/sell", label: "Sell" },
-          { to: "/projects", label: "Projects" },
+          { to: "/Societies", label: "Societies" },
           { to: "/about-us", label: "About Us" },
           { to: "/contact-us", label: "Contact Us" },
         ].map(({ to, label }) => (

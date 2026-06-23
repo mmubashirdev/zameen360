@@ -3,6 +3,7 @@ import SignupPage from "../pages/SignupPage";
 import VerifyEmailPage from "../pages/VerifyEmailPage";
 import GoogleCallbackPage from "../pages/GoogleCallbackPage";
 import AuthFlow from "../components/AuthFlow";
+import SocietySetupPasswordPage from "../pages/SocietySetupPasswordPage";
 
 const authRoutes = [
   {
@@ -33,6 +34,10 @@ const authRoutes = [
   {
     path: "/auth",
     element: <AuthFlow />,
+  },
+  {
+    path: "/society-setup-password",
+    element: <SocietySetupPasswordPage />,
   },
 ];
 

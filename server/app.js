@@ -17,6 +17,7 @@ const buyerRoutes = require("./modules/buyerProfile/routes/buyerRoutes");
 const supportRoutes = require("./modules/support/routes/support.routes");
 const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
 const messageRoutes = require("./modules/message/routes/message.routes");
+const schemeRoutes = require("./modules/schemes/routes/scheme.routes");
 const aiRoutes = require("./modules/ai/routes/ai.routes")
 
 const app = express();
@@ -136,7 +137,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/ai", aiRoutes);
 
-["uploads/profiles", "uploads/properties", "uploads/messages"].forEach((d) => {
+["uploads/profiles", "uploads/properties", "uploads/messages", "uploads/schemes"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
@@ -148,6 +149,7 @@ app.use("/api/support", supportRoutes);
 app.use("/api/contactus", contactusRoutes);
 app.use("/api/buyer", buyerRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/schemes", schemeRoutes);
   
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });

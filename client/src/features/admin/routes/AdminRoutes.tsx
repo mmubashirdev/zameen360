@@ -8,6 +8,8 @@ import PendingApproval from "../PendingApproval";
 import Approved from "../Approved";
 import Rejected from "../Rejected";
 import ProtectedAdminRoute from "./ProtectedAdminRoute";
+import AdminSocietiesList from "../pages/AdminSocietiesList";
+import AdminSocietyDetails from "../pages/AdminSocietyDetails";
 
 const AdminRoutes: RouteObject[] = [
   // PUBLIC — no auth guard
@@ -29,6 +31,8 @@ const AdminRoutes: RouteObject[] = [
           { path: "pending", element: <PendingApproval /> },
           { path: "approved", element: <Approved /> },
           { path: "rejected", element: <Rejected /> },
+          { path: "societies", element: <AdminSocietiesList /> },
+          { path: "societies/:id", element: <AdminSocietyDetails /> },
         ],
       },
     ],

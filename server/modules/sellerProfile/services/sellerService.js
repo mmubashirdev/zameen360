@@ -19,6 +19,8 @@ function calculateProfileCompletion(user) {
   return Math.round((filled / total) * 100);
 }
 
+const SELLER_PROFILE_ROLES = ["SELLER", "SOCIETY_OWNER"];
+
 // Get Seller Profile
 async function getSellerProfile(userId) {
   console.log("🔍 [getSellerProfile] userId:", userId);
@@ -40,8 +42,8 @@ async function getSellerProfile(userId) {
     throw new Error("Seller not found");
   }
 
-  if (seller.role !== "SELLER") {
-    throw new Error(`User role is "${seller.role}", not SELLER`);
+  if (!SELLER_PROFILE_ROLES.includes(seller.role)) {
+    throw new Error(`User role is "${seller.role}", not allowed for seller profile`);
   }
 
   const profileCompletion = calculateProfileCompletion(seller);

@@ -9,6 +9,7 @@ datasource db {
 enum Role {
   BUYER
   SELLER
+  SOCIETY_OWNER
   ADMIN
 }
 enum Gender {
@@ -25,6 +26,12 @@ enum ActivityStatus {
   SUCCESS
   FAILED
   SUSPICIOUS
+}
+enum SocietyVerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
 }
 model Admin {
   id        Int      @id @default(autoincrement())
@@ -61,6 +68,7 @@ model User {
   buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
   sentMessages        Message[]      @relation("SentMessages")
+  societyVerifications SocietyVerification[]
   @@map("users")
 }
 model UserProfile {
@@ -243,4 +251,54 @@ model Message {
   sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+}
+
+model SocietyVerification {
+  id                   Int      @id @default(autoincrement())
+  userId               Int?     @map("user_id")
+  societyName          String
+  societyType          String
+  city                 String
+  areaSector           String
+  address              String
+  googleMapsLocation   String?
+  website              String?
+  officialEmail        String?
+  officialContact      String
+
+  developerCompany     String
+  ownerName            String
+  cnicNumber           String
+  designation          String
+  contactNumber        String
+  emailAddress         String
+
+  cnicFront            String?
+  cnicBack             String?
+  companyRegistration  String?
+  ntnCertificate       String?
+  authorityLetter      String?
+
+  nocStatus            String
+  approvingAuthority   String
+  nocNumber            String?
+  nocIssueDate         String?
+  nocExpiryDate        String?
+
+  nocCopy              String?
+  ownershipDocuments   String?
+  fardRegistry         String?
+  landTransfer         String?
+
+  availablePlotSizes   String[] @default([])
+
+  status               SocietyVerificationStatus @default(PENDING)
+  adminNotes           String?
+
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("society_verifications")
 }

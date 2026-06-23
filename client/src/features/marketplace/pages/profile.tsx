@@ -35,7 +35,7 @@ const ProfilePage: React.FC = () => {
     }
   }, [user, isLoading, navigate]);
 
-  if (isLoading || !user || String(user.role || '').toUpperCase() !== 'SELLER') {
+  if (isLoading || !user || (String(user.role || '').toUpperCase() !== 'SELLER' && String(user.role || '').toUpperCase() !== 'SOCIETY_OWNER')) {
     return null;
   }
 

@@ -31,10 +31,9 @@ const TopHeader: React.FC = () => {
           { label: 'Home', path: '/' },
           { label: 'Buy', path: '/buy' },
           { label: 'Rent', path: '/rent' },
-          { label: 'Sell', path: '/sell' },
-          { label: 'Projects', path: '/projects' },
+          { label: 'Societies', path: '/Societies' },
           { label: 'About Us', path: '/about-us' },
-          { label: 'Contact', path: '/contact' },
+          { label: 'Contact Us', path: '/contact-us' },
         ].map((link) => (
           <Link key={link.label} to={link.path} className="text-[14px] text-gray-700 hover:text-blue-600 font-normal">
             {link.label}
