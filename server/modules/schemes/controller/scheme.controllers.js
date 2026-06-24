@@ -3,11 +3,75 @@ const { uploadToCloudinary } = require("../../../../server/utils/uploadToCloudin
 const { sendSocietyRegistrationEmail, sendSocietyApprovalEmail } = require("../../../../server/utils/sendEmail");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const { z } = require("zod");
+
+const optionalTrimmedString = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+  z.string().trim().optional()
+);
+
+const optionalUrl = optionalTrimmedString.refine(
+  (value) => !value || z.string().url().safeParse(value).success,
+  "Must be a valid URL"
+);
+
+const societyApplicationSchema = z.object({
+  societyName: z.string().trim().min(2, "Society name is required"),
+  societyType: z.enum(["Residential", "Commercial", "Mixed Use"], { message: "Society type is required" }),
+  city: z.string().trim().min(2, "City is required"),
+  areaSector: z.string().trim().min(2, "Area / Sector is required"),
+  address: z.string().trim().min(5, "Complete address is required"),
+  googleMapsLocation: optionalUrl,
+  website: optionalUrl,
+  officialEmail: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().trim().email("Invalid official email").optional()
+  ),
+  officialContact: z.string().trim().regex(/^\d{10,15}$/, "Official contact must contain 10 to 15 digits only"),
+
+  developerCompany: z.string().trim().min(2, "Company name is required"),
+  ownerName: z.string().trim().min(2, "Owner/Rep name is required"),
+  cnicNumber: z.string().trim().regex(/^\d{13}$/, "CNIC must contain exactly 13 digits only"),
+  designation: z.string().trim().min(2, "Designation is required"),
+  contactNumber: z.string().trim().regex(/^03\d{9}$/, "Mobile number must be 11 digits and start with 03"),
+  emailAddress: z.string().trim().min(1, "Email is required").email("Invalid email"),
+
+  nocStatus: z.enum(["Approved", "Under Process", "Not Available"], { message: "NOC Status is required" }),
+  approvingAuthority: z.enum(["LDA", "RDA", "CDA", "FDA", "MDA", "PHATA", "Other"], { message: "Approving authority is required" }),
+  nocNumber: optionalTrimmedString,
+  nocIssueDate: optionalTrimmedString,
+  nocExpiryDate: optionalTrimmedString,
+  availablePlotSizes: z.array(z.string().trim().min(1)).min(1, "Select at least one plot size"),
+});
+
+const requiredApplicationFiles = [
+  "cnicFront",
+  "cnicBack",
+  "companyRegistration",
+  "nocCopy",
+  "ownershipDocuments",
+  "fardRegistry",
+  "landTransfer",
+];
+
+const acceptedDocumentTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+]);
+const maxDocumentSize = 5 * 1024 * 1024;
+
+const hasUploadedFile = (files, fieldName) =>
+  Array.isArray(files?.[fieldName]) && files[fieldName].length > 0;
+
 // Create a new Society Verification application
 exports.createApplication = async (req, res) => {
   try {
     const userId = req.user?.id ?? null;
-    const body = req.body;
+    let body = req.body;
 
     // Parse availablePlotSizes if it was sent as JSON string
     let availablePlotSizes = [];
@@ -19,8 +83,62 @@ exports.createApplication = async (req, res) => {
       }
     }
 
+    const validation = societyApplicationSchema.safeParse({
+      ...body,
+      availablePlotSizes,
+    });
+
+    if (!validation.success) {
+      const firstIssue = validation.error.issues[0];
+      return res.status(400).json({
+        success: false,
+        message: firstIssue?.message || "Invalid society verification details",
+        errors: validation.error.flatten().fieldErrors,
+      });
+    }
+
     // Upload files to Cloudinary
     const files = req.files || {};
+    const missingFiles = requiredApplicationFiles.filter(
+      (fieldName) => !hasUploadedFile(files, fieldName)
+    );
+
+    if (missingFiles.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Required documents are missing",
+        errors: missingFiles.reduce((acc, fieldName) => {
+          acc[fieldName] = ["This document is required"];
+          return acc;
+        }, {}),
+      });
+    }
+
+    const invalidFiles = Object.entries(files)
+      .flatMap(([fieldName, fileList]) =>
+        (fileList || []).map((file) => ({ fieldName, file }))
+      )
+      .filter(({ file }) => {
+        return (
+          !acceptedDocumentTypes.has(file.mimetype) ||
+          file.size > maxDocumentSize
+        );
+      });
+
+    if (invalidFiles.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Only JPG, PNG, WebP, PDF, DOC, or DOCX files up to 5MB are allowed",
+        errors: invalidFiles.reduce((acc, { fieldName }) => {
+          acc[fieldName] = ["Invalid file type or size"];
+          return acc;
+        }, {}),
+      });
+    }
+
+    body = validation.data;
+    availablePlotSizes = body.availablePlotSizes;
+
     const getCloudinaryUrl = async (fieldName) => {
       if (files[fieldName] && files[fieldName].length > 0) {
         try {
@@ -296,7 +414,17 @@ exports.updateApplicationStatus = async (req, res) => {
         });
 
 
-        // Generate token and save in PasswordReset
+        // Generate a single-use setup token that remains valid for 24 hours.
+        await prisma.passwordReset.updateMany({
+          where: {
+            userId: user.id,
+            isUsed: false,
+          },
+          data: {
+            isUsed: true,
+          },
+        });
+
         const resetToken = crypto.randomBytes(32).toString("hex");
         const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
@@ -470,7 +598,7 @@ exports.getPublicSocietyById = async (req, res) => {
         status: "APPROVED"
       },
       include: {
-        user: { select: { id: true, fullName: true, email: true, phone: true } }
+        user: { select: { id: true, fullName: true, email: true, phone: true, profilePicture: true } }
       }
     });
 
@@ -508,5 +636,45 @@ exports.getPublicSocietyById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching public society:", error);
     res.status(500).json({ success: false, message: "Failed to fetch society" });
+  }
+};
+
+// OWNER: Update public society cover image
+exports.updateSocietyCover = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Cover image is required" });
+    }
+
+    if (!req.file.mimetype?.startsWith("image/")) {
+      return res.status(400).json({ success: false, message: "Only image files are allowed for the cover" });
+    }
+
+    const society = await prisma.societyVerification.findUnique({
+      where: { id: Number(id) },
+      select: { id: true, userId: true },
+    });
+
+    if (!society) {
+      return res.status(404).json({ success: false, message: "Society not found" });
+    }
+
+    if (society.userId !== req.user.id) {
+      return res.status(403).json({ success: false, message: "Only the society owner can update the cover image" });
+    }
+
+    const coverImage = await uploadToCloudinary(req.file.buffer, "zameen360/schemes/covers");
+
+    const updated = await prisma.societyVerification.update({
+      where: { id: Number(id) },
+      data: { coverImage },
+    });
+
+    res.status(200).json({ success: true, coverImage, society: updated });
+  } catch (error) {
+    console.error("Error updating society cover:", error);
+    res.status(500).json({ success: false, message: "Failed to update cover image" });
   }
 };

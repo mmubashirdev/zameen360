@@ -65,6 +65,7 @@ model User {
   passwordResets PasswordReset[]
   activityLogs   UserActivityLog[]
   properties     Property[]
+  reviews        Review[]
   buyerConversations  Conversation[] @relation("BuyerConversations")
   sellerConversations Conversation[] @relation("SellerConversations")
   sentMessages        Message[]      @relation("SentMessages")
@@ -198,7 +199,7 @@ model Property {
   user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   conversations        Conversation[]
   panoramas            Panorama[]
-  reviews              PropertyReview[]
+  reviews              Review[]
   @@index([city])
   @@index([purpose])
   @@index([propertyType])
@@ -238,6 +239,24 @@ model Panorama {
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("panoramas")
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  propertyId Int     @map("property_id")
+  userId     Int     @map("user_id")
+  rating     Int
+  message    String
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([propertyId, userId])
+  @@index([propertyId, rating])
+  @@index([userId])
+  @@map("reviews")
 }
 
 model Conversation {
@@ -311,6 +330,7 @@ model SocietyVerification {
   ownershipDocuments   String?
   fardRegistry         String?
   landTransfer         String?
+  coverImage           String? @map("cover_image")
 
   availablePlotSizes   String[] @default([])
 

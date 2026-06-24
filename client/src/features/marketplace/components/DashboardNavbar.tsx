@@ -259,7 +259,7 @@ const AuthenticatedNavbar = () => {
             { to: "/", label: "Home" },
             { to: "/buy", label: "Buy" },
             { to: "/rent", label: "Rent" },
-            { to: "/Societies", label: "Societies" },
+            { to: "/societies", label: "Societies" },
             { to: "/about-us", label: "About Us" },
             { to: "/contact-us", label: "Contact Us" },
           ].map(({ to, label }) => (
@@ -551,7 +551,7 @@ const UnauthenticatedNavbar = () => {
           { to: "/", label: "Home" },
           { to: "/buy", label: "Buy" },
           { to: "/rent", label: "Rent" },
-          { to: "/Societies", label: "Societies" },
+          { to: "/societies", label: "Societies" },
           { to: "/about-us", label: "About Us" },
           { to: "/contact-us", label: "Contact Us" },
         ].map(({ to, label }) => (

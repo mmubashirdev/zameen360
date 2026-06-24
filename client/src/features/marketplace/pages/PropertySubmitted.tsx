@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import DashboardNavbar from "../components/DashboardNavbar";
 import Footer from "../components/Footer";
+import { useAuthContext } from "@features/auth/hooks/useAuth";
 import styles from "../styles/PropertySubmitted.module.css";
 
 // Confetti colors defined outside component
@@ -49,7 +50,11 @@ const generateConfetti = (count: number): ConfettiItem[] =>
 
 const PropertySubmitted = () => {
   const navigate = useNavigate();
+  const { user } = useAuthContext();
   const [showConfetti, setShowConfetti] = useState(true);
+  const isSocietyOwner = String(user?.role || "").toUpperCase() === "SOCIETY_OWNER";
+  const browsePath = isSocietyOwner ? "/societies" : "/buy";
+  const browseLabel = isSocietyOwner ? "Browse Societies" : "Browse Properties";
 
   useEffect(()=>{
     window.scrollTo({top: 0, behavior: "smooth"})
@@ -315,10 +320,10 @@ const PropertySubmitted = () => {
         <div className={styles.actionButtons}>
           <button
             className={styles.primaryBtn}
-            onClick={() => navigate("/buy")}
+            onClick={() => navigate(browsePath)}
           >
             <Home size={18} />
-            Browse Properties
+            {browseLabel}
           </button>
           <button
             className={styles.secondaryBtn}

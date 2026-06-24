@@ -6,7 +6,7 @@ import PropertyOverview from "../components/overview/PropertyOverview";
 import AmenitiesList from "../components/aminities/AmenitiesList";
 import FloorPlans from "../components/floorplans/FloorPlans";
 import LocationMap from "../components/location/LocationMap";
-import ReviewsSection from "../components/reviews/ReviewsSection";
+import ReviewsSection from "@features/review/components/ReviewsSection";
 import AgentCard from "../components/agent/AgentCard";
 import DashboardNavbar from "../components/DashboardNavbar";
 import SpecificationsTable from "../components/specifications/SpecificationsTable";

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, MapPin, Bed, Bath, Maximize, Heart } from "lucide-react";
+import { Search, MapPin, Bed, Bath, Maximize, Heart, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import styles from "../../marketplace/components/media/styles/Buy.module.css";
 import axiosInstance from "@shared/lib/axios";
@@ -13,9 +13,9 @@ const Schemes = () => {
   useEffect(() => {
     const fetchSocieties = async () => {
       try {
-        const response = await axiosInstance.get("/schemes/public");
-        if (response.data?.success) {
-          setSocieties(response.data.societies || []);
+        const response: any = await axiosInstance.get("/schemes/public");
+        if (response?.success) {
+          setSocieties(response.societies || []);
         }
       } catch (err) {
         console.error("Failed to fetch societies:", err);
@@ -31,7 +31,9 @@ const Schemes = () => {
     soc.city?.toLowerCase().includes(search.toLowerCase()) ||
     soc.areaSector?.toLowerCase().includes(search.toLowerCase())
   );
-
+  const societiesWithProperties = filteredSocieties.filter(
+    (soc) => Array.isArray(soc.properties) && soc.properties.length > 0
+  );
   const formatPrice = (p: string | number) => {
     if (!p) return "N/A";
     return new Intl.NumberFormat("en-IN").format(Number(p));
@@ -73,55 +75,43 @@ const Schemes = () => {
               />
             </div>
 
-            <div className={styles.resultsHead}>
-              <span>Verified Societies ({filteredSocieties.length})</span>
-            </div>
+      
 
             {loading ? (
               <p>Loading societies...</p>
-            ) : filteredSocieties.length > 0 ? (
+            ) : societiesWithProperties.length > 0 ? (
               <div style={{ marginTop: "20px" }}>
-                {filteredSocieties.map((soc) => (
+                {societiesWithProperties.map((soc) => (
                   <div key={soc.id} style={{ marginBottom: "40px" }}>
-                    <div
-                      onClick={() => navigate(`/societies/${soc.id}`)}
-                      style={{
-                        border: "1px solid #e2e8f0",
-                        borderRadius: "12px",
-                        padding: "20px",
-                        cursor: "pointer",
-                        backgroundColor: "#fff",
-                        transition: "transform 0.2s, box-shadow 0.2s",
-                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                        marginBottom: "20px"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "translateY(-4px)";
-                        e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "none";
-                        e.currentTarget.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
-                      }}
-                    >
-                      <h3 style={{ margin: "0 0 10px 0", fontSize: "1.25rem", color: "#1e293b" }}>{soc.societyName}</h3>
-                      <p style={{ margin: "0 0 5px 0", color: "#64748b", fontSize: "0.9rem" }}>
-                        <strong>City:</strong> {soc.city}
-                      </p>
-                      <p style={{ margin: "0 0 5px 0", color: "#64748b", fontSize: "0.9rem" }}>
-                        <strong>Sector:</strong> {soc.areaSector}
-                      </p>
-                      <div style={{ marginTop: "15px", display: "inline-block", padding: "4px 8px", backgroundColor: "#dcfce7", color: "#166534", borderRadius: "4px", fontSize: "0.8rem", fontWeight: "bold" }}>
-                        NOC: {soc.nocStatus}
-                      </div>
-                    </div>
-
                     {/* Properties of this society */}
                     {soc.properties && soc.properties.length > 0 && (
                       <div style={{ paddingLeft: "20px", borderLeft: "4px solid #e2e8f0" }}>
-                        <h4 style={{ marginBottom: "15px", color: "#475569" }}>Properties in {soc.societyName}</h4>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", marginBottom: "15px", flexWrap: "wrap" }}>
+                          <h4 style={{ margin: 0, color: "#475569" }}>
+                            <span style={{ color: "#2563eb", fontWeight: "bold" }}>{soc.societyName}</span>
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/societies/${soc.id}`)}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              backgroundColor: "#2563eb",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "6px",
+                              padding: "8px 14px",
+                              cursor: "pointer",
+                              fontWeight: 600,
+                            }}
+                          >
+                            View All
+                            <ArrowRight size={15} />
+                          </button>
+                        </div>
                         <div className={styles.grid}>
-                          {soc.properties.map((p: any) => (
+                          {soc.properties.slice(0, 4).map((p: any) => (
                             <div key={p.id} className={styles.card} onClick={() => navigate(`/property/${p.id}`)}>
                               <div className={styles.imageWrap}>
                                 <img
@@ -165,7 +155,7 @@ const Schemes = () => {
               </div>
             ) : (
               <div className={styles.emptyState}>
-                <p>No societies found</p>
+                <p>No society properties found</p>
                 <small>Try adjusting your search criteria.</small>
               </div>
             )}

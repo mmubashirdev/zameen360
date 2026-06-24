@@ -21,17 +21,24 @@ import type {
 
 const persistAuth = (token: string, user: User) => {
   localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-  // Note: User data should NOT be stored in localStorage for security reasons
+  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 };
 
 export const clearAuth = () => {
   localStorage.removeItem(STORAGE_KEYS.TOKEN);
+  localStorage.removeItem(STORAGE_KEYS.USER);
 };
 
 export const getStoredUser = (): User | null => {
-  // User data is not stored in localStorage for security reasons
-  // Fetch user data from the API after token validation
-  return null;
+  const rawUser = localStorage.getItem(STORAGE_KEYS.USER);
+  if (!rawUser) return null;
+
+  try {
+    return JSON.parse(rawUser) as User;
+  } catch {
+    localStorage.removeItem(STORAGE_KEYS.USER);
+    return null;
+  }
 };
 
 export const getStoredToken = () => localStorage.getItem(STORAGE_KEYS.TOKEN);

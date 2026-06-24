@@ -1,4 +1,5 @@
 // client/src/features/marketplace/routes/Marketplace.routes.tsx
+import { Navigate, useParams } from "react-router-dom";
 import PropertyDetails from "../pages/propertyDetails";
 import DashboardHome from "../pages/Marketplace";
 import CreatePropertyPost from "../pages/CreatePropertyPost";
@@ -19,6 +20,11 @@ import VirtualTourPage from "../../marketplace/pages/VirtualTourPage";
 import SchemesPage from "@features/schemes/pages/SchemesPage";
 import VerifySocietyPage from "@features/schemes/pages/VerifySocietyPage";
 import SocietyProfile from "@features/schemes/pages/SocietyProfile";
+
+const SocietyProfileCaseRedirect = () => {
+  const { id } = useParams();
+  return <Navigate to={`/societies/${id}`} replace />;
+};
 
 const marketplaceRoutes = [
   {
@@ -96,12 +102,20 @@ const marketplaceRoutes = [
     element: <PrivacyPolicy />,
   },
   {
-    path: "/Societies",
+    path: "/societies",
     element: <SchemesPage />,
+  },
+  {
+    path: "/Societies",
+    element: <Navigate to="/societies" replace />,
   },
   {
     path: "/societies/:id",
     element: <SocietyProfile />,
+  },
+  {
+    path: "/Societies/:id",
+    element: <SocietyProfileCaseRedirect />,
   },
   {
     path: "/verify-society",

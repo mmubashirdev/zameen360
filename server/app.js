@@ -18,6 +18,7 @@ const supportRoutes = require("./modules/support/routes/support.routes");
 const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
 const messageRoutes = require("./modules/message/routes/message.routes");
 const schemeRoutes = require("./modules/schemes/routes/scheme.routes");
+const reviewRoutes = require("./modules/review/routes/review.routes");
 const aiRoutes = require("./modules/ai/routes/ai.routes")
 
 const app = express();
@@ -150,6 +151,7 @@ app.use("/api/contactus", contactusRoutes);
 app.use("/api/buyer", buyerRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/schemes", schemeRoutes);
+app.use("/api/reviews", reviewRoutes);
   
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
