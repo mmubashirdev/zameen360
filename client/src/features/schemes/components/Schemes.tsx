@@ -75,9 +75,7 @@ const Schemes = () => {
               />
             </div>
 
-            <div className={styles.resultsHead}>
-              <span>Verified Societies ({filteredSocieties.length})</span>
-            </div>
+      
 
             {loading ? (
               <p>Loading societies...</p>

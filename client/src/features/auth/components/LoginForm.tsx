@@ -46,7 +46,12 @@ export default function LoginForm({ toast }: LoginFormProps) {
       toast.success("Welcome Back!", result.message ?? "Login successful.");
 
 
-      navigate("/marketplace", { replace: true });
+      const destination =
+        result.user.role === "SOCIETY_OWNER" || result.user.role === "SELLER"
+          ? "/profile"
+          : "/marketplace";
+
+      navigate(destination, { replace: true });
     } catch (err) {
       const message = getErrorMessage(err, "Login failed. Please try again.");
 

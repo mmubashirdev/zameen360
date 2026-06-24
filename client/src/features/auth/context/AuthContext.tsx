@@ -7,6 +7,7 @@ import {
 import type { ReactNode } from "react";
 import type { AuthContextType, AuthState, User } from "../types/auth.types";
 import { getStoredUser, getStoredToken, clearAuth } from "../services/authService";
+import { STORAGE_KEYS } from "../constants/authConstants";
 import { getProfile } from "../api/authApi";
 import { AuthContext } from "./authContextStore";
 
@@ -29,6 +30,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const setUser = useCallback(
     (user: User | null, token?: string) => {
+      if (user) {
+        localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+        if (token) {
+          localStorage.setItem(STORAGE_KEYS.TOKEN, token);
+        }
+      } else {
+        clearAuth();
+      }
+
       setState((prev) => ({
         user,
         token:           token ?? prev.token,

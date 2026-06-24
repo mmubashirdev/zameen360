@@ -5,6 +5,7 @@ import { useToast } from "@shared/hooks/useToast";
 import { getErrorMessage } from "@shared/utils/errorHandler";
 import { useAuthContext } from "../hooks/useAuth";
 import { setupSocietyOwnerPassword } from "../../../api/scheme.api";
+import type { User } from "../types/auth.types";
 import styles from "./societysetuppassword.module.css";
 // We reuse the VerifyEmail image or a placeholder
 import image from "../assets/photo-1722421492323-eaf9c401befe.avif";
@@ -49,12 +50,21 @@ export default function SocietySetupPasswordPage() {
       
       // Assume response returns { success: true, message, accessToken, user }
       if (response.success && response.accessToken && response.user) {
-        setUser?.(response.user, response.accessToken);
+        const user: User = {
+          id: String(response.user.id ?? response.user.userId ?? ""),
+          userId: String(response.user.userId ?? response.user.id ?? ""),
+          fullName: response.user.fullName,
+          email: response.user.email,
+          role: response.user.role,
+          isVerified: Boolean(response.user.isVerified),
+        };
+
+        setUser?.(user, response.accessToken);
         toast.success("Success", "Password set successfully. Welcome!");
         
-        // Redirect to profile/dashboard
+        // Redirect society owners to their dashboard.
         setTimeout(() => {
-          navigate("/", { replace: true });
+          navigate("/profile", { replace: true });
         }, 1000);
       } else {
         toast.error("Setup Failed", response.message || "Could not complete setup.");

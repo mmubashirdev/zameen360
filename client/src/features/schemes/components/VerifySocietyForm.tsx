@@ -6,48 +6,102 @@ import toast from "react-hot-toast";
 
 import { submitVerification } from "../../../api/scheme.api";
 
-// File type helper
-const fileSchema = z.any().optional();
+const ACCEPTED_DOCUMENT_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+const MAX_DOCUMENT_SIZE = 5 * 1024 * 1024;
+
+const trimString = (message: string, min = 2) =>
+  z.string().trim().min(min, message);
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .optional()
+  .or(z.literal(""))
+  .refine((value) => !value || z.string().url().safeParse(value).success, "Must be a valid URL");
+
+const optionalText = z.string().trim().optional().or(z.literal(""));
+
+const hasFile = (value: unknown) =>
+  Boolean(
+    value &&
+      typeof value === "object" &&
+      "length" in value &&
+      typeof value.length === "number" &&
+      value.length > 0,
+  );
+
+const getFirstFile = (value: unknown): File | null => {
+  if (!hasFile(value)) return null;
+  const file = (value as FileList | File[])[0];
+  return file instanceof File ? file : null;
+};
+
+const fileSchema = z
+  .any()
+  .optional()
+  .refine((value) => {
+    const file = getFirstFile(value);
+    return !file || ACCEPTED_DOCUMENT_TYPES.includes(file.type);
+  }, "Only JPG, PNG, WebP, PDF, DOC, or DOCX files are allowed")
+  .refine((value) => {
+    const file = getFirstFile(value);
+    return !file || file.size <= MAX_DOCUMENT_SIZE;
+  }, "File size must be 5MB or less");
+
+const requiredFileSchema = fileSchema.refine(hasFile, "This document is required");
 
 const verifySocietySchema = z.object({
   // Society Info
-  societyName: z.string().min(2, "Society name is required"),
+  societyName: trimString("Society name is required"),
   societyType: z.enum(["Residential", "Commercial", "Mixed Use"], { message: "Society type is required" }),
-  city: z.string().min(2, "City is required"),
-  areaSector: z.string().min(2, "Area / Sector is required"),
-  address: z.string().min(5, "Complete address is required"),
-  googleMapsLocation: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  website: z.string().url("Must be a valid URL").optional().or(z.literal("")),
-  officialEmail: z.string().email("Invalid email").optional().or(z.literal("")),
-  officialContact: z.string().min(10, "Contact number is required"),
+  city: trimString("City is required"),
+  areaSector: trimString("Area / Sector is required"),
+  address: trimString("Complete address is required", 5),
+  googleMapsLocation: optionalUrl,
+  website: optionalUrl,
+  officialEmail: z.string().trim().email("Invalid email").optional().or(z.literal("")),
+  officialContact: z
+    .string()
+    .trim()
+    .regex(/^\d{10,15}$/, "Official contact must contain 10 to 15 digits only"),
 
   // Developer Info
-  developerCompany: z.string().min(2, "Company name is required"),
-  ownerName: z.string().min(2, "Owner/Rep name is required"),
-  cnicNumber: z.string().min(13, "CNIC must be 13 digits"),
-  designation: z.string().min(2, "Designation is required"),
-  contactNumber: z.string().min(10, "Contact number is required"),
-  emailAddress: z.string().email("Invalid email").min(1, "Email is required"),
+  developerCompany: trimString("Company name is required"),
+  ownerName: trimString("Owner/Rep name is required"),
+  cnicNumber: z.string().trim().regex(/^\d{13}$/, "CNIC must contain exactly 13 digits only"),
+  designation: trimString("Designation is required"),
+  contactNumber: z
+    .string()
+    .trim()
+    .regex(/^03\d{9}$/, "Mobile number must be 11 digits and start with 03"),
+  emailAddress: z.string().trim().min(1, "Email is required").email("Invalid email"),
 
   // Documents
-  cnicFront: fileSchema,
-  cnicBack: fileSchema,
-  companyRegistration: fileSchema,
+  cnicFront: requiredFileSchema,
+  cnicBack: requiredFileSchema,
+  companyRegistration: requiredFileSchema,
   ntnCertificate: fileSchema,
   authorityLetter: fileSchema,
 
   // NOC Status
   nocStatus: z.enum(["Approved", "Under Process", "Not Available"], { message: "NOC Status is required" }),
   approvingAuthority: z.enum(["LDA", "RDA", "CDA", "FDA", "MDA", "PHATA", "Other"], { message: "Approving authority is required" }),
-  nocNumber: z.string().optional(),
-  nocIssueDate: z.string().optional(),
-  nocExpiryDate: z.string().optional(),
+  nocNumber: optionalText,
+  nocIssueDate: optionalText,
+  nocExpiryDate: optionalText,
 
   // Upload Documents
-  nocCopy: fileSchema,
-  ownershipDocuments: fileSchema,
-  fardRegistry: fileSchema,
-  landTransfer: fileSchema,
+  nocCopy: requiredFileSchema,
+  ownershipDocuments: requiredFileSchema,
+  fardRegistry: requiredFileSchema,
+  landTransfer: requiredFileSchema,
 
   // Plot Information
   availablePlotSizes: z.array(z.string()).min(1, "Select at least one plot size"),
@@ -236,7 +290,7 @@ const VerifySocietyForm = () => {
             <InputField label="Google Maps Location" name="googleMapsLocation" placeholder="https://maps.google.com/..." />
             <InputField label="Official Website" name="website" placeholder="https://..." />
             <InputField label="Official Email" name="officialEmail" type="email" />
-            <InputField label="Official Contact Number" name="officialContact" required />
+            <InputField label="Official Contact Number" name="officialContact" required placeholder="Digits only" />
           </div>
         </section>
 
@@ -246,9 +300,9 @@ const VerifySocietyForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <InputField label="Developer Company Name" name="developerCompany" required />
             <InputField label="Owner / Authorized Representative Name" name="ownerName" required />
-            <InputField label="CNIC Number" name="cnicNumber" required placeholder="XXXXX-XXXXXXX-X" />
+            <InputField label="CNIC Number" name="cnicNumber" required placeholder="13 digits only" />
             <InputField label="Designation" name="designation" required />
-            <InputField label="Contact Number" name="contactNumber" required />
+            <InputField label="Contact Number" name="contactNumber" required placeholder="03XXXXXXXXX" />
             <InputField label="Email Address" name="emailAddress" type="email" required />
           </div>
         </section>
