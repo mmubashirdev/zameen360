@@ -6,7 +6,7 @@
 
 * **Frontend:** React.js + Vite + TypeScript + Three.js + socket.io Client + Axios + Lucide + Hot Toast
 * **Backend:** Node.js + Express.js + Socket.IO + JWT + Cloudinary + Multer + Stripe + Nodemailer + bcrypt + Google Gemini AI
-* **Database:** PostgreSQL
+* **Database:** PostgreSQL + Prisma ORM
 * **Architecture:** Monorepo + Featured Based folder Structure
 * **Visualization:** 3D Property Rendering (Web-based)
 
