@@ -20,6 +20,8 @@ const messageRoutes = require("./modules/message/routes/message.routes");
 const schemeRoutes = require("./modules/schemes/routes/scheme.routes");
 const reviewRoutes = require("./modules/review/routes/review.routes");
 const aiRoutes = require("./modules/ai/routes/ai.routes")
+const paymentRoutes = require("./modules/payment/routes/payment.routes")
+const paymentController = require("./modules/payment/controllers/payment.controller")
 
 const app = express();
 
@@ -126,6 +128,14 @@ BigInt.prototype.toJSON = function () {
 app.use(morgan("dev"));
 
 app.use(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  paymentController.handleWebhook,
+);
+
+
+
+app.use(
   cors({
     origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://127.0.0.1:5173"],
     credentials: true,
@@ -137,6 +147,9 @@ app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/ai", aiRoutes);
+
+app.use("/api/payments", paymentRoutes);
+console.log("Payment router mounted");
 
 ["uploads/profiles", "uploads/properties", "uploads/messages", "uploads/schemes"].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });

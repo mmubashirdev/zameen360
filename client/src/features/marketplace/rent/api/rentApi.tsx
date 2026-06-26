@@ -18,6 +18,8 @@ export interface Property {
   amenities: string[];
   images: string[];
   status: string;
+  isFeatured: boolean; // ← add
+  featuredUntil: string | null;
 }
 
 export interface RentFilters {

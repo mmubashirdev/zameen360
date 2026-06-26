@@ -75,7 +75,7 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${BASE_URL}/api/properties?status=approved`);
+        const res = await fetch(`${BASE_URL}/api/properties?status=approved&featured=true`);
         const result = await res.json();
 
         if (!res.ok) throw new Error(result.message || "Failed to fetch");

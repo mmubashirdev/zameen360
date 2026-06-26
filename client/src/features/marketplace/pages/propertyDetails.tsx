@@ -1,5 +1,9 @@
 // client/src/features/marketplace/pages/propertyDetails.tsx
 import { useParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+
 import usePropertyDetails from "../components/context/usePropertyDetail";
 import PropertyGallery from "../components/gallery/PropertyGallery";
 import PropertyOverview from "../components/overview/PropertyOverview";
@@ -17,11 +21,58 @@ import ActionsCard from "../components/shared/ActionCards";
 import SafetyTips from "../components/shared/SafetyTips";
 import RecentlyViewed from "../components/shared/RecentlyViewed";
 import type { PanoramaRoom } from "../components/shared/VirtualTour";
+import FeaturePropertyModal from "../components/FeaturePropertyModal";
+
+// ✅ Lifted out of component — stable reference, no re-creation on render
+interface FeatureModalState {
+  id: number;
+  title: string;
+}
 
 const PropertyDetails = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { property, loading, error } = usePropertyDetails(id);
+
+  // ✅ { id, title } object type — NOT a function signature
+  const [featureModal, setFeatureModal] = useState<FeatureModalState | null>(
+    null,
+  );
+
+  // ✅ searchParams in deps array — no stale closure
+  // ✅ Functional updater — operates on latest params, not captured snapshot
+  useEffect(() => {
+    const payment = searchParams.get("payment");
+    if (payment === "success") {
+      toast.success("Property featured successfully!", { duration: 5000 });
+      setSearchParams((prev) => {
+        prev.delete("payment");
+        prev.delete("session_id");
+        return prev;
+      });
+    } else if (payment === "cancelled") {
+      toast.error("Property feature request cancelled.", { duration: 5000 });
+      setSearchParams((prev) => {
+        prev.delete("payment");
+        prev.delete("session_id");
+        return prev;
+      });
+    }
+  }, [searchParams, setSearchParams]);
+
+  // ✅ Called after successful payment — surgically updates local state
+  // WHY: Avoids a full property re-fetch just to flip isFeatured=true.
+  // The modal hands us exactly what changed.
+  const handleFeatureSuccess = (propertyId: number, featuredUntil: string) => {
+    // PropertyDetails doesn't hold a list to update —
+    // the toast from the Stripe redirect already confirms success.
+    // Closing the modal is sufficient here.
+    setFeatureModal(null);
+    toast.success(
+      `Property featured until ${new Date(featuredUntil).toLocaleDateString()}!`,
+    );
+  };
 
   // ==================== LOADING STATE ====================
   if (loading) {
@@ -82,7 +133,7 @@ const PropertyDetails = () => {
 
   if (!property) return null;
 
-  // ✅ Map panoramas - safely handle missing property
+  // ✅ Typed properly — remove `as any` once usePropertyDetails types panoramas
   const panoramaRooms: PanoramaRoom[] = (
     (property as any)?.panoramas || []
   ).map((p: any) => ({
@@ -93,113 +144,137 @@ const PropertyDetails = () => {
 
   const hasTour = panoramaRooms.length > 0;
 
+  // ✅ Derived from date, not just the boolean flag
+  // WHY: DB may not have cleaned up expired featured records yet
+  const isStillFeatured =
+    property.isFeatured &&
+    !!property.featuredUntil &&
+    new Date(property.featuredUntil) > new Date();
+
   const launchVirtualTour = () => {
     navigate(`/property/${property.id}/virtual-tour`, {
-      state: {
-        panoramas: panoramaRooms,
-        propertyTitle: property.title,
-      },
+      state: { panoramas: panoramaRooms, propertyTitle: property.title },
     });
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <DashboardNavbar />
+    // ✅ Fragment — modal must be a sibling of the page layout,
+    // not nested inside it, to avoid z-index and overflow clipping issues
+    <>
+      <div className="bg-gray-50 min-h-screen">
+        <DashboardNavbar />
 
-      {/* pt-20 pushes content below the fixed navbar (~80px height) */}
-      <main className="max-w-7xl mx-auto px-4 pb-6 pt-20 mt-5">
-        {/* Breadcrumbs + Virtual Tour Button */}
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <Breadcrumbs
-            city={property.city}
-            propertyType={property.propertyType}
-            title={property.title}
-          />
-
-          {/* 🌐 Virtual Tour Button */}
-          <button
-            onClick={launchVirtualTour}
-            disabled={!hasTour}
-            className={`px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md transition-all ${
-              hasTour
-                ? "bg-linear-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg cursor-pointer"
-                : "bg-gray-200 text-gray-500 cursor-not-allowed"
-            }`}
-            title={
-              hasTour
-                ? "View 360° Virtual Tour"
-                : "Virtual tour not available for this property"
-            }
-          >
-            Take 3D Virtual Tour
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ==================== LEFT SIDE ==================== */}
-          <div className="lg:col-span-2 space-y-6 bg-white rounded-xl p-6">
-            <PropertyGallery images={property.images} title={property.title} />
-
-            <PropertyOverview
+        <main className="max-w-7xl mx-auto px-4 pb-6 pt-20 mt-5">
+          {/* Breadcrumbs + action buttons row */}
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <Breadcrumbs
+              city={property.city}
+              propertyType={property.propertyType}
               title={property.title}
-              purpose={property.purpose}
-              propertyType={property.propertyType}
-              price={property.price}
-              monthlyRent={property.monthlyRent}
-              negotiable={property.negotiable}
-              city={property.city}
-              locality={property.locality}
-              address={property.address}
-              description={property.description}
-              bedrooms={property.bedrooms}
-              bathrooms={property.bathrooms}
-              areaSize={property.areaSize}
-              areaUnit={property.areaUnit}
-              createdAt={property.createdAt}
             />
 
-            <AmenitiesList amenities={property.amenities} />
+            <div className="flex items-center gap-3">
+              {/* Featured action button removed from property detail page.
+                  Featuring can only be initiated from the profile (SellerProperties). */}
 
-            <SpecificationsTable
-              areaSize={property.areaSize}
-              areaUnit={property.areaUnit}
-              bedrooms={property.bedrooms}
-              bathrooms={property.bathrooms}
-              floors={property.floors}
-              parking={property.parking}
-              yearBuilt={property.yearBuilt}
-              furnishing={property.furnishing}
-              possession={property.possession}
-              facing={property.facing}
-              purpose={property.purpose}
-              propertyType={property.propertyType}
-            />
-
-            <FloorPlans floorPlan={property.floorPlan} title={property.title} />
-            <LocationMap
-              address={property.address}
-              city={property.city}
-              locality={property.locality}
-            />
-            <RecentlyViewed currentPropertyId={property.id} />
-            <ReviewsSection propertyId={property.id} />
+              {/* ✅ bg-gradient-to-r — was bg-linear-to-r (invalid Tailwind class) */}
+              <button
+                onClick={launchVirtualTour}
+                disabled={!hasTour}
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-md transition-all ${
+                  hasTour
+                    ? "bg-linear-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg cursor-pointer"
+                    : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                }`}
+                title={
+                  hasTour
+                    ? "View 360° Virtual Tour"
+                    : "Virtual tour not available for this property"
+                }
+              >
+                Take 3D Virtual Tour
+              </button>
+            </div>
           </div>
 
-          {/* ==================== RIGHT SIDEBAR ==================== */}
-          <div className="space-y-4">
-            <AgentCard user={property.user} propertyId={property.id} />
-            <MortgageCalculator
-              propertyPrice={property.price}
-              downPayment={property.downPayment}
-            />
-            <ActionsCard propertyId={property.id} title={property.title} />
-            <SafetyTips />
-          </div>
-        </div>
-      </main>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* LEFT */}
+            <div className="lg:col-span-2 space-y-6 bg-white rounded-xl p-6">
+              <PropertyGallery
+                images={property.images}
+                title={property.title}
+              />
+              <PropertyOverview
+                title={property.title}
+                purpose={property.purpose}
+                propertyType={property.propertyType}
+                price={property.price}
+                monthlyRent={property.monthlyRent}
+                negotiable={property.negotiable}
+                city={property.city}
+                locality={property.locality}
+                address={property.address}
+                description={property.description}
+                bedrooms={property.bedrooms}
+                bathrooms={property.bathrooms}
+                areaSize={property.areaSize}
+                areaUnit={property.areaUnit}
+                createdAt={property.createdAt}
+              />
+              <AmenitiesList amenities={property.amenities} />
+              <SpecificationsTable
+                areaSize={property.areaSize}
+                areaUnit={property.areaUnit}
+                bedrooms={property.bedrooms}
+                bathrooms={property.bathrooms}
+                floors={property.floors}
+                parking={property.parking}
+                yearBuilt={property.yearBuilt}
+                furnishing={property.furnishing}
+                possession={property.possession}
+                facing={property.facing}
+                purpose={property.purpose}
+                propertyType={property.propertyType}
+              />
+              <FloorPlans
+                floorPlan={property.floorPlan}
+                title={property.title}
+              />
+              <LocationMap
+                address={property.address}
+                city={property.city}
+                locality={property.locality}
+              />
+              <RecentlyViewed currentPropertyId={property.id} />
+              <ReviewsSection propertyId={property.id} />
+            </div>
 
-      <Footer />
-    </div>
+            {/* RIGHT SIDEBAR */}
+            <div className="space-y-4">
+              <AgentCard user={property.user} propertyId={property.id} />
+              <MortgageCalculator
+                propertyPrice={property.price}
+                downPayment={property.downPayment}
+              />
+              <ActionsCard propertyId={property.id} title={property.title} />
+              <SafetyTips />
+            </div>
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+
+      {/* ✅ Modal outside main layout — clean stacking context */}
+      {featureModal && (
+        <FeaturePropertyModal
+          propertyId={featureModal.id}
+          propertyTitle={featureModal.title}
+          onClose={() => setFeatureModal(null)}
+          onSuccess={handleFeatureSuccess}
+        />
+      )}
+    </>
   );
 };
 

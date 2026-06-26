@@ -6,73 +6,84 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 enum Role {
   BUYER
   SELLER
   SOCIETY_OWNER
   ADMIN
 }
+
 enum Gender {
   MALE
   FEMALE
   OTHER
 }
+
 enum OtpType {
   EMAIL
   PHONE
   PASSWORD_RESET
 }
+
 enum ActivityStatus {
   SUCCESS
   FAILED
   SUSPICIOUS
 }
+
 enum SocietyVerificationStatus {
   PENDING
   UNDER_REVIEW
   APPROVED
   REJECTED
 }
+
 model Admin {
-  id        Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   // fullName  String   @map("")
-  email     String   @default("ismalumair912@gmail.com")
-  passwordHash String @default("12345678Aa@")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  email        String   @default("ismalumair912@gmail.com")
+  passwordHash String   @default("12345678Aa@")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
   @@map("admins")
 }
+
 model User {
-  id             Int      @id @default(autoincrement())
-  fullName       String   @map("full_name")
-  email          String   @unique
-  phone          String?
-  passwordHash   String   @map("password_hash")
-  role           Role     @default(BUYER)
-  city           String?
-  profilePicture String?  @map("profile_picture")
-  trustScore     Decimal? @default(0) @map("trust_score") @db.Decimal(5, 2)
-  isVerified     Boolean  @default(false) @map("is_verified")
-  isActive       Boolean  @default(true) @map("is_active")
-  lastActiveAt   DateTime @default(now()) @map("last_active_at")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
-  googleId       String?  @unique
-  profile        UserProfile?
-  sellerDetail   SellerDetail?
-  verifications  UserVerification[]
-  sessions       UserSession[]
-  passwordResets PasswordReset[]
-  activityLogs   UserActivityLog[]
-  properties     Property[]
-  reviews        Review[]
-  buyerConversations  Conversation[] @relation("BuyerConversations")
-  sellerConversations Conversation[] @relation("SellerConversations")
-  sentMessages        Message[]      @relation("SentMessages")
+  id                   Int                   @id @default(autoincrement())
+  fullName             String                @map("full_name")
+  email                String                @unique
+  phone                String?
+  passwordHash         String                @map("password_hash")
+  role                 Role                  @default(BUYER)
+  city                 String?
+  profilePicture       String?               @map("profile_picture")
+  trustScore           Decimal?              @default(0) @map("trust_score") @db.Decimal(5, 2)
+  isVerified           Boolean               @default(false) @map("is_verified")
+  isActive             Boolean               @default(true) @map("is_active")
+  lastActiveAt         DateTime              @default(now()) @map("last_active_at")
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+  googleId             String?               @unique
+  profile              UserProfile?
+  sellerDetail         SellerDetail?
+  verifications        UserVerification[]
+  sessions             UserSession[]
+  passwordResets       PasswordReset[]
+  activityLogs         UserActivityLog[]
+  properties           Property[]
+  reviews              Review[]
+  buyerConversations   Conversation[]        @relation("BuyerConversations")
+  sellerConversations  Conversation[]        @relation("SellerConversations")
+  sentMessages         Message[]             @relation("SentMessages")
   societyVerifications SocietyVerification[]
-  propertyReviews     PropertyReview[]
+  propertyReviews      PropertyReview[]
+  payments             Payment[]
+
   @@map("users")
 }
+
 model UserProfile {
   id              Int       @id @default(autoincrement())
   userId          Int       @unique @map("user_id")
@@ -85,9 +96,11 @@ model UserProfile {
   lastLogin       DateTime? @map("last_login")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_profiles")
 }
+
 model SellerDetail {
   id             Int      @id @default(autoincrement())
   userId         Int      @unique @map("user_id")
@@ -98,9 +111,11 @@ model SellerDetail {
   isPremium      Boolean  @default(false) @map("is_premium")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("seller_details")
 }
+
 model UserVerification {
   id         Int       @id @default(autoincrement())
   userId     Int       @map("user_id")
@@ -112,9 +127,11 @@ model UserVerification {
   attempts   Int       @default(0)
   ipAddress  String?   @map("ip_address")
   createdAt  DateTime  @default(now()) @map("created_at")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_verifications")
 }
+
 model UserSession {
   id           Int       @id @default(autoincrement())
   userId       Int       @map("user_id")
@@ -127,9 +144,11 @@ model UserSession {
   isActive     Boolean   @default(true) @map("is_active")
   rememberMe   Boolean   @default(false) @map("remember_me")
   createdAt    DateTime  @default(now()) @map("created_at")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_sessions")
 }
+
 model PasswordReset {
   id          Int       @id @default(autoincrement())
   userId      Int       @map("user_id")
@@ -139,9 +158,11 @@ model PasswordReset {
   resetAt     DateTime? @map("reset_at")
   ipAddress   String?   @map("ip_address")
   createdAt   DateTime  @default(now()) @map("created_at")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("password_resets")
 }
+
 model UserActivityLog {
   id          Int            @id @default(autoincrement())
   userId      Int            @map("user_id")
@@ -151,55 +172,66 @@ model UserActivityLog {
   device      String?
   status      ActivityStatus @default(SUCCESS)
   createdAt   DateTime       @default(now()) @map("created_at")
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@map("user_activity_logs")
 }
+
 model Property {
-  id                   Int      @id @default(autoincrement())
+  id                   Int              @id @default(autoincrement())
   purpose              String?
-  propertyType         String?  @map("property_type")
+  propertyType         String?          @map("property_type")
   title                String?
   description          String?
-  areaSize             String?  @map("area_size")
-  areaUnit             String?  @map("area_unit")
+  areaSize             String?          @map("area_size")
+  areaUnit             String?          @map("area_unit")
   bedrooms             String?
   bathrooms            String?
   floors               String?
   parking              String?
-  yearBuilt            String?  @map("year_built")
+  yearBuilt            String?          @map("year_built")
   furnishing           String?
   possession           String?
   facing               String?
   price                BigInt?
-  negotiable           Boolean  @default(false)
-  installmentAvailable Boolean  @default(false) @map("installment_available")
-  downPayment          BigInt?  @map("down_payment")
-  monthlyInstallment   BigInt?  @map("monthly_installment")
+  negotiable           Boolean          @default(false)
+  installmentAvailable Boolean          @default(false) @map("installment_available")
+  downPayment          BigInt?          @map("down_payment")
+  monthlyInstallment   BigInt?          @map("monthly_installment")
   duration             String?
-  monthlyRent          BigInt?  @map("monthly_rent")
-  securityDeposit      BigInt?  @map("security_deposit")
-  advanceMonths        String?  @map("advance_months")
-  amenities            String[] @default([])
+  monthlyRent          BigInt?          @map("monthly_rent")
+  securityDeposit      BigInt?          @map("security_deposit")
+  advanceMonths        String?          @map("advance_months")
+  amenities            String[]         @default([])
   city                 String?
   locality             String?
   address              String?
-  latitude             Decimal? @db.Decimal(10, 7)
-  longitude            Decimal? @db.Decimal(10, 7)
-  images               String[] @default([])
-  videoUrl             String?  @map("video_url")
-  floorPlan            String?  @map("floor_plan")
-  status               String   @default("pending")
-  userId               Int?     @map("user_id")
-  approvedAt           DateTime? @map("approved_at")
-  rejectedAt           DateTime? @map("rejected_at")
-  approvedBy           Int?     @map("approved_by")
-  rejectionReason      String?  @map("rejection_reason")
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
-  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  latitude             Decimal?         @db.Decimal(10, 7)
+  longitude            Decimal?         @db.Decimal(10, 7)
+  images               String[]         @default([])
+  videoUrl             String?          @map("video_url")
+  floorPlan            String?          @map("floor_plan")
+  status               String           @default("pending")
+  userId               Int?             @map("user_id")
+  approvedAt           DateTime?        @map("approved_at")
+  rejectedAt           DateTime?        @map("rejected_at")
+  approvedBy           Int?             @map("approved_by")
+  rejectionReason      String?          @map("rejection_reason")
+  createdAt            DateTime         @default(now()) @map("created_at")
+  updatedAt            DateTime         @updatedAt @map("updated_at")
+  user                 User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   conversations        Conversation[]
   panoramas            Panorama[]
   reviews              Review[]
+  propertyReviews      PropertyReview[]
+
+  isFeatured    Boolean   @default(false) @map("is_featured")
+  featuredUntil DateTime? @map("featured_until")
+  featuredPlan  String?   @map("featured_plan")
+
+  payments Payment[]
+
+  @@index([isFeatured, featuredUntil])
   @@index([city])
   @@index([purpose])
   @@index([propertyType])
@@ -208,20 +240,41 @@ model Property {
   @@map("properties")
 }
 
-model PropertyReview {
-  id        Int      @id @default(autoincrement())
-  propertyId Int     @map("property_id")
-  userId    Int?     @map("user_id")
-  name      String
-  email     String?
-  rating    Int
-  comment   String
-  isVerified Boolean @default(false) @map("is_verified")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+model Payment {
+  id                    Int      @id @default(autoincrement())
+  userId                Int      @map("user_id")
+  propertyId            Int      @map("property_id")
+  stripeSessionId       String   @unique @map("stripe_session_id")
+  stripePaymentIntentId String?  @map("stripe_payment_intent_id")
+  amount                Int
+  currency              String   @default("pkr")
+  status                String   @default("pending")
+  plan                  String
+  duration              Int
+  createdAt             DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property              Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
-  property  Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  @@index([userId])
+  @@index([propertyId])
+  @@index([status])
+  @@map("payments")
+}
+
+model PropertyReview {
+  id         Int      @id @default(autoincrement())
+  propertyId Int      @map("property_id")
+  userId     Int?     @map("user_id")
+  name       String
+  email      String?
+  rating     Int
+  comment    String
+  isVerified Boolean  @default(false) @map("is_verified")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([propertyId])
   @@index([rating])
@@ -229,29 +282,29 @@ model PropertyReview {
 }
 
 model Panorama {
-  id          Int      @id @default(autoincrement())
-  propertyId  Int      @map("property_id")
-  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  roomName    String   @map("room_name")
-  imageUrl    String   @map("image_url")
-  hotspots    Json     @default("[]")
-  order       Int      @default(0)
-  createdAt   DateTime @default(now()) @map("created_at")
+  id         Int      @id @default(autoincrement())
+  propertyId Int      @map("property_id")
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomName   String   @map("room_name")
+  imageUrl   String   @map("image_url")
+  hotspots   Json     @default("[]")
+  order      Int      @default(0)
+  createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("panoramas")
 }
 
 model Review {
   id         Int      @id @default(autoincrement())
-  propertyId Int     @map("property_id")
-  userId     Int     @map("user_id")
+  propertyId Int      @map("property_id")
+  userId     Int      @map("user_id")
   rating     Int
   message    String
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([propertyId, userId])
   @@index([propertyId, rating])
@@ -260,87 +313,87 @@ model Review {
 }
 
 model Conversation {
-  id        Int       @id @default(autoincrement())
-  buyerId   Int       @map("buyer_id")
-  sellerId  Int       @map("seller_id")
-  propertyId Int?     @map("property_id")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  messages  Message[]
+  id         Int       @id @default(autoincrement())
+  buyerId    Int       @map("buyer_id")
+  sellerId   Int       @map("seller_id")
+  propertyId Int?      @map("property_id")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+  messages   Message[]
 
-  buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
-  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
-  property  Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  buyer    User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller   User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
 
   @@map("conversations")
 }
 
 model Message {
-  id             Int          @id @default(autoincrement())
-  conversationId Int          @map("conversation_id")
-  senderId       Int          @map("sender_id")
+  id             Int      @id @default(autoincrement())
+  conversationId Int      @map("conversation_id")
+  senderId       Int      @map("sender_id")
   text           String?
-  isVoice        Boolean      @default(false) @map("is_voice")
-  voiceUrl       String?      @map("voice_url")
-  voiceDuration  String?      @map("voice_duration")
-  mediaUrl       String?      @map("media_url")
-  mediaType      String?      @map("media_type")
-  isRead         Boolean      @default(false) @map("is_read")
-  createdAt      DateTime     @default(now()) @map("created_at")
+  isVoice        Boolean  @default(false) @map("is_voice")
+  voiceUrl       String?  @map("voice_url")
+  voiceDuration  String?  @map("voice_duration")
+  mediaUrl       String?  @map("media_url")
+  mediaType      String?  @map("media_type")
+  isRead         Boolean  @default(false) @map("is_read")
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("messages")
 }
 
 model SocietyVerification {
-  id                   Int      @id @default(autoincrement())
-  userId               Int?     @map("user_id")
-  societyName          String
-  societyType          String
-  city                 String
-  areaSector           String
-  address              String
-  googleMapsLocation   String?
-  website              String?
-  officialEmail        String?
-  officialContact      String
+  id                 Int     @id @default(autoincrement())
+  userId             Int?    @map("user_id")
+  societyName        String
+  societyType        String
+  city               String
+  areaSector         String
+  address            String
+  googleMapsLocation String?
+  website            String?
+  officialEmail      String?
+  officialContact    String
 
-  developerCompany     String
-  ownerName            String
-  cnicNumber           String
-  designation          String
-  contactNumber        String
-  emailAddress         String
+  developerCompany String
+  ownerName        String
+  cnicNumber       String
+  designation      String
+  contactNumber    String
+  emailAddress     String
 
-  cnicFront            String?
-  cnicBack             String?
-  companyRegistration  String?
-  ntnCertificate       String?
-  authorityLetter      String?
+  cnicFront           String?
+  cnicBack            String?
+  companyRegistration String?
+  ntnCertificate      String?
+  authorityLetter     String?
 
-  nocStatus            String
-  approvingAuthority   String
-  nocNumber            String?
-  nocIssueDate         String?
-  nocExpiryDate        String?
+  nocStatus          String
+  approvingAuthority String
+  nocNumber          String?
+  nocIssueDate       String?
+  nocExpiryDate      String?
 
-  nocCopy              String?
-  ownershipDocuments   String?
-  fardRegistry         String?
-  landTransfer         String?
-  coverImage           String? @map("cover_image")
+  nocCopy            String?
+  ownershipDocuments String?
+  fardRegistry       String?
+  landTransfer       String?
+  coverImage         String? @map("cover_image")
 
-  availablePlotSizes   String[] @default([])
+  availablePlotSizes String[] @default([])
 
-  status               SocietyVerificationStatus @default(PENDING)
-  adminNotes           String?
+  status     SocietyVerificationStatus @default(PENDING)
+  adminNotes String?
 
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  user                 User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("society_verifications")
 }

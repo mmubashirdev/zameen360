@@ -141,7 +141,7 @@ const HotspotEditor = ({
 
       const geometry = new THREE.SphereGeometry(500, 60, 40);
       geometry.scale(-1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+      const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const sphere = new THREE.Mesh(geometry, material);
       scene.add(sphere);
       sphereRef.current = sphere;

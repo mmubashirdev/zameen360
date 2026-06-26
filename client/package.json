@@ -15,6 +15,7 @@
     "@mdi/react": "^1.6.1",
     "@react-google-maps/api": "^2.20.0",
     "@reduxjs/toolkit": "^2.11.2",
+    "@stripe/stripe-js": "^9.8.0",
     "@tailwindcss/vite": "^4.3.0",
     "axios": "^1.17.0",
     "framer-motion": "^12.38.0",

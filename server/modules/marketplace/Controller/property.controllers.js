@@ -1,18 +1,15 @@
-
 const prisma = require("../../../configs/prisma");
 const cloudinary = require("../../../configs/cloudinary");
-
 
 const {
   uploadToCloudinaryFromPath,
 } = require("../../../utils/uploadToCloudinary");
-
+const { fa } = require("zod/v4/locales");
 
 console.log(
   "Cloudinary upload_stream available:",
   typeof cloudinary.uploader?.upload_stream,
 );
-
 
 const toBigInt = (val) => {
   if (val === null || val === undefined || val === "") return null;
@@ -160,7 +157,6 @@ exports.panorama = async (req, res) => {
   }
 };
 
-
 exports.createProperty = async (req, res) => {
   try {
     const d = req.body;
@@ -175,7 +171,6 @@ exports.createProperty = async (req, res) => {
       });
     }
 
-    
     let imageUrls = [];
     if (files.length > 0) {
       try {
@@ -194,7 +189,7 @@ exports.createProperty = async (req, res) => {
     const property = await prisma.property.create({
       data: {
         user: {
-          connect: { id: Number(userId) }, 
+          connect: { id: Number(userId) },
         },
         purpose: d.purpose || null,
         propertyType: d.propertyType || null,
@@ -225,7 +220,7 @@ exports.createProperty = async (req, res) => {
         address: d.address || null,
         latitude: d.lat ? Number(d.lat) : null,
         longitude: d.lng ? Number(d.lng) : null,
-        images: imageUrls, 
+        images: imageUrls,
         videoUrl: d.videoUrl || null,
         floorPlan: d.floorPlan || null,
         status: "pending",
@@ -239,7 +234,6 @@ exports.createProperty = async (req, res) => {
 
     const serialized = serializeBigInt(property);
 
-    
     const io = req.app.get("io");
     if (io) {
       io.to("admin_room").emit("new_property_pending", {
@@ -269,7 +263,6 @@ exports.createProperty = async (req, res) => {
     });
   }
 };
-
 
 exports.getProperties = async (req, res) => {
   try {
@@ -344,15 +337,47 @@ exports.getProperties = async (req, res) => {
       if (maxPrice) where.price.lte = BigInt(maxPrice);
     }
 
+    // Featured filter (valid only, and for non-expired time)
+    const featuredOnly =
+      String(req.query.featured || "").toLowerCase() === "true";
+    if (featuredOnly) {
+      const now = new Date();
+      where.isFeatured = true;
+      // Keep only currently active featured records
+      where.featuredUntil = { gt: now };
+    }
+
     const properties = await prisma.property.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { isFeatured: "desc" },
+        { featuredUntil: "desc" },
+        { createdAt: "desc" },
+      ],
       include: {
         user: {
           select: { id: true, fullName: true, email: true, phone: true },
         },
       },
     });
+
+    const now = new Date();
+    const expiredFeatured = properties
+      .filter((p) => p.isFeatured && p.featuredUntil && p.featuredPlan < now)
+      .map((p) => p.id);
+
+    if (expiredFeatured.length > 0) {
+      await prisma.property.updateMany({
+        where: { id: { in: expiredFeatured } },
+        data: { isFeatured: false, featuredPlan: null },
+      });
+      properties.forEach((p) => {
+        if (expiredFeatured.includes(p.id)) {
+          p.isFeatured = false;
+          p.featuredPlan = null;
+        }
+      });
+    }
 
     res.json({
       success: true,
@@ -368,7 +393,6 @@ exports.getProperties = async (req, res) => {
     });
   }
 };
-
 
 exports.getAdminProperties = async (req, res) => {
   try {
@@ -531,7 +555,6 @@ exports.updatePropertyStatus = async (req, res) => {
   }
 };
 
-
 exports.getDashboardStats = async (req, res) => {
   try {
     const [total, pending, approved, rejected] = await Promise.all([
@@ -544,16 +567,13 @@ exports.getDashboardStats = async (req, res) => {
     res.json({ success: true, data: { total, pending, approved, rejected } });
   } catch (err) {
     console.error("STATS ERROR:", err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch stats",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch stats",
+      error: err.message,
+    });
   }
 };
-
 
 // In property.controllers.js — fix getPropertyById
 exports.getPropertyById = async (req, res) => {
@@ -642,15 +662,19 @@ exports.getPropertyReviews = async (req, res) => {
     const averageRating = totalReviews
       ? Number(
           (
-            serializedReviews.reduce((sum, review) => sum + Number(review.rating), 0) /
-            totalReviews
+            serializedReviews.reduce(
+              (sum, review) => sum + Number(review.rating),
+              0,
+            ) / totalReviews
           ).toFixed(1),
         )
       : 0;
 
     const ratingBreakdown = [5, 4, 3, 2, 1].map((stars) => ({
       stars,
-      count: serializedReviews.filter((review) => Number(review.rating) === stars).length,
+      count: serializedReviews.filter(
+        (review) => Number(review.rating) === stars,
+      ).length,
     }));
 
     res.json({
@@ -859,16 +883,13 @@ exports.updateProperty = async (req, res) => {
     });
   } catch (err) {
     console.error("UPDATE PROPERTY ERROR:", err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to update property",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to update property",
+      error: err.message,
+    });
   }
 };
-
 
 exports.deleteProperty = async (req, res) => {
   try {
@@ -914,12 +935,10 @@ exports.deleteProperty = async (req, res) => {
     res.json({ success: true, message: "Property deleted successfully" });
   } catch (err) {
     console.error("DELETE PROPERTY ERROR:", err);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to delete property",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete property",
+      error: err.message,
+    });
   }
 };

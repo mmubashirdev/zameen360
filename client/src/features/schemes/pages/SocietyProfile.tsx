@@ -110,7 +110,11 @@ const SocietyProfile = () => {
     setPlotFilters({ marla: marlaFilters, kanal: kanalFilters });
   };
 
-  const handleFilterClick = async (filterKey: string, size?: number, unit?: string) => {
+  const handleFilterClick = async (
+    filterKey: string,
+    size?: number,
+    unit?: string,
+  ) => {
     setActiveFilter(filterKey);
     setFilterLoading(true);
 
@@ -183,15 +187,31 @@ const SocietyProfile = () => {
   const logoSrc = society?.user?.profilePicture || null;
 
   const infoItems = [
-    { label: "Type", value: society?.societyType, icon: <Landmark size={15} /> },
+    {
+      label: "Type",
+      value: society?.societyType,
+      icon: <Landmark size={15} />,
+    },
     { label: "NOC", value: society?.nocStatus, icon: <FileCheck2 size={15} /> },
-    { label: "Developer", value: society?.developerCompany, icon: <Users size={15} /> },
-    { label: "Contact", value: society?.officialContact, icon: <Phone size={15} /> },
-    { label: "Website", value: society?.website, icon: <Globe size={15} />, isLink: true },
+    {
+      label: "Developer",
+      value: society?.developerCompany,
+      icon: <Users size={15} />,
+    },
+    {
+      label: "Contact",
+      value: society?.officialContact,
+      icon: <Phone size={15} />,
+    },
+    {
+      label: "Website",
+      value: society?.website,
+      icon: <Globe size={15} />,
+      isLink: true,
+    },
   ].filter((item) => item.value);
 
-  const totalFilters =
-    plotFilters.marla.length + plotFilters.kanal.length;
+  const totalFilters = plotFilters.marla.length + plotFilters.kanal.length;
 
   return (
     <div className="min-h-screen bg-slate-50 pt-15">
@@ -203,7 +223,9 @@ const SocietyProfile = () => {
           </div>
         ) : !society ? (
           <div className="py-20 text-center">
-            <p className="text-lg font-semibold text-slate-600">Society not found</p>
+            <p className="text-lg font-semibold text-slate-600">
+              Society not found
+            </p>
             <p className="mt-1 text-sm text-slate-400">
               This society may not exist or is pending approval.
             </p>
@@ -242,12 +264,16 @@ const SocietyProfile = () => {
                       <h2 className="text-xl font-bold text-white drop-shadow-md sm:text-2xl">
                         {society.societyName}
                       </h2>
-                      <ShieldCheck size={20} className="shrink-0 text-blue-400 drop-shadow-md" />
+                      <ShieldCheck
+                        size={20}
+                        className="shrink-0 text-blue-400 drop-shadow-md"
+                      />
                     </div>
                     <p className="mt-0.5 flex items-center gap-1 text-[13px] text-white/75 drop-shadow-sm">
                       <MapPin size={12} />
-                      {[society.areaSector, society.city].filter(Boolean).join(", ") ||
-                        "Location not available"}
+                      {[society.areaSector, society.city]
+                        .filter(Boolean)
+                        .join(", ") || "Location not available"}
                     </p>
                   </div>
 
@@ -262,8 +288,8 @@ const SocietyProfile = () => {
                         {coverUploading
                           ? "Uploading..."
                           : coverSrc
-                          ? "Change Cover"
-                          : "Add Cover"}
+                            ? "Change Cover"
+                            : "Add Cover"}
                       </button>
                       <input
                         ref={coverInputRef}
@@ -281,7 +307,11 @@ const SocietyProfile = () => {
                   <div className="-mt-10 mb-4 flex items-end gap-4">
                     <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl border-[3px] border-white bg-white shadow-md">
                       {logoSrc ? (
-                        <img src={logoSrc} alt="logo" className="h-full w-full object-cover" />
+                        <img
+                          src={logoSrc}
+                          alt="logo"
+                          className="h-full w-full object-cover"
+                        />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 text-2xl font-black text-blue-600">
                           {society.societyName?.charAt(0) || "S"}
@@ -295,12 +325,18 @@ const SocietyProfile = () => {
                       <p className="text-2xl font-extrabold text-slate-900">
                         {allProperties.length}
                       </p>
-                      <p className="text-[11px] font-medium text-slate-400">Properties</p>
+                      <p className="text-[11px] font-medium text-slate-400">
+                        Properties
+                      </p>
                     </div>
                     {society.city && (
                       <div>
-                        <p className="text-2xl font-extrabold text-slate-900">{society.city}</p>
-                        <p className="text-[11px] font-medium text-slate-400">City</p>
+                        <p className="text-2xl font-extrabold text-slate-900">
+                          {society.city}
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-400">
+                          City
+                        </p>
                       </div>
                     )}
                   </div>
@@ -313,7 +349,9 @@ const SocietyProfile = () => {
                           className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-[13px] text-slate-700 transition hover:border-slate-300 hover:bg-white"
                         >
                           <span className="text-slate-400">{item.icon}</span>
-                          <span className="font-medium text-slate-500">{item.label}:</span>
+                          <span className="font-medium text-slate-500">
+                            {item.label}:
+                          </span>
                           {item.isLink ? (
                             <a
                               href={
@@ -329,7 +367,9 @@ const SocietyProfile = () => {
                               {item.value}
                             </a>
                           ) : (
-                            <span className="font-semibold text-slate-800">{item.value}</span>
+                            <span className="font-semibold text-slate-800">
+                              {item.value}
+                            </span>
                           )}
                         </div>
                       ))}
@@ -338,7 +378,9 @@ const SocietyProfile = () => {
 
                   {society.address && (
                     <p className="mt-3 text-[13px] leading-relaxed text-slate-500">
-                      <span className="font-semibold text-slate-600">Address:</span>{" "}
+                      <span className="font-semibold text-slate-600">
+                        Address:
+                      </span>{" "}
                       {society.address}
                     </p>
                   )}
@@ -353,10 +395,11 @@ const SocietyProfile = () => {
                   <div className="flex items-center gap-2">
                     <Grid3X3 size={18} className="text-blue-600" />
                     <h3 className="text-[15px] font-bold text-slate-800">
-                      Filter 
+                      Filter
                     </h3>
                     <span className="ml-auto text-[12px] text-slate-400">
-                      {filteredProperties.length} of {allProperties.length} shown
+                      {filteredProperties.length} of {allProperties.length}{" "}
+                      shown
                     </span>
                   </div>
                 </div>
@@ -403,14 +446,16 @@ const SocietyProfile = () => {
                       return (
                         <button
                           key={key}
-                          onClick={() => handleFilterClick(key, f.size, "Marla")}
+                          onClick={() =>
+                            handleFilterClick(key, f.size, "Marla")
+                          }
                           disabled={f.count === 0}
                           className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-semibold transition-all ${
                             isActive
                               ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-600/20"
                               : f.count === 0
-                              ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
-                              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-blue-50"
+                                ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
+                                : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-blue-50"
                           }`}
                         >
                           {f.size} Marla
@@ -419,8 +464,8 @@ const SocietyProfile = () => {
                               isActive
                                 ? "bg-white/20 text-white"
                                 : f.count === 0
-                                ? "bg-slate-100 text-slate-300"
-                                : "bg-blue-100 text-blue-700"
+                                  ? "bg-slate-100 text-slate-300"
+                                  : "bg-blue-100 text-blue-700"
                             }`}
                           >
                             {f.count}
@@ -447,14 +492,16 @@ const SocietyProfile = () => {
                       return (
                         <button
                           key={key}
-                          onClick={() => handleFilterClick(key, f.size, "Kanal")}
+                          onClick={() =>
+                            handleFilterClick(key, f.size, "Kanal")
+                          }
                           disabled={f.count === 0}
                           className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-semibold transition-all ${
                             isActive
                               ? "border-emerald-600 bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                               : f.count === 0
-                              ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
-                              : "border-slate-200 bg-slate-50 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                                ? "cursor-not-allowed border-slate-100 bg-slate-50 text-slate-300"
+                                : "border-slate-200 bg-slate-50 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
                           }`}
                         >
                           {f.size} Kanal
@@ -463,8 +510,8 @@ const SocietyProfile = () => {
                               isActive
                                 ? "bg-white/20 text-white"
                                 : f.count === 0
-                                ? "bg-slate-100 text-slate-300"
-                                : "bg-emerald-100 text-emerald-700"
+                                  ? "bg-slate-100 text-slate-300"
+                                  : "bg-emerald-100 text-emerald-700"
                             }`}
                           >
                             {f.count}
@@ -502,7 +549,9 @@ const SocietyProfile = () => {
               <div className="flex items-center justify-center py-16">
                 <div className="flex flex-col items-center gap-3">
                   <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-slate-200 border-t-blue-600" />
-                  <p className="text-sm text-slate-400">Filtering properties...</p>
+                  <p className="text-sm text-slate-400">
+                    Filtering properties...
+                  </p>
                 </div>
               </div>
             ) : filteredProperties.length === 0 ? (
@@ -595,9 +644,9 @@ const SocietyProfile = () => {
                       {/* Amenities */}
                       {p.amenities && p.amenities.length > 0 && (
                         <div className="mb-3 flex flex-wrap gap-1.5">
-                          {p.amenities.slice(0, 3).map((a, i) => (
+                          {p.amenities.slice(0, 3).map((a) => (
                             <span
-                              key={i}
+                              key={a}
                               className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600"
                             >
                               {a}
