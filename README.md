@@ -59,7 +59,20 @@ cd client
 npm install
 npm run dev
 ```
+### 4. DataBase Setup
 
+```bash
+cd server
+npm install
+npx prisma generate
+npx prisma migrate
+npm run dev
+```
+### 5. Stripe Setup
+
+```bash
+stripe listen --forward-to localhost:5000/api/payments/webhook
+```
 ---
 
 ##  Architecture 
@@ -89,3 +102,7 @@ Software Engineering Student
 Trainee Software Engineering
 **Shazaib**
 Trainee Software Engineering
+
+---
+## License
+* This project is licensed under the MIT License
