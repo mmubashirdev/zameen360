@@ -4,6 +4,8 @@ import AppRouter from './routes/Router';
 import { AuthProvider } from '@features/auth/context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 
+
+
 const App = () => {
   return (
     <AuthProvider>

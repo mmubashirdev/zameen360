@@ -9,20 +9,20 @@ const FEATURED_PLANS = {
   basic: {
     name: "Basic Boost",
     description: "Feature you property for 7 days",
-    amount: 1000*100,
+    amount: 10*100,
     duration: 7,
   },
 
   premium: {
     name: "Premium Boost",
     description: "Feature your property for 15 days",
-    amount: 2500*100,
+    amount: 25*100,
     duration: 15,
   },
   elite: {
     name: "Elite Boost",
     description: "Feature your property for 30 days",
-    amount: 5000*100,
+    amount: 50*100,
     duration: 30,
   },
 };

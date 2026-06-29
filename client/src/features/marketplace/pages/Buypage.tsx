@@ -27,8 +27,11 @@ import {
   parseSearchQuery,
 } from "../utils/aiSearchParser";
 import styles from "../../marketplace/components/media/styles/Buy.module.css";
-import SkeletonCard from "../../../shared/components/SkeletonCard";
+// import SkeletonCard from "../../../shared/components/SkeletonCard";
 import debounce from "../../../shared/utils/debounce";
+
+import { useProperties } from "../hook/useProperties";
+import { useQueryClient } from "@tanstack/react-query";
 type DebouncedSearchFn = ((value: string) => void) & { cancel: () => void };
 interface Property {
   id: number;
@@ -51,10 +54,8 @@ interface Property {
 const Buy = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [loading, setLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const queryClient = useQueryClient();
 
   // ── Get user ──────────────────────────────────────────────────────
   const { user: currentUser } = useAuthContext();
@@ -77,7 +78,9 @@ const Buy = () => {
   const [areaUnit, setAreaUnit] = useState("");
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const searchDebounceRef = useRef<DebouncedSearchFn | null>(null);
-  const [societyLookup, setSocietyLookup] = useState<Record<number, number>>({});
+  const [societyLookup, setSocietyLookup] = useState<Record<number, number>>(
+    {},
+  );
   const [societyLookupLoaded, setSocietyLookupLoaded] = useState(false);
 
   const [sections, setSections] = useState({
@@ -130,10 +133,7 @@ const Buy = () => {
       // Skip Rent properties — Buy page only shows Sell/Lease
       if (newProperty.purpose?.toLowerCase() === "rent") return;
 
-      setProperties((prev) => {
-        if (prev.find((p) => p.id === newProperty.id)) return prev;
-        return [newProperty, ...prev];
-      });
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
 
       toast.success(`New property: ${newProperty.title || "New listing"}`, {
         duration: 5000,
@@ -143,7 +143,7 @@ const Buy = () => {
 
     const handleDeleted = (data: PropertyEventData) => {
       if (!data.propertyId) return;
-      setProperties((prev) => prev.filter((p) => p.id !== data.propertyId));
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
     };
 
     const unsub1 = on("property_approved", handleApproved);
@@ -172,7 +172,7 @@ const Buy = () => {
     if (urlMaxPrice) setMaxPrice(urlMaxPrice);
     if (urlLocality) setLocality(urlLocality);
 
-    setInitialLoad(false);
+    // setInitialLoad(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -197,12 +197,15 @@ const Buy = () => {
         ? response.data.societies
         : [];
 
-      const lookup = societies.reduce((acc: Record<number, number>, society: any) => {
-        if (society?.userId != null && society?.id != null) {
-          acc[Number(society.userId)] = Number(society.id);
-        }
-        return acc;
-      }, {});
+      const lookup = societies.reduce(
+        (acc: Record<number, number>, society: any) => {
+          if (society?.userId != null && society?.id != null) {
+            acc[Number(society.userId)] = Number(society.id);
+          }
+          return acc;
+        },
+        {},
+      );
 
       setSocietyLookup(lookup);
       setSocietyLookupLoaded(true);
@@ -217,65 +220,6 @@ const Buy = () => {
   useEffect(() => {
     void loadSocietyLookup();
   }, [loadSocietyLookup]);
-
-  const fetchProperties = useCallback(async (searchTerm = debouncedSearch) => {
-    try {
-      const params = new URLSearchParams();
-      if (searchTerm) params.append("search", searchTerm);
-      params.append("purpose", purpose || "Sell");
-      if (propertyType) params.append("propertyType", propertyType);
-      if (city) params.append("city", city);
-      if (locality) params.append("locality", locality);
-      if (minPrice) params.append("minPrice", minPrice);
-      if (maxPrice) params.append("maxPrice", maxPrice);
-      if (minBeds) params.append("minBeds", minBeds);
-      if (maxBeds) params.append("maxBeds", maxBeds);
-      if (minBaths) params.append("minBaths", minBaths);
-      if (maxBaths) params.append("maxBaths", maxBaths);
-      if (minArea) params.append("minArea", minArea);
-      if (maxArea) params.append("maxArea", maxArea);
-      if (areaUnit) params.append("areaUnit", areaUnit);
-      if (selectedAmenities.length > 0)
-        params.append("amenities", selectedAmenities.join(","));
-
-      const res = await fetch(`http://localhost:5000/api/properties?${params}`);
-      const result = await res.json();
-
-      if (result.success && Array.isArray(result.data)) {
-        setProperties(result.data);
-      } else if (Array.isArray(result)) {
-        setProperties(result);
-      } else {
-        setProperties([]);
-      }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setProperties([]);
-    }
-  }, [
-    debouncedSearch,
-    purpose,
-    propertyType,
-    city,
-    locality,
-    minPrice,
-    maxPrice,
-    minBeds,
-    maxBeds,
-    minBaths,
-    maxBaths,
-    minArea,
-    maxArea,
-    areaUnit,
-    selectedAmenities,
-  ]);
-
-  useEffect(() => {
-    if (!initialLoad) {
-      setLoading(true);
-      fetchProperties().finally(() => setLoading(false));
-    }
-  }, [fetchProperties, initialLoad]);
 
   const handleReset = () => {
     setSearch("");
@@ -296,7 +240,6 @@ const Buy = () => {
     setDebouncedSearch("");
     searchDebounceRef.current?.cancel();
     navigate("/buy", { replace: true });
-    setTimeout(() => fetchProperties(""), 0);
   };
 
   const activeFilterCount = [
@@ -390,6 +333,38 @@ const Buy = () => {
 
     navigate(`/property/${property.id}`);
   };
+
+  const filters = {
+    search: debouncedSearch,
+    // Backend does exact match on purpose, so only send if it's one of the supported values.
+    purpose: purpose === "Sell" || purpose === "Lease" ? purpose : undefined,
+    propertyType,
+    city,
+    locality,
+    minPrice,
+    maxPrice,
+    minBeds,
+    maxBeds,
+    minBaths,
+    maxBaths,
+    minArea,
+    maxArea,
+    areaUnit,
+    amenities: selectedAmenities,
+  };
+
+  const { data, isLoading, refetch } = useProperties(filters);
+  console.log("[Buypage] query filters:", filters);
+  console.log("[Buypage] query raw data:", data);
+  console.log("[Buypage] data?.data isArray:", Array.isArray(data?.data));
+
+  // backend returns either { success, count, data: [...] } or directly an array
+  const properties = Array.isArray(data?.data)
+    ? data!.data
+    : Array.isArray(data)
+      ? data
+      : [];
+  console.log("[Buypage] properties length:", properties.length);
 
   return (
     <div className={styles.page}>
@@ -739,7 +714,7 @@ const Buy = () => {
               <button
                 className={styles.applyBtn}
                 onClick={() => {
-                  fetchProperties();
+                  refetch();
                   setSidebarOpen(false);
                 }}
               >
@@ -780,7 +755,7 @@ const Buy = () => {
 
             <div className={styles.resultsHead}>
               <span>
-                {loading
+                {isLoading
                   ? "Searching..."
                   : `${properties.length} Properties Found`}
               </span>
@@ -862,7 +837,7 @@ const Buy = () => {
               </div>
             </div>
 
-            {loading ? (
+            {isLoading ? (
               <div className={styles.skeletonGrid}>
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div key={i} className={styles.skeletonCard}>
@@ -894,11 +869,11 @@ const Buy = () => {
             ) : (
               <div className={styles.grid}>
                 {properties.map((p) => (
-                    <div
-                      key={p.id}
-                      className={styles.card}
-                      onClick={() => void handleSeeMore(p)}
-                    >
+                  <div
+                    key={p.id}
+                    className={styles.card}
+                    onClick={() => void handleSeeMore(p)}
+                  >
                     <div className={styles.imageWrap}>
                       <img
                         src={
