@@ -10,6 +10,7 @@ const passport = require("./configs/passport");
 const cors = require("cors");
 const fs = require("fs");
 
+
 const index = require("./modules/auth/routes/index");
 const propertyRoutes = require("./modules/marketplace/routes/property.routes");
 const sellerRoutes = require("./modules/sellerProfile/routes/sellerRoutes");
@@ -20,7 +21,7 @@ const messageRoutes = require("./modules/message/routes/message.routes");
 const schemeRoutes = require("./modules/schemes/routes/scheme.routes");
 const reviewRoutes = require("./modules/review/routes/review.routes");
 const aiRoutes = require("./modules/ai/routes/ai.routes")
-
+const chatRoutes = require("./modules/chatbot/routes/chat.routes");
 const app = express();
 
 // ─── Create HTTP server (Socket.IO ke liye zaruri) ────────────────────────────
@@ -110,19 +111,7 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-// const apiLogger = (req, res, next) => {
-//   const start = Date.now();
-//   const originalSend = res.send;
 
-//   res.send = function (data) {
-//     console.log(`${req.method} ${req.originalUrl} | ${res.statusCode} | ${Date.now() - start}ms`);
-//     return originalSend.call(this, data);
-//   };
-
-//   next();
-// };
-
-// app.use(apiLogger);
 app.use(morgan("dev"));
 
 app.use(
@@ -152,6 +141,7 @@ app.use("/api/buyer", buyerRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/schemes", schemeRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/chat", chatRoutes);
   
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
