@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x' # Use your active LTS
+          node-version: '25.8.1' # Use your active LTS
           cache: 'npm'
           cache-dependency-path: ./client/package-lock.json
       - run: npm ci
@@ -45,7 +45,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '25.8.1'
           cache: 'npm'
           cache-dependency-path: ./server/package-lock.json
       - run: npm ci
