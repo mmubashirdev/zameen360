@@ -6,12 +6,14 @@ import HeroSection from "../components/HeroSection"
 import FeaturedProperties from "../components/FeatureProperty"
 import Testimonials from "../components/Testimonials"
 import Footer from "../components/Footer"
+import ChatBot from "@features/chatbot/components/ChatBot"
 
 function DashboardHome() {
   return (
     <>
     <DashboardNavbar/>
     <HeroSection />
+    <ChatBot />
     <FeaturedProperties />
     <PropertiesCategories />
     <PopularLocations />
