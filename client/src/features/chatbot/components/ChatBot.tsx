@@ -8,10 +8,6 @@ import {
   CheckCheck,
   Trash2,
   Loader2,
-  Home,
-  MapPin,
-  Ruler,
-  TrendingUp,
 } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -36,15 +32,10 @@ const WELCOME: Message = {
     minute: "2-digit",
   }),
   content:
-    "Hi there! 👋 Welcome to **Zameen360**!\n\nI'm your personal real estate assistant. I can help you with:\n- Finding plots, houses & apartments\n- Price ranges across DHA, Bahria Town & more\n- Buying, selling & renting guidance\n- Society comparisons & investment tips\n\nWhat are you looking for today? 🏠",
+    "Hi there! 👋 Welcome to **Zameen360**!\n\nI'm your personal real estate assistant. Here's what I can help you with:\n\n- 🏠 **Properties** — plots, houses, apartments, commercial\n- 💰 **Prices** — DHA, Bahria Town, Gulberg & more\n- 🔑 **Buy / Sell / Rent** — step-by-step guidance\n- 📄 **Documents** — fard, registry, mutation, NOC\n- 🏘️ **Societies** — verification & comparisons\n- 🌐 **Platform Help** — how to use Zameen360\n\nWhat are you looking for today? 🏡",
 };
 
-const QUICK_REPLIES = [
-  { label: "5 Marla plots in DHA Lahore", icon: <Home size={12} /> },
-  { label: "Rent a house in Bahria Town", icon: <MapPin size={12} /> },
-  { label: "1 Kanal house price in Islamabad", icon: <Ruler size={12} /> },
-  { label: "Best society to invest in 2025", icon: <TrendingUp size={12} /> },
-];
+
 
 // ─── Markdown Renderer ───────────────────────────────────────────────────────
 const renderMarkdown = (text: string) => {
@@ -295,9 +286,6 @@ const ChatBot = () => {
   };
 
   // ── Last message state ──────────────────────────────────────────────────
-  const lastMsg = messages[messages.length - 1];
-  const showQuickReplies =
-    lastMsg?.type === "bot" && !lastMsg?.isStreaming && !isTyping;
 
   // ─── Render ────────────────────────────────────────────────────────────
   const chatBot = (
@@ -383,9 +371,8 @@ const ChatBot = () => {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${
-                  msg.type === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"
+                  }`}
               >
                 {/* Bot avatar */}
                 {msg.type === "bot" && (
@@ -395,11 +382,10 @@ const ChatBot = () => {
                 )}
 
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] shadow-sm ${
-                    msg.type === "user"
+                  className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-[13px] shadow-sm ${msg.type === "user"
                       ? "rounded-br-sm bg-blue-600 text-white"
                       : "rounded-bl-sm bg-white text-slate-700"
-                  }`}
+                    }`}
                 >
                   {/* Content */}
                   <div className="space-y-0.5 leading-relaxed">
@@ -412,11 +398,10 @@ const ChatBot = () => {
 
                   {/* Footer */}
                   <div
-                    className={`mt-1.5 flex items-center gap-1 text-[10px] ${
-                      msg.type === "user"
+                    className={`mt-1.5 flex items-center gap-1 text-[10px] ${msg.type === "user"
                         ? "justify-end text-blue-100"
                         : "text-slate-400"
-                    }`}
+                      }`}
                   >
                     {msg.isStreaming && (
                       <Loader2 size={9} className="animate-spin" />
@@ -433,38 +418,16 @@ const ChatBot = () => {
             {/* Typing dots */}
             {isTyping && <TypingDots />}
 
-            {/* Quick replies */}
-            {showQuickReplies && (
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                {QUICK_REPLIES.map((qr, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => sendMessage(qr.label)}
-                    disabled={isStreaming}
-                    className="flex items-center gap-1.5 rounded-xl border
-                               border-slate-200 bg-white px-2.5 py-2 text-left
-                               text-[11.5px] font-medium text-slate-600 shadow-sm
-                               transition hover:border-blue-300 hover:bg-blue-50
-                               hover:text-blue-700 disabled:opacity-50"
-                  >
-                    <span className="shrink-0 text-blue-500">{qr.icon}</span>
-                    {qr.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
             <div ref={messagesEndRef} />
           </div>
 
           {/* ── Input ──────────────────────────────────────────────── */}
           <div className="border-t border-slate-100 bg-white px-3 py-3">
             <div
-              className={`flex items-center gap-2 rounded-full border px-4 py-2.5 transition ${
-                isStreaming
+              className={`flex items-center gap-2 rounded-full border px-4 py-2.5 transition ${isStreaming
                   ? "border-slate-200 bg-slate-50"
                   : "border-slate-200 bg-white focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-50"
-              }`}
+                }`}
             >
               <input
                 ref={inputRef}
