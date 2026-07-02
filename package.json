@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@google/genai": "^2.10.0",
+    "@google/generative-ai": "^0.24.1",
     "@react-google-maps/api": "^2.20.8",
     "react-router-dom": "^7.15.1",
     "recharts": "^3.8.1",
