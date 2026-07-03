@@ -1,7 +1,19 @@
 const Stripe = require("stripe");
 const paymentService = require("../services/payment.service");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+let stripeClient;
+
+function getStripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("Stripe is not configured");
+  }
+
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
+  }
+
+  return stripeClient;
+}
 
 exports.createCheckout = async (req, res) => {
   try {
@@ -39,7 +51,7 @@ exports.handleWebhook = async (req, res) => {
   let event;
 
   try {
-    event = stripe.webhooks.constructEvent(
+    event = getStripeClient().webhooks.constructEvent(
       req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET,
@@ -59,7 +71,7 @@ exports.handleWebhook = async (req, res) => {
 };
 
 exports.getPlans = async (_req, res) => {
-    console.log("Plans endpoint hit");
+  console.log("Plans endpoint hit");
   res.json({
     success: true,
     plans: paymentService.FEATURED_PLANS,
@@ -89,9 +101,9 @@ exports.verifyPayment = async (req, res) => {
     const session = await paymentService.verifySession(req.params.sessionId);
     if (session.metadata.userId !== req.user.id.toString()) {
       return res.status(403).json({
-        success:false,
-        message: "Forbidden"
-      })
+        success: false,
+        message: "Forbidden",
+      });
     }
     res.json({
       success: true,

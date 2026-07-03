@@ -5,11 +5,10 @@ require("dotenv").config({ path: dotenvPath });
 const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
-const prisma = require("../server/configs/prisma");
+const prisma = require("./configs/prisma");
 const passport = require("./configs/passport");
 const cors = require("cors");
 const fs = require("fs");
-
 
 const index = require("./modules/auth/routes/index");
 const propertyRoutes = require("./modules/marketplace/routes/property.routes");
@@ -20,23 +19,41 @@ const contactusRoutes = require("./modules/contactus/routes/contactus.routes");
 const messageRoutes = require("./modules/message/routes/message.routes");
 const schemeRoutes = require("./modules/schemes/routes/scheme.routes");
 const reviewRoutes = require("./modules/review/routes/review.routes");
-const aiRoutes = require("./modules/ai/routes/ai.routes")
-const paymentRoutes = require("./modules/payment/routes/payment.routes")
-const paymentController = require("./modules/payment/controllers/payment.controller")
+const aiRoutes = require("./modules/ai/routes/ai.routes");
+const paymentRoutes = require("./modules/payment/routes/payment.routes");
+const paymentController = require("./modules/payment/controllers/payment.controller");
 
 const chatRoutes = require("./modules/chatbot/routes/chat.routes");
 const app = express();
+
+const defaultClientOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const configuredClientOrigin = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.replace(/\/$/, "")
+  : null;
+const allowedOrigins = new Set(
+  [configuredClientOrigin, ...defaultClientOrigins]
+    .filter(Boolean)
+    .map((origin) => origin.replace(/\/$/, "")),
+);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin.replace(/\/$/, ""))) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked origin: ${origin}`));
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  credentials: true,
+};
 
 // ─── Create HTTP server (Socket.IO ke liye zaruri) ────────────────────────────
 const httpServer = http.createServer(app);
 
 // ─── Socket.IO setup ──────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://127.0.0.1:5173"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  },
+  cors: corsOptions,
 });
 
 // ─── Socket.IO ko globally available karo (controllers mein use karne ke liye)
@@ -66,7 +83,7 @@ io.on("connection", (socket) => {
       try {
         await prisma.user.update({
           where: { id: Number(userId) },
-          data: { lastActiveAt: new Date() }
+          data: { lastActiveAt: new Date() },
         });
       } catch (err) {
         console.error("Error updating lastActiveAt on connect:", err);
@@ -91,17 +108,21 @@ io.on("connection", (socket) => {
     const userId = onlineUsers.get(socket.id);
     if (userId) {
       onlineUsers.delete(socket.id);
-      
+
       // Update DB
       try {
         const now = new Date();
         await prisma.user.update({
           where: { id: Number(userId) },
-          data: { lastActiveAt: now }
+          data: { lastActiveAt: now },
         });
-        
+
         // Notify others
-        io.emit("user_status_update", { userId: Number(userId), isOnline: false, lastActiveAt: now.toISOString() });
+        io.emit("user_status_update", {
+          userId: Number(userId),
+          isOnline: false,
+          lastActiveAt: now.toISOString(),
+        });
       } catch (err) {
         console.error("Error updating lastActiveAt on disconnect:", err);
       }
@@ -114,7 +135,6 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-
 app.use(morgan("dev"));
 
 app.use(
@@ -123,14 +143,8 @@ app.use(
   paymentController.handleWebhook,
 );
 
-
-
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL] : ["http://localhost:5173", "http://127.0.0.1:5173"],
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
@@ -141,14 +155,19 @@ app.use("/api/ai", aiRoutes);
 app.use("/api/payments", paymentRoutes);
 console.log("Payment router mounted");
 
-["uploads/profiles", "uploads/properties", "uploads/messages", "uploads/schemes"].forEach((d) => {
+[
+  "uploads/profiles",
+  "uploads/properties",
+  "uploads/messages",
+  "uploads/schemes",
+].forEach((d) => {
   if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
 });
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", index);
 app.use("/api/properties", propertyRoutes);
-app.use("/api/seller", sellerRoutes); 
+app.use("/api/seller", sellerRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/contactus", contactusRoutes);
 app.use("/api/buyer", buyerRoutes);
@@ -156,7 +175,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/schemes", schemeRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/chat", chatRoutes);
-  
+
 app.get("/", (req, res) => {
   res.json({ success: true, message: "Zameen 360 API v1.0" });
 });
