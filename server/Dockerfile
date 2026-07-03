@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:22-bullseye-slim
 
 WORKDIR /app
 
@@ -12,4 +12,4 @@ RUN npx prisma generate
 
 EXPOSE 5000
 
-CMD ["npm","run","dev"]
+CMD ["sh", "-c", "npm ci && npx prisma generate && npm run dev"]

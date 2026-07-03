@@ -2,13 +2,16 @@ const { GoogleGenAI } = require("@google/genai");
 require("dotenv").config();
 
 if (!process.env.GEMINI_API_KEY) {
-  console.error("❌  GEMINI_API_KEY is missing from .env file");
-  process.exit(1);
+  console.warn(
+    "GEMINI_API_KEY is missing; chatbot features will be unavailable.",
+  );
 }
 
-const geminiClient = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const geminiClient = process.env.GEMINI_API_KEY
+  ? new GoogleGenAI({
+      apiKey: process.env.GEMINI_API_KEY,
+    })
+  : null;
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 
