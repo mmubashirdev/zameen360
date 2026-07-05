@@ -1,28 +1,40 @@
 const Stripe = require("stripe");
 const prisma = require("../../../configs/prisma");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2026-05-27.dahlia",
-});
+let stripeClient;
+
+function getStripeClient() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("Stripe is not configured");
+  }
+
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2026-05-27.dahlia",
+    });
+  }
+
+  return stripeClient;
+}
 
 const FEATURED_PLANS = {
   basic: {
     name: "Basic Boost",
     description: "Feature you property for 7 days",
-    amount: 10*100,
+    amount: 10 * 100,
     duration: 7,
   },
 
   premium: {
     name: "Premium Boost",
     description: "Feature your property for 15 days",
-    amount: 25*100,
+    amount: 25 * 100,
     duration: 15,
   },
   elite: {
     name: "Elite Boost",
     description: "Feature your property for 30 days",
-    amount: 50*100,
+    amount: 50 * 100,
     duration: 30,
   },
 };
@@ -44,13 +56,13 @@ exports.createCheckoutSession = async ({ propertyId, userId, plan }) => {
   }
 
   console.log(planConfig);
-  console.log(planConfig.amount)*100;
+  console.log(planConfig.amount) * 100;
   console.log({
     currency: "pkr",
-    unit_amount: planConfig.amount*100,
+    unit_amount: planConfig.amount * 100,
   });
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripeClient().checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
     line_items: [
@@ -61,7 +73,7 @@ exports.createCheckoutSession = async ({ propertyId, userId, plan }) => {
             name: planConfig.name,
             description: `${planConfig.description} - Property: ${property.title}`,
           },
-          unit_amount: planConfig.amount*100,
+          unit_amount: planConfig.amount * 100,
         },
         quantity: 1,
       },
@@ -81,7 +93,7 @@ exports.createCheckoutSession = async ({ propertyId, userId, plan }) => {
       userId,
       propertyId,
       stripeSessionId: session.id,
-      amount: planConfig.amount*100,
+      amount: planConfig.amount * 100,
       currency: "pkr",
       status: "pending",
       plan,
@@ -171,7 +183,7 @@ exports.getUserPayments = async (userId) => {
 };
 
 exports.verifySession = async (sessionId) => {
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const session = await getStripeClient().checkout.sessions.retrieve(sessionId);
   return session;
 };
 
