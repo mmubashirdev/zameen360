@@ -1,6 +1,6 @@
 # Zameen360
 
-3D Real Estate Visualization 
+3D Real Estate Visualization website 
 
 ## Tech Stack
 

@@ -4,7 +4,7 @@ import { ToastContainer } from "@shared/components/Toast";
 import { useToast } from "@shared/hooks/useToast";
 import { getErrorMessage } from "@shared/utils/errorHandler";
 import { useAuth } from "../hooks/useAuth";
-import styles from "../pages/verifyemail.module.css";
+import styles from "../styles/VerifyEmail.module.css";
 import image from "../assets/photo-1722421492323-eaf9c401befe.avif"
 
 const EMAIL_OTP_EXPIRY_MS = 60 * 1000;

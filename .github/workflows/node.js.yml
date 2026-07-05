@@ -1,0 +1,55 @@
+name: Zameen360 CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Job 1: Build and Test Client
+  client-ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./client
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25.8.1' # Use your active LTS
+          cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+
+  # Job 2: Build and Test Server
+  server-ci:
+    runs-on: ubuntu-latest
+    # Define a Postgres service for integration tests
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: ${{secrets.DB_DATABASE}}
+          POSTGRES_PASSWORD: ${{secrets.DB_PASSWORD}}
+        ports:
+          - 5432:5432
+    defaults:
+      run:
+        working-directory: ./server
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '25.8.1'
+          cache: 'npm'
+          cache-dependency-path: ./server/package-lock.json
+      - run: npm ci
+      # Example: Passing DB URL from secrets to your test environment
+      - run: npm test
+        env:
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
