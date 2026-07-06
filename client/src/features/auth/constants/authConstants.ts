@@ -50,6 +50,10 @@ export const STORAGE_KEYS = {
   USER:  "zameen360_user",
 } as const;
 
+export const VERIFY_EMAIL_RESEND_KEY = "verify_email_resend_expiry";
+export const VERIFY_EMAIL_CODE_KEY = "verify_email_code_expiry";
+export const VERIFY_EMAIL_PENDING_EMAIL_KEY = "verify_email_pending_email";
+
 // ─── Hero Features ────────────────────────────────────────────────────────────
 
 export const HERO_FEATURES = [

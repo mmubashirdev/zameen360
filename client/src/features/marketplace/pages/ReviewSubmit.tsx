@@ -421,6 +421,34 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
 
   return (
     <div className={styles.form}>
+      {/* ============ Property Review Snapshot ============ */}
+      <Section title="Property Review Snapshot" onEdit={handleEditBasic}>
+        <div className={styles.summaryGrid}>
+          <div className={styles.summaryCardItem}>
+            <span className={styles.summaryLabel}>Property Title</span>
+            <span className={styles.summaryValue}>
+              {data.title || "Untitled property"}
+            </span>
+          </div>
+          <div className={styles.summaryCardItem}>
+            <span className={styles.summaryLabel}>Property Type</span>
+            <span className={styles.summaryValue}>{data.propertyType || "House"}</span>
+          </div>
+          <div className={styles.summaryCardItem}>
+            <span className={styles.summaryLabel}>Location</span>
+            <span className={styles.summaryValue}>
+              {[data.city, data.locality].filter(Boolean).join(", ") || "Location pending"}
+            </span>
+          </div>
+          <div className={styles.summaryCardItem}>
+            <span className={styles.summaryLabel}>Price</span>
+            <span className={styles.summaryValue}>
+              {data.price ? `PKR ${formatPrice(data.price)}` : "Price pending"}
+            </span>
+          </div>
+        </div>
+      </Section>
+
       {/* ============ A. Basic Information ============ */}
       <Section title="A. Basic Information" onEdit={handleEditBasic}>
         <div className={styles.grid2}>

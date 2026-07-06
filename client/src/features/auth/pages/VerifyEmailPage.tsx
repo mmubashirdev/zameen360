@@ -6,12 +6,14 @@ import { getErrorMessage } from "@shared/utils/errorHandler";
 import { useAuth } from "../hooks/useAuth";
 import styles from "../styles/VerifyEmail.module.css";
 import image from "../assets/photo-1722421492323-eaf9c401befe.avif"
+import {
+  VERIFY_EMAIL_CODE_KEY,
+  VERIFY_EMAIL_PENDING_EMAIL_KEY,
+  VERIFY_EMAIL_RESEND_KEY,
+} from "../constants/authConstants";
 
 const EMAIL_OTP_EXPIRY_MS = 60 * 1000;
 const RESEND_COOLDOWN_MS = 60 * 1000;
-const VERIFY_EMAIL_RESEND_KEY = "verify_email_resend_expiry";
-const VERIFY_EMAIL_CODE_KEY = "verify_email_code_expiry";
-const VERIFY_EMAIL_PENDING_EMAIL_KEY = "verify_email_pending_email";
 
 interface VerifyEmailLocationState {
   email?: string;

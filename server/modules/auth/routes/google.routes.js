@@ -3,28 +3,60 @@ const passport = require("../../../configs/passport");
 const { generateAccessToken, generateRefreshToken } = require("../../../utils/generateToken");
 const prisma = require("../../../configs/prisma");
 
+const getPublicBaseUrl = (req, fallback) => {
+  const configuredUrl = process.env.CLIENT_URL || process.env.PUBLIC_URL || process.env.NGROK_URL;
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, "");
+  }
 
-router.get( "/google", passport.authenticate("google", {scope: ["profile", "email"],
+  const forwardedProto = req.headers["x-forwarded-proto"]?.split(",")[0]?.trim();
+  const proto = forwardedProto || req.protocol || "http";
+  const forwardedHost = req.headers["x-forwarded-host"]?.split(",")[0]?.trim();
+  const host = forwardedHost || req.headers.host;
+
+  if (host) {
+    return `${proto}://${host}`;
+  }
+
+  return fallback;
+};
+
+const getGoogleCallbackUrl = (req) => {
+  const baseUrl = getPublicBaseUrl(req, process.env.GOOGLE_CALLBACK_URL || "http://localhost:5000");
+  return `${baseUrl.replace(/\/$/, "")}/api/auth/google/callback`;
+};
+
+router.get("/google", (req, res, next) => {
+  const callbackURL = getGoogleCallbackUrl(req);
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
     session: false,
-  })
-);
+    callbackURL,
+  })(req, res, next);
+});
 
 // ─── Google OAuth Callback ────────────────────────────────────────────────────
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", {
-    session: false,
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=google_failed`,
-  }),
+  (req, res, next) => {
+    const callbackURL = getGoogleCallbackUrl(req);
+    const frontendBaseUrl = getPublicBaseUrl(req, process.env.CLIENT_URL || "http://localhost:5173");
+    const failureRedirect = `${frontendBaseUrl}/login?error=google_failed`;
+
+    passport.authenticate("google", {
+      session: false,
+      callbackURL,
+      failureRedirect,
+    })(req, res, next);
+  },
   async (req, res) => {
     try {
       const user = req.user;
+      const frontendBaseUrl = getPublicBaseUrl(req, process.env.CLIENT_URL || "http://localhost:5173");
 
       if (!user) {
-        return res.redirect(
-          `${process.env.CLIENT_URL}/login?error=no_user`
-        );
+        return res.redirect(`${frontendBaseUrl}/login?error=no_user`);
       }
 
       // Generate JWT tokens
@@ -61,12 +93,13 @@ router.get(
       });
 
       // Redirect to frontend with token
-      const redirectUrl = `${process.env.CLIENT_URL}/auth/google/callback?token=${accessToken}&refreshToken=${refreshToken}`;
-      
+      const redirectUrl = `${frontendBaseUrl}/auth/google/callback?token=${accessToken}&refreshToken=${refreshToken}`;
+
       res.redirect(redirectUrl);
     } catch (error) {
       console.error("Google callback error:", error);
-      res.redirect(`${process.env.CLIENT_URL}/login?error=callback_failed`);
+      const frontendBaseUrl = getPublicBaseUrl(req, process.env.CLIENT_URL || "http://localhost:5173");
+      res.redirect(`${frontendBaseUrl}/login?error=callback_failed`);
     }
   }
 );

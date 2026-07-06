@@ -33,11 +33,7 @@ function Testimonials() {
     return featuredReviews.map((review, index) => ({
       id: review.id,
       name: review.user.fullName,
-      location:
-        review.property?.locality ||
-        review.property?.city ||
-        review.user.city ||
-        "Zameen 360 Client",
+      location: review.user.city || "Verified Client",
       review: review.message,
       rating: review.rating,
       avatar:

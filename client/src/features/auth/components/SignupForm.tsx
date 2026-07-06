@@ -8,7 +8,12 @@ import {
   type SignupSchemaType,
 } from "../validations/signupSchema";
 import { useAuth, detectErrorField } from "../hooks/useAuth";
-import { PAKISTAN_CITIES } from "../constants/authConstants";
+import {
+  PAKISTAN_CITIES,
+  VERIFY_EMAIL_CODE_KEY,
+  VERIFY_EMAIL_PENDING_EMAIL_KEY,
+  VERIFY_EMAIL_RESEND_KEY,
+} from "../constants/authConstants";
 import { getErrorMessage } from "@shared/utils/errorHandler";
 import type { ToastHook } from "../types/auth.types";
 import { becomeSeller } from "../api/authApi";
@@ -65,9 +70,13 @@ export default function SignupForm({ toast }: SignupFormProps) {
         const result = await signup(data);
         setSubmitSuccess(true);
         setSignedUpUserId(result.data.userId);
-        sessionStorage.removeItem("verify_email_resend_expiry");
-        sessionStorage.removeItem("verify_email_code_expiry");
-        sessionStorage.setItem("verify_email_pending_email", result.data.email);
+        if (result.data?.resendAvailableAt) {
+          sessionStorage.setItem(VERIFY_EMAIL_RESEND_KEY, result.data.resendAvailableAt);
+        }
+        if (result.data?.otpExpiresAt) {
+          sessionStorage.setItem(VERIFY_EMAIL_CODE_KEY, result.data.otpExpiresAt);
+        }
+        sessionStorage.setItem(VERIFY_EMAIL_PENDING_EMAIL_KEY, result.data.email);
         toast.success(
           "Account Created!",
           "Please verify your email to continue."
