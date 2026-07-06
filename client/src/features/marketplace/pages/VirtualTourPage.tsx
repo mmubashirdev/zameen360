@@ -3,6 +3,10 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import * as THREE from "three";
 import { ArrowLeft, Maximize, Minimize, RotateCcw } from "lucide-react";
 import DashboardNavbar from "../components/DashboardNavbar";
+import {
+  API_BASE_URL,
+  NGROK_SKIP_BROWSER_WARNING_HEADER,
+} from "@shared/config/api";
 
 interface PanoramaRoom {
   roomName: string;
@@ -155,7 +159,9 @@ const VirtualTourPage = () => {
 
     const fetchPanoramas = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/properties/${id}`);
+        const res = await fetch(`${API_BASE_URL}/properties/${id}`, {
+          headers: NGROK_SKIP_BROWSER_WARNING_HEADER,
+        });
         const result = await res.json();
 
         if (result.success && result.data?.panoramas?.length > 0) {

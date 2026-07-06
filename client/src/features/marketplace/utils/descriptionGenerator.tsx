@@ -1,4 +1,10 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
+/* eslint-disable react-refresh/only-export-components */
+import {
+  API_BASE_URL,
+  NGROK_SKIP_BROWSER_WARNING_HEADER,
+} from "@shared/config/api";
+
+const BASE_URL = API_BASE_URL;
 
 type DescriptionPayload = {
   purpose?: string;
@@ -24,6 +30,7 @@ export async function generatePropertyDescription(data: DescriptionPayload) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...NGROK_SKIP_BROWSER_WARNING_HEADER,
     },
     body: JSON.stringify(data),
   });
@@ -34,5 +41,7 @@ export async function generatePropertyDescription(data: DescriptionPayload) {
     throw new Error(result?.message || "Failed to generate description");
   }
 
-  return typeof result?.description === "string" ? result.description.trim() : "";
+  return typeof result?.description === "string"
+    ? result.description.trim()
+    : "";
 }

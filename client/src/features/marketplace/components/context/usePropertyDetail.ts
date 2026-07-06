@@ -1,7 +1,11 @@
 // src/hooks/usePropertyDetails.ts
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  API_BASE_URL,
+  NGROK_SKIP_BROWSER_WARNING_HEADER,
+} from "@shared/config/api";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = API_BASE_URL;
 
 export interface PropertyDetail {
   id: number;
@@ -63,12 +67,14 @@ interface UsePropertyDetailsReturn {
   refetch: () => void;
 }
 
-const usePropertyDetails = (id: string | undefined): UsePropertyDetailsReturn => {
+const usePropertyDetails = (
+  id: string | undefined,
+): UsePropertyDetailsReturn => {
   const [property, setProperty] = useState<PropertyDetail | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProperty = async () => {
+  const fetchProperty = useCallback(async () => {
     // ID validate karo
     if (!id || isNaN(Number(id))) {
       setError("Invalid property ID");
@@ -79,7 +85,9 @@ const usePropertyDetails = (id: string | undefined): UsePropertyDetailsReturn =>
     setError(null);
 
     try {
-      const response = await fetch(`${BASE_URL}/api/properties/${id}`);
+      const response = await fetch(`${BASE_URL}/properties/${id}`, {
+        headers: NGROK_SKIP_BROWSER_WARNING_HEADER,
+      });
       const result = await response.json();
 
       if (!response.ok) {
@@ -96,11 +104,11 @@ const usePropertyDetails = (id: string | undefined): UsePropertyDetailsReturn =>
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchProperty();
-  }, [id]); // ID change ho to refetch
+  }, [fetchProperty]); // ID change ho to refetch
 
   return { property, loading, error, refetch: fetchProperty };
 };

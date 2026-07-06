@@ -36,9 +36,22 @@ const allowedOrigins = new Set(
     .map((origin) => origin.replace(/\/$/, "")),
 );
 
+const isAllowedNgrokOrigin = (origin) => {
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname.endsWith(".ngrok-free.dev");
+  } catch {
+    return false;
+  }
+};
+
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.has(origin.replace(/\/$/, ""))) {
+    if (
+      !origin ||
+      allowedOrigins.has(origin.replace(/\/$/, "")) ||
+      isAllowedNgrokOrigin(origin)
+    ) {
       return callback(null, true);
     }
 

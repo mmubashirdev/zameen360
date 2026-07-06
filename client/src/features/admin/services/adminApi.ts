@@ -1,6 +1,7 @@
 import axios from "axios";
+import { API_BASE_URL } from "@shared/config/api";
 
-const BASE_URL = "http://localhost:5000/api/properties";
+const BASE_URL = `${API_BASE_URL}/properties`;
 
 // Property type (jaisa backend se aata hai)
 export interface AdminProperty {
@@ -80,8 +81,8 @@ export interface AdminLoginPayload {
   password: string;
 }
 
-const AUTH_BASE = "http://localhost:5000/api/auth";
+const AUTH_BASE = `${API_BASE_URL}/auth`;
 export const adminLogin = async (payload: AdminLoginPayload) => {
   const res = await axios.post(`${AUTH_BASE}/admin/login`, payload);
   return res.data;
-}
+};

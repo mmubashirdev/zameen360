@@ -6,6 +6,7 @@ import type {
   AxiosError,
 } from "axios";
 import { STORAGE_KEYS } from "@features/auth/constants/authConstants";
+import { API_BASE_URL } from "@shared/config/api";
 
 interface ApiErrorShape {
   message: string;
@@ -15,10 +16,11 @@ interface ApiErrorShape {
 }
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
