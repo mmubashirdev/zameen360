@@ -21,7 +21,6 @@ const BuyerProfile: React.FC = () => {
     const userRole = String(user.role || '').toUpperCase();
 
     if (userRole === 'SELLER') {
-      console.log('🔄 Seller detected on buyer profile, redirecting to /profile');
       navigate('/profile', { replace: true });
       return;
     }

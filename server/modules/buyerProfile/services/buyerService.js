@@ -203,6 +203,13 @@ async function convertToSeller(userId, sellerData) {
     userId,
     newRole: "SELLER",
     newToken: newToken,
+    user: {
+      userId: updatedUser.id,
+      fullName: updatedUser.fullName,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      isVerified: updatedUser.isVerified,
+    },
   };
 }
 

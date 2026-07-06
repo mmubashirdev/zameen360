@@ -1,4 +1,5 @@
 import API from "./axios";
+import { STORAGE_KEYS } from "../features/auth/constants/authConstants";
 
 // Types
 export interface BuyerProfile {
@@ -62,12 +63,29 @@ export const updateBuyerProfile = async (
 // ✅ Switch to Seller (with additional info)
 export const switchToSeller = async (data: SwitchToSellerData) => {
   const response = await API.post("/buyer/switch-to-seller", data);
-  
-  // ⭐ Auto-update token with new SELLER role
-  if (response.data.data?.newToken) {
-    localStorage.setItem('zameen360_token', response.data.data.newToken);
+
+  const newToken = response.data.data?.newToken;
+  if (newToken) {
+    localStorage.setItem(STORAGE_KEYS.TOKEN, newToken);
   }
-  
+
+  try {
+    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+    const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+
+    const updatedUser = response.data.data?.user
+      ? { ...parsedUser, ...response.data.data.user }
+      : parsedUser
+        ? { ...parsedUser, role: "SELLER" }
+        : null;
+
+    if (updatedUser) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+    }
+  } catch (error) {
+    console.warn("Failed to sync seller user data in storage", error);
+  }
+
   return response.data.data;
 };
 

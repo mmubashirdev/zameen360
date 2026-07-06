@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { switchToSeller } from '../../../../api/buyer.api';
+import { useAuthContext } from '@features/auth/hooks/useAuth';
 
 interface Props {
   open: boolean;
@@ -20,6 +22,8 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<FormErrors>({});
+  const navigate = useNavigate();
+  const { user: authUser, setUser } = useAuthContext();
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -140,13 +144,23 @@ const SwitchToSellerModal: React.FC<Props> = ({ open, onClose }) => {
       setSaving(true);
       setError(null);
 
-      await switchToSeller(formData);
+      const result = await switchToSeller(formData);
+
+      if (result?.user || result?.newToken) {
+        setUser({
+          userId: result?.user?.userId || authUser?.userId || '',
+          fullName: result?.user?.fullName || authUser?.fullName || '',
+          email: result?.user?.email || authUser?.email || '',
+          role: 'SELLER',
+          isVerified: result?.user?.isVerified ?? authUser?.isVerified ?? false,
+        }, result?.newToken);
+      }
 
       setSuccess(true);
 
       setTimeout(() => {
-        window.location.href = '/profile';
-      }, 2000);
+        navigate('/profile', { replace: true });
+      }, 1200);
     } catch (err: any) {
       console.error('Switch error:', err);
       setError(err.response?.data?.message || 'Failed to switch to seller');

@@ -49,15 +49,12 @@ export const BuyerProvider: React.FC<{ children: ReactNode }> = ({
 
       // Only fetch if user is BUYER
       if (authUser.role !== 'BUYER') {
-        console.log("⏭️ Skipping buyer fetch - user is", authUser.role);
         setBuyer(null);
         setLoading(false);
         return;
       }
 
-      console.log("🔍 Fetching buyer profile...");
       const data = await getBuyerProfile();
-      console.log("✅ Buyer data:", data);
       setBuyer(data);
     } catch (err: any) {
       console.error("❌ Buyer fetch error:", err.response?.data?.message || err.message);

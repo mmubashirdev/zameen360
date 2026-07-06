@@ -72,7 +72,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setState(prev => ({ ...prev, isLoading: false }));
         return;
       }
-      
+
       try {
         const response = await getProfile();
         if (response.data) {
@@ -86,12 +86,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    if (!state.user && state.token) {
+    if (state.token) {
       initAuth();
     } else {
       setState(prev => ({ ...prev, isLoading: false }));
     }
-  }, [state.user, state.token, setUser, logout]);
+  }, [state.token, setUser, logout]);
 
   const value = useMemo<AuthContextType>(
     () => ({ ...state, setLoading, setUser, setError, logout }),
