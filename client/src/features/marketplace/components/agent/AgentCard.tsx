@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Phone, MessageSquare, MessageCircle, User, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "@features/auth/hooks/useAuth";
 
 interface PropertyUser {
   id: number;
@@ -26,6 +27,7 @@ interface Props {
 const AgentCard = ({ user, propertyId }: Props) => {
   const [showCallModal, setShowCallModal] = useState(false);
   const navigate = useNavigate();
+  const { user: currentUser } = useAuthContext();
 
   if (!user) {
     return (
@@ -94,35 +96,41 @@ const AgentCard = ({ user, propertyId }: Props) => {
           </div>
         )}
 
-        <div className="space-y-2">
-          {user.phone && (
+        {Number(currentUser?.userId || currentUser?.id) === user.id ? (
+          <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700">
+            This is your listing. Contact actions are hidden for your own property.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {user.phone && (
+              <button
+                onClick={() => setShowCallModal(true)}
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                <Phone className="w-4 h-4" />
+                Call Now
+              </button>
+            )}
+            {user.phone && (
+              <a
+                href={`https://wa.me/${user.phone.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp
+              </a>
+            )}
             <button
-              onClick={() => setShowCallModal(true)}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              onClick={handleMessageClick}
+              className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition cursor-pointer hover:text-blue-600"
             >
-              <Phone className="w-4 h-4" />
-              Call Now
+              <MessageSquare className="w-4 h-4 " />
+              Message
             </button>
-          )}
-          {user.phone && (
-            <a
-              href={`https://wa.me/${user.phone.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noreferrer"
-              className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              <MessageCircle className="w-4 h-4" />
-              WhatsApp
-            </a>
-          )}
-          <button
-            onClick={handleMessageClick}
-            className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition cursor-pointer hover:text-blue-600"
-          >
-            <MessageSquare className="w-4 h-4 " />
-            Message
-          </button>
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Call Modal */}
