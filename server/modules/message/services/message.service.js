@@ -128,6 +128,20 @@ class MessageService {
   }
 
   async markAsRead(conversationId, userId) {
+    const messagesToRead = await prisma.message.findMany({
+      where: {
+        conversationId: Number(conversationId),
+        senderId: { not: Number(userId) },
+        isRead: false,
+      },
+      select: {
+        id: true,
+        senderId: true,
+      },
+    });
+
+    if (messagesToRead.length === 0) return [];
+
     await prisma.message.updateMany({
       where: {
         conversationId: Number(conversationId),
@@ -136,6 +150,8 @@ class MessageService {
       },
       data: { isRead: true },
     });
+
+    return messagesToRead;
   }
 }
 

@@ -38,7 +38,7 @@ class MessageController {
       const { conversationId } = req.params;
       const messages =
         await messageService.getConversationMessages(conversationId);
-      await messageService.markAsRead(conversationId, req.user.id);
+      const readMessages = await messageService.markAsRead(conversationId, req.user.id);
 
       const onlineUsers = req.app.get("onlineUsers") || new Map();
       const onlineUserIds = new Set(onlineUsers.values());
@@ -47,6 +47,20 @@ class MessageController {
         if (m.sender) m.sender.isOnline = onlineUserIds.has(m.sender.id);
         return m;
       });
+
+      const io = req.app.get("io");
+      if (io && readMessages.length > 0) {
+        const conversationIdNum = Number(conversationId);
+        const readerId = Number(req.user.id);
+
+        readMessages.forEach((msg) => {
+          io.to(`user_${msg.senderId}`).emit("message_read", {
+            conversationId: conversationIdNum,
+            messageIds: [msg.id],
+            readerId,
+          });
+        });
+      }
 
       res.status(200).json({ success: true, data: updatedMessages });
     } catch (error) {

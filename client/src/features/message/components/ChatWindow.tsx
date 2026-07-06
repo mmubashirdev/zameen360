@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Phone, Video, Info, MoreVertical, Smile, Paperclip,
-  Camera, Mic, Play, CheckCheck, Send, X, ChevronLeft, ChevronRight, Loader2,
+  Camera, Mic, Play, Check, CheckCheck, Send, X, ChevronLeft, ChevronRight, Loader2,
 } from "lucide-react";
 import axiosInstance from "@shared/lib/axios";
 import socket from "@shared/lib/socket";
@@ -17,6 +17,7 @@ export interface Message {
   isVoice?: boolean;
   voiceDuration?: string;
   senderId: number;
+  isRead?: boolean;
   mediaUrl?: string;
   mediaType?: string;
   sender?: { id: number; fullName: string; profilePicture?: string; lastActiveAt?: string };
@@ -99,8 +100,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
       scrollToBottom();
     };
 
+    const onMessageRead = (data: { conversationId: number; messageIds: number[] }) => {
+      if (Number(data.conversationId) !== Number(conversationIdRef.current)) return;
+      setMessages((prev) =>
+        prev.map((msg) =>
+          data.messageIds.includes(Number(msg.id)) ? { ...msg, isRead: true } : msg,
+        ),
+      );
+    };
+
     socket.on("connect", onConnect);
     socket.on("receive_message", onReceiveMessage);
+    socket.on("message_read", onMessageRead);
 
     if (!socket.connected) {
       socket.connect();
@@ -122,6 +133,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
     return () => {
       socket.off("connect", onConnect);
       socket.off("receive_message", onReceiveMessage);
+      socket.off("message_read", onMessageRead);
       socket.off("connect_error");
       socket.off("user_status_update", onStatusUpdate);
     };
@@ -349,6 +361,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
   const isOnline = status ? status.isOnline : (otherUserMsg?.sender as any)?.isOnline || false;
   const lastActiveAt = status?.lastActiveAt || otherUserMsg?.sender?.lastActiveAt || null;
 
+  const renderDeliveryIcon = (msg: Message) => {
+    if (!msg.isSender) return null;
+
+    return msg.isRead ? (
+      <CheckCheck className="w-3.5 h-3.5 text-blue-500" />
+    ) : (
+      <Check className="w-3.5 h-3.5 text-gray-400" />
+    );
+  };
+
   return (
     <>
       {/* ── Main Chat Container ─────────────────────────────────────────────── */}
@@ -429,7 +451,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                       onError={handleAvatarError}
                       className="w-9 h-9 rounded-full object-cover"
                     />
-                    <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
+                    {isOnline && (
+                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
+                    )}
                   </div>
                 )}
 
@@ -451,7 +475,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                       </div>
                       <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
                         <span className="text-[11px] text-gray-400">{formatTime(msg.createdAt)}</span>
-                        {msg.isSender && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
+                        {msg.isSender && renderDeliveryIcon(msg)}
                       </div>
                     </>
 
@@ -473,7 +497,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                         </div>
                         <span className="text-xs text-gray-600 font-medium">{msg.voiceDuration || "0:15"}</span>
                       </div>
-                      <span className="text-[11px] text-gray-400 mt-1 px-1">{formatTime(msg.createdAt)}</span>
+                      <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
+                        <span className="text-[11px] text-gray-400">{formatTime(msg.createdAt)}</span>
+                        {msg.isSender && renderDeliveryIcon(msg)}
+                      </div>
                     </>
 
                   ) : (
@@ -490,7 +517,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
                       </div>
                       <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isSender ? "justify-end" : "justify-start"}`}>
                         <span className="text-[11px] text-gray-400">{formatTime(msg.createdAt)}</span>
-                        {msg.isSender && <CheckCheck className="w-3.5 h-3.5 text-blue-400" />}
+                        {msg.isSender && renderDeliveryIcon(msg)}
                       </div>
                     </>
                   )}

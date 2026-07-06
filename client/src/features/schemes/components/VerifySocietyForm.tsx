@@ -16,8 +16,22 @@ const ACCEPTED_DOCUMENT_TYPES = [
 ];
 const MAX_DOCUMENT_SIZE = 5 * 1024 * 1024;
 
-const trimString = (message: string, min = 2) =>
-  z.string().trim().min(min, message);
+const requiredText = (fieldName: string, min = 3, max = 120) =>
+  z
+    .string()
+    .trim()
+    .min(min, `${fieldName} must be at least ${min} characters`)
+    .max(max, `${fieldName} must be at most ${max} characters`);
+
+const numericString = (fieldName: string, minLength = 1, maxLength = 20, message?: string) =>
+  z
+    .string()
+    .trim()
+    .refine((value) => /^\d+$/.test(value), message || `${fieldName} must contain digits only`)
+    .refine(
+      (value) => value.length >= minLength && value.length <= maxLength,
+      message || `${fieldName} must be between ${minLength} and ${maxLength} digits`,
+    );
 
 const optionalUrl = z
   .string()
@@ -27,6 +41,12 @@ const optionalUrl = z
   .refine((value) => !value || z.string().url().safeParse(value).success, "Must be a valid URL");
 
 const optionalText = z.string().trim().optional().or(z.literal(""));
+const dateString = z
+  .string()
+  .trim()
+  .optional()
+  .or(z.literal(""))
+  .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), "Please enter a valid date");
 
 const hasFile = (value: unknown) =>
   Boolean(
@@ -57,59 +77,77 @@ const fileSchema = z
 
 const requiredFileSchema = fileSchema.refine(hasFile, "This document is required");
 
-const verifySocietySchema = z.object({
-  // Society Info
-  societyName: trimString("Society name is required"),
-  societyType: z.enum(["Residential", "Commercial", "Mixed Use"], { message: "Society type is required" }),
-  city: trimString("City is required"),
-  areaSector: trimString("Area / Sector is required"),
-  address: trimString("Complete address is required", 5),
-  googleMapsLocation: optionalUrl,
-  website: optionalUrl,
-  officialEmail: z.string().trim().email("Invalid email").optional().or(z.literal("")),
-  officialContact: z
-    .string()
-    .trim()
-    .regex(/^\d{10,15}$/, "Official contact must contain 10 to 15 digits only"),
+const plotSizeValues = ["3 Marla", "5 Marla", "7 Marla", "10 Marla", "1 Kanal", "2 Kanal", "Commercial Plots"] as const;
+const plotSizeSchema = z.enum(plotSizeValues);
 
-  // Developer Info
-  developerCompany: trimString("Company name is required"),
-  ownerName: trimString("Owner/Rep name is required"),
-  cnicNumber: z.string().trim().regex(/^\d{13}$/, "CNIC must contain exactly 13 digits only"),
-  designation: trimString("Designation is required"),
-  contactNumber: z
-    .string()
-    .trim()
-    .regex(/^03\d{9}$/, "Mobile number must be 11 digits and start with 03"),
-  emailAddress: z.string().trim().min(1, "Email is required").email("Invalid email"),
+const verifySocietySchema = z
+  .object({
+    // Society Info
+    societyName: requiredText("Society name"),
+    societyType: z.enum(["Residential", "Commercial", "Mixed Use"], { message: "Society type is required" }),
+    city: requiredText("City"),
+    areaSector: requiredText("Area / Sector"),
+    address: requiredText("Complete address", 5, 220),
+    googleMapsLocation: optionalUrl,
+    website: optionalUrl,
+    officialEmail: z.string().trim().email("Invalid email").optional().or(z.literal("")),
+    officialContact: numericString("Official contact number", 10, 15, "Official contact number must contain 10 to 15 digits only"),
 
-  // Documents
-  cnicFront: requiredFileSchema,
-  cnicBack: requiredFileSchema,
-  companyRegistration: requiredFileSchema,
-  ntnCertificate: fileSchema,
-  authorityLetter: fileSchema,
+    // Developer Info
+    developerCompany: requiredText("Company name"),
+    ownerName: requiredText("Owner / Representative name"),
+    cnicNumber: numericString("CNIC number", 13, 13, "CNIC must contain exactly 13 digits only"),
+    designation: requiredText("Designation"),
+    contactNumber: numericString("Contact number", 11, 11, "Mobile number must be 11 digits and start with 03").refine(
+      (value) => /^03\d{9}$/.test(value),
+      "Mobile number must be 11 digits and start with 03",
+    ),
+    emailAddress: z.string().trim().min(1, "Email is required").email("Invalid email"),
 
-  // NOC Status
-  nocStatus: z.enum(["Approved", "Under Process", "Not Available"], { message: "NOC Status is required" }),
-  approvingAuthority: z.enum(["LDA", "RDA", "CDA", "FDA", "MDA", "PHATA", "Other"], { message: "Approving authority is required" }),
-  nocNumber: optionalText,
-  nocIssueDate: optionalText,
-  nocExpiryDate: optionalText,
+    // Documents
+    cnicFront: requiredFileSchema,
+    cnicBack: requiredFileSchema,
+    companyRegistration: requiredFileSchema,
+    ntnCertificate: fileSchema,
+    authorityLetter: fileSchema,
 
-  // Upload Documents
-  nocCopy: requiredFileSchema,
-  ownershipDocuments: requiredFileSchema,
-  fardRegistry: requiredFileSchema,
-  landTransfer: requiredFileSchema,
+    // NOC Status
+    nocStatus: z.enum(["Approved", "Under Process", "Not Available"], { message: "NOC Status is required" }),
+    approvingAuthority: z.enum(["LDA", "RDA", "CDA", "FDA", "MDA", "PHATA", "Other"], { message: "Approving authority is required" }),
+    nocNumber: optionalText,
+    nocIssueDate: dateString,
+    nocExpiryDate: dateString,
 
-  // Plot Information
-  availablePlotSizes: z.array(z.string()).min(1, "Select at least one plot size"),
-});
+    // Upload Documents
+    nocCopy: requiredFileSchema,
+    ownershipDocuments: requiredFileSchema,
+    fardRegistry: requiredFileSchema,
+    landTransfer: requiredFileSchema,
+
+    // Plot Information
+    availablePlotSizes: z.array(plotSizeSchema).min(1, "Select at least one plot size"),
+  })
+  .superRefine((data, ctx) => {
+    if ((data.nocStatus === "Approved" || data.nocStatus === "Under Process") && !data.nocNumber.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["nocNumber"],
+        message: "NOC number is required when NOC status is approved or under process",
+      });
+    }
+
+    if (data.nocIssueDate && data.nocExpiryDate && data.nocExpiryDate < data.nocIssueDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["nocExpiryDate"],
+        message: "NOC expiry date cannot be earlier than the issue date",
+      });
+    }
+  });
 
 type VerifySocietyFormValues = z.infer<typeof verifySocietySchema>;
 
-const PLOT_SIZES = ["3 Marla", "5 Marla", "7 Marla", "10 Marla", "1 Kanal", "2 Kanal", "Commercial Plots"];
+const PLOT_SIZES = [...plotSizeValues];
 
 const VerifySocietyForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -122,6 +160,9 @@ const VerifySocietyForm = () => {
     formState: { errors },
   } = useForm<VerifySocietyFormValues>({
     resolver: zodResolver(verifySocietySchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    criteriaMode: "all",
     defaultValues: {
       availablePlotSizes: [],
     },
@@ -187,6 +228,20 @@ const VerifySocietyForm = () => {
       </label>
       <input
         type={type}
+        inputMode={type === "date" ? undefined : "numeric"}
+        pattern={type === "date" ? undefined : "[0-9]*"}
+        onKeyDown={(event) => {
+          if (type === "date") return;
+          const allowedKeys = ["Backspace", "Delete", "Tab", "ArrowLeft", "ArrowRight", "Home", "End"];
+          if (allowedKeys.includes(event.key)) return;
+          if (/\d/.test(event.key)) return;
+          event.preventDefault();
+        }}
+        onPaste={(event) => {
+          if (type === "date") return;
+          const pasted = event.clipboardData.getData("text");
+          if (!/^\d*$/.test(pasted)) event.preventDefault();
+        }}
         {...register(name)}
         placeholder={placeholder}
         className="px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
