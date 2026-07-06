@@ -1,8 +1,7 @@
 // src/features/marketplace/components/hooks/useSocket.ts
 import { useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
-
-const SOCKET_URL = "http://localhost:5000";
+import { SOCKET_URL } from "@shared/config/api";
 
 // ─── Singleton socket instance ────────────────────────────────────────────────
 let socketInstance: Socket | null = null;

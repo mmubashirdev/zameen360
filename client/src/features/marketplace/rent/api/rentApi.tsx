@@ -1,5 +1,6 @@
 // client/src/features/marketplace/rent/api/rentApi.ts
 import axios from "axios";
+import { API_BASE_URL } from "@shared/config/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,10 +41,11 @@ interface ApiResponse {
 // ─── Axios Instance ───────────────────────────────────────────────────────────
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 

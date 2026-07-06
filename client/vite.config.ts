@@ -15,6 +15,25 @@ export default defineConfig({
       brotliSize: true,
     }),
   ],
+  server: {
+    host: true,
+    allowedHosts: [".ngrok-free.dev"],
+    proxy: {
+      "/api": {
+        target: "http://backend:5000",
+        changeOrigin: true,
+      },
+      "/socket.io": {
+        target: "http://backend:5000",
+        ws: true,
+        changeOrigin: true,
+      },
+      "/uploads": {
+        target: "http://backend:5000",
+        changeOrigin: true,
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

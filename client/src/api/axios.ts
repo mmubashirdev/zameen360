@@ -1,12 +1,14 @@
 import axios from "axios";
+import { API_BASE_URL } from "@shared/config/api";
 
 // ⚠️ Same key jo auth ke STORAGE_KEYS.TOKEN mein hai
 const TOKEN_KEY = "zameen360_token";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true",
   },
 });
 
@@ -19,7 +21,7 @@ API.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor
@@ -30,7 +32,7 @@ API.interceptors.response.use(
       console.error("Authentication failed - token invalid/expired");
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default API;

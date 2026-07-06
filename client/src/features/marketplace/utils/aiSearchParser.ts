@@ -1,4 +1,9 @@
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
+import {
+  API_BASE_URL,
+  NGROK_SKIP_BROWSER_WARNING_HEADER,
+} from "@shared/config/api";
+
+const BASE_URL = API_BASE_URL;
 
 export type ParsedSearchFilters = {
   type: string | null;
@@ -71,16 +76,21 @@ type ApiResponse = {
   message?: string;
 };
 
-export async function parseSearchQuery(query: string): Promise<ParsedSearchFilters> {
+export async function parseSearchQuery(
+  query: string,
+): Promise<ParsedSearchFilters> {
   const response = await fetch(`${BASE_URL}/ai/parse-search`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...NGROK_SKIP_BROWSER_WARNING_HEADER,
     },
     body: JSON.stringify({ query }),
   });
 
-  const result = (await response.json().catch(() => null)) as ApiResponse | null;
+  const result = (await response
+    .json()
+    .catch(() => null)) as ApiResponse | null;
 
   if (!response.ok) {
     throw new Error(result?.message || "Failed to parse search query");
@@ -116,8 +126,10 @@ export async function parseSearchQuery(query: string): Promise<ParsedSearchFilte
         : typeof filters?.max_price === "number"
           ? filters.max_price
           : null,
-    min_price: typeof filters?.min_price === "number" ? filters.min_price : null,
-    max_price: typeof filters?.max_price === "number" ? filters.max_price : null,
+    min_price:
+      typeof filters?.min_price === "number" ? filters.min_price : null,
+    max_price:
+      typeof filters?.max_price === "number" ? filters.max_price : null,
     features: canonicalFeatures,
     search: filters?.search ?? null,
   };

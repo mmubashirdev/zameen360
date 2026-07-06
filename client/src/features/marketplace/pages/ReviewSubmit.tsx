@@ -4,14 +4,16 @@ import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Edit, Save, Rocket, MapPin } from "lucide-react";
 import toast from "react-hot-toast";
+import {
+  API_BASE_URL,
+  NGROK_SKIP_BROWSER_WARNING_HEADER,
+} from "@shared/config/api";
 import { useProperty } from "../components/context/useProperty";
 import { useAuthContext } from "../../auth/context/useAuthContext";
 import type { PropertyData } from "../components/context/PropertyContext";
 import styles from "../components/media/styles/ReviewSubmit.module.css";
 import Map from "../components/media/Map";
 import { reverseGeocodeLatLng } from "../utils/geocoding";
-import FormLoader from "../../../shared/components/FormLoader";
-import Loader from "../../../shared/Loader";
 
 interface ReviewSubmitProps {
   onBack?: () => void;
@@ -310,9 +312,12 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       setPhase("Creating property...");
       setProgress(50);
 
-      const res = await fetch("http://localhost:5000/api/properties", {
+      const res = await fetch(`${API_BASE_URL}/properties`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          ...NGROK_SKIP_BROWSER_WARNING_HEADER,
+        },
         body: formData,
       });
 
@@ -346,7 +351,11 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
               // ✅ Provide fallback if roomName is undefined
               const name = p.roomName || `Room ${index + 1}`;
               roomNames.push(name);
-              hotspotsArray.push((p as any).hotspots || []);
+              const hotspots = "hotspots" in p ? p.hotspots : undefined;
+              const normalizedHotspots: unknown[] = Array.isArray(hotspots)
+                ? hotspots
+                : [];
+              hotspotsArray.push(normalizedHotspots);
             }
           });
 
@@ -355,10 +364,13 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
             panoramaFormData.append("roomNames", JSON.stringify(roomNames));
             panoramaFormData.append("hotspots", JSON.stringify(hotspotsArray));
             const panoramaRes = await fetch(
-              `http://localhost:5000/api/properties/${propertyId}/panoramas`,
+              `${API_BASE_URL}/properties/${propertyId}/panoramas`,
               {
                 method: "POST",
-                headers: { Authorization: `Bearer ${authToken}` },
+                headers: {
+                  Authorization: `Bearer ${authToken}`,
+                  ...NGROK_SKIP_BROWSER_WARNING_HEADER,
+                },
                 body: panoramaFormData,
               },
             );

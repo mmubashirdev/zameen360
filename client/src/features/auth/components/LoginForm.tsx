@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import styles from "../styles/login.module.css";
 import { useAuth, detectErrorField } from "../hooks/useAuth";
 import { getErrorMessage } from "@shared/utils/errorHandler";
+import { API_BASE_URL } from "@shared/config/api";
 import {
   loginSchema,
   type LoginSchemaType,
@@ -85,9 +86,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
   };
 
   const handleGoogleLogin = () => {
-    const baseUrl =
-      import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
-    window.location.href = `${baseUrl}/auth/google`;
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   return (

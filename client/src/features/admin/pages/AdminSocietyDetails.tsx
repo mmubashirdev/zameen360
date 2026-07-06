@@ -65,12 +65,10 @@ const AdminSocietyDetails = () => {
 
   if (!app) return null;
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-  
   const getDocUrl = (path?: string) => {
     if (!path) return null;
     if (path.startsWith("http")) return path;
-    return `${API_URL}${path}`;
+    return path.startsWith("/") ? path : `/${path}`;
   };
 
   const InfoRow = ({ label, value }: { label: string, value?: string | React.ReactNode }) => (
@@ -91,7 +89,7 @@ const AdminSocietyDetails = () => {
 
     return (
       <div className="py-4 border-b border-gray-100 last:border-0 flex flex-col sm:flex-row sm:items-start sm:gap-4">
-        <span className="w-full sm:w-1/3 text-sm font-medium text-gray-500 mb-2 sm:mb-0 flex-shrink-0">{label}</span>
+        <span className="w-full sm:w-1/3 text-sm font-medium text-gray-500 mb-2 sm:mb-0 shrink-0">{label}</span>
         <div className="flex-1">
           {!isPdf && !imgError ? (
             <button

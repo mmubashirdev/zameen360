@@ -1,15 +1,14 @@
 import { useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import toast from "react-hot-toast";
+import { SOCKET_URL } from "@shared/config/api";
 
 export const useSocket = () => {
   const socketRef = useRef<Socket | null>(null);
 
   useEffect(() => {
     // Initialize socket connection
-    const serverURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-    
-    socketRef.current = io(serverURL, {
+    socketRef.current = io(SOCKET_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,

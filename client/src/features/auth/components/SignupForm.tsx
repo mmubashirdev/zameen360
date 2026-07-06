@@ -12,6 +12,7 @@ import { PAKISTAN_CITIES } from "../constants/authConstants";
 import { getErrorMessage } from "@shared/utils/errorHandler";
 import type { ToastHook } from "../types/auth.types";
 import { becomeSeller } from "../api/authApi";
+import { API_BASE_URL } from "@shared/config/api";
 
 import PasswordStrength from "./PasswordStrength";
 import SocialLogin from "./SocialLogin";
@@ -115,9 +116,7 @@ export default function SignupForm({ toast }: SignupFormProps) {
 
   const handleGoogleClick = useCallback(() => {
     setIsGoogleLoading(true);
-    const baseUrl =
-      import.meta.env.VITE_API_BASE_URL ?? "http://localhost:5000/api";
-    window.location.href = `${baseUrl}/auth/google`;
+    window.location.href = `${API_BASE_URL}/auth/google`;
   }, []);
 
   // ── Switch to Seller ──────────────────────────────────────────────────────

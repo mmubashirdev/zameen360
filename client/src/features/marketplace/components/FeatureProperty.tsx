@@ -3,8 +3,12 @@ import { useState, useEffect, useRef } from "react";
 import { MdLocationOn } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/FeatureProperty.module.css";
+import {
+  API_BASE_URL,
+  NGROK_SKIP_BROWSER_WARNING_HEADER,
+} from "@shared/config/api";
 
-const BASE_URL = "http://localhost:5000";
+const BASE_URL = API_BASE_URL;
 const AUTO_SLIDE_INTERVAL = 4000; // ⭐ 4 seconds per slide
 
 interface Property {
@@ -31,7 +35,7 @@ interface Property {
 const formatPrice = (
   price: string | null,
   purpose: string | null,
-  rent: string | null
+  rent: string | null,
 ): string => {
   const isRent = purpose?.toLowerCase() === "rent";
   const value = isRent ? rent : price;
@@ -39,19 +43,19 @@ const formatPrice = (
   if (!value) return "Price on Request";
 
   const num = Number(value);
-  
+
   if (num >= 10000000) {
     return isRent
       ? `PKR ${(num / 10000000).toFixed(2)} Cr/mo`
       : `PKR ${(num / 10000000).toFixed(2)} Cr`;
   }
-  
+
   if (num >= 100000) {
     return isRent
       ? `PKR ${(num / 100000).toFixed(2)} Lac/mo`
       : `PKR ${(num / 100000).toFixed(2)} Lac`;
   }
-  
+
   return isRent
     ? `PKR ${num.toLocaleString()}/mo`
     : `PKR ${num.toLocaleString()}`;
@@ -64,7 +68,7 @@ function FeaturedProperties() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false); // ⭐ Pause on hover
-const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const itemsPerPage = 4;
   const maxIndex = Math.max(0, properties.length - itemsPerPage);
@@ -75,7 +79,12 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${BASE_URL}/api/properties?status=approved&featured=true`);
+        const res = await fetch(
+          `${BASE_URL}/properties?status=approved&featured=true`,
+          {
+            headers: NGROK_SKIP_BROWSER_WARNING_HEADER,
+          },
+        );
         const result = await res.json();
 
         if (!res.ok) throw new Error(result.message || "Failed to fetch");
@@ -138,7 +147,9 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
             <h2 className={styles.title}>
               Featured <span>Properties</span>
             </h2>
-            <p className={styles.subtitle}>Handpicked properties just for you</p>
+            <p className={styles.subtitle}>
+              Handpicked properties just for you
+            </p>
           </div>
           <div style={{ display: "flex", gap: "20px", overflow: "hidden" }}>
             {[1, 2, 3, 4].map((i) => (
@@ -168,7 +179,9 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
             <h2 className={styles.title}>
               Featured <span>Properties</span>
             </h2>
-            <p className={styles.subtitle}>Handpicked properties just for you</p>
+            <p className={styles.subtitle}>
+              Handpicked properties just for you
+            </p>
           </div>
           <div
             style={{
@@ -179,8 +192,16 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
             }}
           >
             <div style={{ fontSize: "48px", marginBottom: "12px" }}>🏠</div>
-            <h3 style={{ fontSize: "18px", color: "#374151", marginBottom: "8px" }}>
-              {error ? "Couldn't load properties" : "No properties available yet"}
+            <h3
+              style={{
+                fontSize: "18px",
+                color: "#374151",
+                marginBottom: "8px",
+              }}
+            >
+              {error
+                ? "Couldn't load properties"
+                : "No properties available yet"}
             </h3>
             <p style={{ color: "#6b7280", fontSize: "14px" }}>
               {error || "Check back soon for new listings!"}
@@ -233,8 +254,9 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
                 const isRent = property.purpose?.toLowerCase() === "rent";
                 const statusLabel = isRent ? "For Rent" : "For Sale";
                 const location =
-                  [property.locality, property.city].filter(Boolean).join(", ") ||
-                  "Location not specified";
+                  [property.locality, property.city]
+                    .filter(Boolean)
+                    .join(", ") || "Location not specified";
 
                 return (
                   <div className={styles.card} key={property.id}>
@@ -271,7 +293,7 @@ const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
                         {formatPrice(
                           property.price,
                           property.purpose,
-                          property.monthlyRent
+                          property.monthlyRent,
                         )}
                       </p>
                       <div className={styles.features}>

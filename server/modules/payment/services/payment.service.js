@@ -20,7 +20,7 @@ function getStripeClient() {
 const FEATURED_PLANS = {
   basic: {
     name: "Basic Boost",
-    description: "Feature you property for 7 days",
+    description: "Feature your property for 7 days",
     amount: 10 * 100,
     duration: 7,
   },
@@ -56,7 +56,7 @@ exports.createCheckoutSession = async ({ propertyId, userId, plan }) => {
   }
 
   console.log(planConfig);
-  console.log(planConfig.amount) * 100;
+  console.log(planConfig.amount);
   console.log({
     currency: "pkr",
     unit_amount: planConfig.amount * 100,
@@ -73,7 +73,7 @@ exports.createCheckoutSession = async ({ propertyId, userId, plan }) => {
             name: planConfig.name,
             description: `${planConfig.description} - Property: ${property.title}`,
           },
-          unit_amount: planConfig.amount * 100,
+          unit_amount: planConfig.amount,
         },
         quantity: 1,
       },
