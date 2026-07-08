@@ -1,9 +1,6 @@
 import API from '../../../../src/api/axios';
 
-const getAuthHeaders = ()=>{
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("token") || localStorage.getItem("authToken");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+// No manual auth headers needed, API instance handles cookies
 
 export interface FeaturedPlan {
   name: string;
@@ -41,20 +38,17 @@ export const paymentService = {
 
   createCheckout: async (propertyId: number, plan: string): Promise<string> =>{
     const res = await API.post(`payments/checkout`,
-      {propertyId, plan},
-      { headers: getAuthHeaders() }
+      {propertyId, plan}
     )
     return res.data.url;
   },
 
   verifySession: async (sessionId: string): Promise<PaymentVerification>=>{
-    const res = await API.post(`payments/verify-session/${sessionId}`,
-      {headers: getAuthHeaders()}
-    )
+    const res = await API.post(`payments/verify-session/${sessionId}`)
     return res.data.data
   },
   getMyPayments: async (): Promise<Payment[]>=>{
-    const res = await API.get(`payments/my-payments`, { headers: getAuthHeaders() });
+    const res = await API.get(`payments/my-payments`);
     return res.data.data;
   }
 }

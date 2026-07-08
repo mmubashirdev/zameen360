@@ -9,6 +9,7 @@ const prisma = require("./configs/prisma");
 const passport = require("./configs/passport");
 const cors = require("cors");
 const fs = require("fs");
+const cookieParser = require("cookie-parser");
 
 const index = require("./modules/auth/routes/index");
 const propertyRoutes = require("./modules/marketplace/routes/property.routes");
@@ -141,6 +142,23 @@ io.on("connection", (socket) => {
       }
     }
   });
+
+  // Automatically mark message as read if the recipient has the chat open
+  socket.on("mark_message_read", async ({ conversationId, messageId, senderId }) => {
+    try {
+      await prisma.message.update({
+        where: { id: Number(messageId) },
+        data: { isRead: true },
+      });
+      // Notify the original sender that their message was read
+      io.to(`user_${senderId}`).emit("message_read", {
+        conversationId: Number(conversationId),
+        messageIds: [Number(messageId)],
+      });
+    } catch (err) {
+      console.error("Error marking message as read via socket:", err);
+    }
+  });
 });
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
@@ -160,6 +178,7 @@ app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(passport.initialize());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

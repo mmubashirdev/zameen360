@@ -3,12 +3,13 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  useRef,
 } from "react";
 import type { ReactNode } from "react";
 import type { AuthContextType, AuthState, User } from "../types/auth.types";
-import { getStoredUser, getStoredToken, clearAuth } from "../services/authService";
+import { getStoredUser, clearAuth } from "../services/authService";
 import { STORAGE_KEYS } from "../constants/authConstants";
-import { getProfile } from "../api/authApi";
+import { getProfile, logout as logoutApi } from "../api/authApi";
 import { AuthContext } from "./authContextStore";
 
 interface AuthProviderProps {
@@ -18,11 +19,13 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   const [state, setState] = useState<AuthState>({
     user:            getStoredUser(),
-    token:           getStoredToken(),
-    isAuthenticated: Boolean(getStoredToken()), // Optimistically authenticate if token exists
+    token:           null,
+    isAuthenticated: Boolean(getStoredUser()), // Optimistically authenticate if user exists
     isLoading:       true, // Start loading if we need to fetch user
     error:           null,
   });
+
+  const isInitialized = useRef(false);
 
   const setLoading = useCallback((isLoading: boolean) => {
     setState((prev) => ({ ...prev, isLoading }));
@@ -32,9 +35,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     (user: User | null, token?: string) => {
       if (user) {
         localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-        if (token) {
-          localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-        }
       } else {
         clearAuth();
       }
@@ -54,21 +54,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setState((prev) => ({ ...prev, error, isLoading: false }));
   }, []);
 
-  const logout = useCallback(() => {
-    clearAuth();
-    setState({
-      user:            null,
-      token:           null,
-      isAuthenticated: false,
-      isLoading:       false,
-      error:           null,
-    });
+  const logout = useCallback(async () => {
+    try {
+      await logoutApi();
+    } catch (err) {
+      console.error("Logout API failed:", err);
+    } finally {
+      clearAuth();
+      setState({
+        user:            null,
+        token:           null,
+        isAuthenticated: false,
+        isLoading:       false,
+        error:           null,
+      });
+    }
   }, []);
 
   useEffect(() => {
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+
     const initAuth = async () => {
-      const token = getStoredToken();
-      if (!token) {
+      const user = getStoredUser();
+      if (!user) {
         setState(prev => ({ ...prev, isLoading: false }));
         return;
       }
@@ -76,7 +85,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const response = await getProfile();
         if (response.data) {
-          setUser(response.data as User, token);
+          setUser(response.data as User);
         } else {
           logout();
         }
@@ -86,12 +95,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    if (state.token) {
-      initAuth();
-    } else {
-      setState(prev => ({ ...prev, isLoading: false }));
-    }
-  }, [state.token, setUser, logout]);
+    initAuth();
+  }, [setUser, logout]);
 
   const value = useMemo<AuthContextType>(
     () => ({ ...state, setLoading, setUser, setError, logout }),

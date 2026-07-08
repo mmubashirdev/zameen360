@@ -354,9 +354,6 @@ const Buy = () => {
   };
 
   const { data, isLoading, refetch } = useProperties(filters);
-  console.log("[Buypage] query filters:", filters);
-  console.log("[Buypage] query raw data:", data);
-  console.log("[Buypage] data?.data isArray:", Array.isArray(data?.data));
 
   // backend returns either { success, count, data: [...] } or directly an array
   const properties = Array.isArray(data?.data)
@@ -364,7 +361,6 @@ const Buy = () => {
     : Array.isArray(data)
       ? data
       : [];
-  console.log("[Buypage] properties length:", properties.length);
 
   return (
     <div className={styles.page}>

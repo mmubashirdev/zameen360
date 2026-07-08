@@ -126,6 +126,33 @@ exports.createApplication = async (req, res) => {
       });
     }
 
+    // Check if the email is already registered in the User table
+    const existingUser = await prisma.user.findUnique({
+      where: { email: validation.data.emailAddress },
+    });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "This email is already registered with an account.",
+        errors: { emailAddress: ["Email is already in use"] },
+      });
+    }
+
+    // Check if the email is already used in a pending or approved society application
+    const existingApplication = await prisma.societyVerification.findFirst({
+      where: { 
+        emailAddress: validation.data.emailAddress,
+        status: { in: ["PENDING", "APPROVED"] } 
+      },
+    });
+    if (existingApplication) {
+      return res.status(400).json({
+        success: false,
+        message: "An application with this email already exists.",
+        errors: { emailAddress: ["Email is already in use for a society application"] },
+      });
+    }
+
     // Upload files to Cloudinary
     const files = req.files || {};
     const missingFiles = requiredApplicationFiles.filter(
@@ -481,13 +508,22 @@ exports.updateApplicationStatus = async (req, res) => {
 
           user = await prisma.user.create({
             data: {
-              fullName: application.ownerName || "Society Owner",
+              fullName: application.societyName || application.ownerName || "Society Owner",
               email: application.emailAddress,
               phone: application.contactNumber,
               passwordHash,
               role: "SOCIETY_OWNER",
               isVerified: false,
               isActive: false,
+            },
+          });
+        } else {
+          // Update existing user to have SOCIETY_OWNER role and use society name as their display name
+          user = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              role: "SOCIETY_OWNER",
+              fullName: application.societyName || user.fullName,
             },
           });
         }
@@ -598,18 +634,24 @@ exports.setupSocietyOwnerPassword = async (req, res) => {
     const accessToken = generateAccessToken(updatedUser.id, updatedUser.role);
     const refreshToken = generateRefreshToken(updatedUser.id, updatedUser.role);
 
-    // Set refresh token in cookie
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: "Lax",
+      path: "/api/auth/refresh",
+      maxAge: 15 * 60 * 1000,
     });
 
     res.status(200).json({
       success: true,
       message: "Password set successfully. You are now logged in.",
-      accessToken,
       user: {
         id: updatedUser.id,
         fullName: updatedUser.fullName,

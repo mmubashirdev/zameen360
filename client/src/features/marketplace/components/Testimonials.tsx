@@ -1,47 +1,14 @@
 // Testimonials.tsx
-import { useEffect, useMemo, useState } from "react";
-import { getFeaturedReviews } from "@features/review/api/reviewApi";
-import type { FeaturedReview } from "@features/review/types";
+import { useState, useEffect } from "react";
 import { testimonialsData } from "../data/testimonialData";
 import type { Testimonial } from "../data/testimonialData";
 import styles from "../styles/Testimonials.module.css";
 
 function Testimonials() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [featuredReviews, setFeaturedReviews] = useState<FeaturedReview[]>([]);
   const itemsPerPage = 3;
 
-  useEffect(() => {
-    let active = true;
-
-    getFeaturedReviews()
-      .then((reviews) => {
-        if (active) setFeaturedReviews(reviews);
-      })
-      .catch(() => {
-        if (active) setFeaturedReviews([]);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const clients = useMemo<Testimonial[]>(() => {
-    if (featuredReviews.length === 0) return testimonialsData;
-
-    return featuredReviews.map((review, index) => ({
-      id: review.id,
-      name: review.user.fullName,
-      location: review.user.city || "Verified Client",
-      review: review.message,
-      rating: review.rating,
-      avatar:
-        review.user.profilePicture ||
-        testimonialsData[index % testimonialsData.length].avatar,
-    }));
-  }, [featuredReviews]);
-
+  const clients = testimonialsData;
   const testimonialClients = clients.slice(0, 3);
   const maxIndex = Math.max(0, testimonialClients.length - itemsPerPage);
 

@@ -8,15 +8,10 @@ const api = axios.create({
     "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",
   },
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(STORAGE_KEYS.TOKEN || "token");
-
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
   return config;
 });
 

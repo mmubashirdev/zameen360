@@ -23,7 +23,27 @@ exports.verifyOTP = async (req, res) => {
       req.ip,
       req.headers["user-agent"]
     );
-    res.status(200).json({ success: true, message: "Verified.", data });
+    
+    res.cookie("accessToken", data.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.cookie("refreshToken", data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      path: "/api/auth/refresh",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    const responseData = { ...data };
+    delete responseData.accessToken;
+    delete responseData.refreshToken;
+
+    res.status(200).json({ success: true, message: "Verified.", data: responseData });
   } catch (e) {
     res.status(e.status || 500).json({
       success: false,

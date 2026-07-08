@@ -14,6 +14,7 @@ import type { PropertyData } from "../components/context/PropertyContext";
 import styles from "../components/media/styles/ReviewSubmit.module.css";
 import Map from "../components/media/Map";
 import { reverseGeocodeLatLng } from "../utils/geocoding";
+import Loader from "@shared/Loader";
 
 interface ReviewSubmitProps {
   onBack?: () => void;
@@ -237,13 +238,7 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
       return;
     }
 
-    const authToken =
-      token ||
-      localStorage.getItem("accessToken") ||
-      localStorage.getItem("token") ||
-      localStorage.getItem("authToken");
-
-    if (!authToken || !isAuthenticated) {
+    if (!isAuthenticated) {
       toast.error("You must be logged in to post a property.");
       navigate("/login");
       return;
@@ -314,8 +309,8 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
 
       const res = await fetch(`${API_BASE_URL}/properties`, {
         method: "POST",
+        credentials: "include",
         headers: {
-          Authorization: `Bearer ${authToken}`,
           ...NGROK_SKIP_BROWSER_WARNING_HEADER,
         },
         body: formData,
@@ -367,8 +362,8 @@ const ReviewSubmit = ({ onBack, onEditStep }: ReviewSubmitProps) => {
               `${API_BASE_URL}/properties/${propertyId}/panoramas`,
               {
                 method: "POST",
+                credentials: "include",
                 headers: {
-                  Authorization: `Bearer ${authToken}`,
                   ...NGROK_SKIP_BROWSER_WARNING_HEADER,
                 },
                 body: panoramaFormData,

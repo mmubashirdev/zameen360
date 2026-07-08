@@ -109,3 +109,7 @@ export const getProfile = async (): Promise<ApiResponse> => {
 export const becomeSeller = async (): Promise<ApiResponse> => {
   return axiosInstance.post(AUTH_ENDPOINTS.BECOME_SELLER) as Promise<ApiResponse>;
 };
+
+export const logout = async (): Promise<void> => {
+  await axiosInstance.post("/auth/logout");
+};

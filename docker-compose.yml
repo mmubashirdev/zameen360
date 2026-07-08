@@ -12,6 +12,9 @@ services:
     depends_on:
       - backend
 
+    environment:
+      - VITE_API_PROXY_TARGET=http://backend:5000
+
     volumes:
       - ./client:/app
       - /app/node_modules

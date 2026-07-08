@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import type { ReactNode } from "react";
 import {
@@ -34,25 +35,31 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
 
+  // Derive stable primitives from the auth user to avoid object-reference churn
+  const authUserId = (authUser as any)?.userId ?? (authUser as any)?.id ?? null;
+  const authUserRole = authUser?.role ?? null;
+
+  // Prevent concurrent or duplicate fetches
+  const isFetchingRef = useRef(false);
+
   const fetchUser = useCallback(async () => {
-    if (authLoading) return;
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
 
     try {
       setLoading(true);
       setError(null);
 
-      if (!isAuthenticated || !authUser) {
+      if (!isAuthenticated || !authUserId) {
         setUser(null);
-        setLoading(false);
         return;
       }
 
-      const userRole = String(authUser.role || "").toUpperCase();
-      const canUseSellerProfile = userRole === "SELLER" || userRole === "SOCIETY_OWNER";
+      const role = String(authUserRole || "").toUpperCase();
+      const canUseSellerProfile = role === "SELLER" || role === "SOCIETY_OWNER";
 
       if (!canUseSellerProfile) {
         setUser(null);
-        setLoading(false);
         return;
       }
 
@@ -60,11 +67,19 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       setUser(data);
     } catch (err: any) {
       setUser(null);
-      setError(err.response?.data?.message || err.message || "Failed to load profile");
+      setError(err?.message || "Failed to load profile");
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [authUser, isAuthenticated, authLoading]);
+    // Only re-create fetchUser when the user's identity or role changes (primitives)
+  }, [authUserId, authUserRole, isAuthenticated]);
+
+  // Run once auth has finished loading
+  useEffect(() => {
+    if (authLoading) return;
+    fetchUser();
+  }, [authLoading, fetchUser]);
 
   const updateUser = useCallback(async (data: UpdateProfileData) => {
     try {
@@ -85,10 +100,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       throw err;
     }
   }, []);
-
-  useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
 
   return (
     <UserContext.Provider

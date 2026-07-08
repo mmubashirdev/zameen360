@@ -2,9 +2,11 @@ import styles from "../styles/footer.module.css";
 import { FaPhone } from "react-icons/fa";
 import { footerColumnsData, contactInfoData } from "../data/footerData";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Footer() {
   const [developer] = useState("Mubashir");
+  const navigate = useNavigate();
   return (
     <footer className={styles.footerWrapper}>
       <div className={styles.ctaSection}>
@@ -17,8 +19,8 @@ function Footer() {
               Explore thousands of properties or list your own with ease.
             </p>
             <div className={styles.ctaButtons}>
-              <button className={styles.exploreBtn}>Explore Now</button>
-              <button className={styles.getStartedBtn}>Get Started</button>
+              <button className={styles.exploreBtn} onClick={() => navigate("/buy")}>Explore Now</button>
+              <button className={styles.getStartedBtn} onClick={() => navigate("/buy")}>Get Started</button>
             </div>
           </div>
 
