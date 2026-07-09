@@ -10,6 +10,7 @@ exports.login = async (req, res) => {
     res.cookie("accessToken", data.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
+      secure:"true",
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -17,7 +18,8 @@ exports.login = async (req, res) => {
     res.cookie("refreshToken", data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      sameSite: "none",
+      secure: "true",
       path: "/api/auth/refresh",
       maxAge: 15 * 60 * 1000,
     });
@@ -40,14 +42,16 @@ exports.adminLogin = async (req, res) => {
     res.cookie("accessToken", data.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      secure: "true",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      sameSite: "none",
+      secure: "true",
       path: "/api/auth/refresh",
       maxAge: 15 * 60 * 1000,
     });
@@ -80,14 +84,16 @@ exports.refresh = async (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      secure: "true",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      sameSite: "none",
+      secure: "true",
       path: "/api/auth/refresh",
       maxAge: 15 * 60 * 1000,
     });
@@ -102,14 +108,16 @@ exports.logout = (req, res) => {
   res.cookie("accessToken", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "Lax",
+    secure: "true",
+    sameSite: "none",
     maxAge: 0,
   });
 
   res.cookie("refreshToken", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "Lax",
+    sameSite: "none",
+    secure: "true",
     path: "/api/auth/refresh",
     maxAge: 0,
   });

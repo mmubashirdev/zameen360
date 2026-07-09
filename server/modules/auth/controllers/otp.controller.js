@@ -27,14 +27,16 @@ exports.verifyOTP = async (req, res) => {
     res.cookie("accessToken", data.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      secure: "true",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.cookie("refreshToken", data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
+      sameSite: "none",
+      secure: "true",
       path: "/api/auth/refresh",
       maxAge: 15 * 60 * 1000,
     });
