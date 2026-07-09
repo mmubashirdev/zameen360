@@ -16,8 +16,6 @@ export default function GoogleCallbackPage() {
     if (processed.current) return;
     processed.current = true;
 
-    const token = searchParams.get("token");
-    const refreshToken = searchParams.get("refreshToken");
     const error = searchParams.get("error");
 
     if (error) {
@@ -25,16 +23,14 @@ export default function GoogleCallbackPage() {
       return;
     }
 
-    if (!token) {
-      navigate("/login?error=no_token", { replace: true });
+    const success = searchParams.get("success");
+
+    if (!success) {
+      navigate("/login?error=no_success", { replace: true });
       return;
     }
 
-    // Save token
-    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
-    if (refreshToken) {
-      localStorage.setItem("refresh_token", refreshToken);
-    }
+    // Save token is no longer needed since it's in HttpOnly cookies
 
     // Fetch user profile
     const fetchUser = async () => {
@@ -63,7 +59,7 @@ export default function GoogleCallbackPage() {
             isVerified: data.data.isVerified,
           };
 
-          ctx?.setUser?.(user, token);
+          ctx?.setUser?.(user);
 
           // Redirect to welcome
           navigate("/marketplace", { replace: true });

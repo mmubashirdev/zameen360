@@ -20,12 +20,10 @@ import type {
 // ─── Storage Helpers ──────────────────────────────────────────────────────────
 
 const persistAuth = (token: string, user: User) => {
-  localStorage.setItem(STORAGE_KEYS.TOKEN, token);
   localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
 };
 
 export const clearAuth = () => {
-  localStorage.removeItem(STORAGE_KEYS.TOKEN);
   localStorage.removeItem(STORAGE_KEYS.USER);
 };
 
@@ -41,7 +39,7 @@ export const getStoredUser = (): User | null => {
   }
 };
 
-export const getStoredToken = () => localStorage.getItem(STORAGE_KEYS.TOKEN);
+export const getStoredToken = () => null; // Tokens are now HttpOnly cookies
 
 const normalizeUser = (user: AuthSuccessPayload["user"]): User => ({
   userId: user.userId || user.id || "",
@@ -104,17 +102,17 @@ export const handleLogin = async (
     const response = await loginUser(data);
     const authPayload = response?.data;
 
-    if (!authPayload?.user || !authPayload.accessToken) {
+    if (!authPayload?.user) {
       throw new Error("Invalid login response structure");
     }
 
     const user = normalizeUser(authPayload.user);
-    persistAuth(authPayload.accessToken, user);
+    persistAuth("", user); // No token needed in localStorage
 
     return {
       user,
-      token: authPayload.accessToken,
-      refreshToken: authPayload.refreshToken,
+      token: "",
+      refreshToken: "",
       message: response.message,
     };
   } catch (error: unknown) {
@@ -131,17 +129,17 @@ export const handleVerifyEmail = async (
     const response = await verifyOtp(payload);
     const authPayload = response?.data;
 
-    if (!authPayload?.user || !authPayload.accessToken) {
+    if (!authPayload?.user) {
       throw new Error("Invalid verification response structure");
     }
 
     const user = normalizeUser(authPayload.user);
-    persistAuth(authPayload.accessToken, user);
+    persistAuth("", user); // No token needed in localStorage
 
     return {
       user,
-      token: authPayload.accessToken,
-      refreshToken: authPayload.refreshToken,
+      token: "",
+      refreshToken: "",
       message: response.message,
     };
   } catch (error: unknown) {

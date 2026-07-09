@@ -98,6 +98,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ conversationId, newConversation
         return [...prev, { ...data.message, isSender: false, avatar: data.message.sender?.profilePicture || DEFAULT_AVATAR }];
       });
       scrollToBottom();
+      
+      // Automatically tell the server we read this message since we have the chat open
+      socket.emit("mark_message_read", {
+        conversationId: data.conversationId,
+        messageId: data.message.id,
+        senderId: data.message.senderId,
+      });
     };
 
     const onMessageRead = (data: { conversationId: number; messageIds: number[] }) => {

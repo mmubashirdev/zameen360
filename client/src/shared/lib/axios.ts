@@ -22,16 +22,11 @@ const axiosInstance: AxiosInstance = axios.create({
     Accept: "application/json",
     "ngrok-skip-browser-warning": "true",
   },
+  withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
-
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
     if (config.data instanceof FormData && config.headers) {
       delete config.headers["Content-Type"];
     }
@@ -43,28 +38,38 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response.data,
-
-  (error: AxiosError<{ message?: string; requiresVerification?: boolean }>) => {
-    const message =
-      error.response?.data?.message ?? error.message ?? "Something went wrong.";
-
+  async (error: AxiosError<{ message?: string; requiresVerification?: boolean }>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
+    const url = originalRequest.url || "";
+    const isAuthRequest =
+      url.includes("/login") ||
+      url.includes("/register") ||
+      url.includes("/refresh") ||
+      url.includes("/auth/profile") ||
+      url.includes("/auth/logout");
 
+    // Handle 401 Unauthorized — try to refresh the access token once
+    if (status === 401 && !isAuthRequest && !originalRequest._retry) {
+      originalRequest._retry = true;
+      try {
+        await axios.post(`${API_BASE_URL}/auth/refresh`, {}, { withCredentials: true });
+        // Retry the original request with the new cookie
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        // Refresh also failed — send user to login
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
+    }
+
+    const message = error.response?.data?.message ?? error.message ?? "Something went wrong.";
     const requiresVerification =
       typeof error.response?.data === "object" &&
       error.response?.data !== null &&
       "requiresVerification" in error.response.data
         ? Boolean((error.response.data as any).requiresVerification)
         : undefined;
-
-    // Auto logout on 401 (but not for login/register)
-    const url = error.config?.url || "";
-    const isAuthRequest = url.includes("/login") || url.includes("/register");
-
-    if (status === 401 && !isAuthRequest) {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      window.location.href = "/login";
-    }
 
     const apiError: ApiErrorShape = {
       message,

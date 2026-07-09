@@ -169,12 +169,10 @@ const AuthenticatedNavbar = () => {
   }, []);
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
-  const handleLogout = useCallback(() => {
-    logout();
-    localStorage.removeItem("zameen360_token");
+  const handleLogout = useCallback(async () => {
+    await logout();
     localStorage.removeItem("zameen360_user");
     navigate("/login");
-    window.location.reload();
   }, [logout, navigate]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

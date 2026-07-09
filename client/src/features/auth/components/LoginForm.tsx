@@ -42,8 +42,6 @@ export default function LoginForm({ toast }: LoginFormProps) {
         password: data.password,
       });
 
-      console.log("login result:", result);
-
       toast.success("Welcome Back!", result.message ?? "Login successful.");
 
 

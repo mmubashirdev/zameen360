@@ -27,7 +27,6 @@ const LoginForm = () => {
       setIsLoading(true);
 
       const result = await adminLogin(data);
-      console.log("Login Result:", result);
 
       // ✅ Just store the admin data — no token check needed
       if (!result.success || !result.data) {

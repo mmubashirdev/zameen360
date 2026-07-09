@@ -64,10 +64,7 @@ export const updateBuyerProfile = async (
 export const switchToSeller = async (data: SwitchToSellerData) => {
   const response = await API.post("/buyer/switch-to-seller", data);
 
-  const newToken = response.data.data?.newToken;
-  if (newToken) {
-    localStorage.setItem(STORAGE_KEYS.TOKEN, newToken);
-  }
+  // Tokens are handled by HttpOnly cookies
 
   try {
     const storedUser = localStorage.getItem(STORAGE_KEYS.USER);

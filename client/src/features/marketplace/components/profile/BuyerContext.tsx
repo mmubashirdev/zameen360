@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import type { ReactNode } from "react";
 import {
@@ -34,36 +35,44 @@ export const BuyerProvider: React.FC<{ children: ReactNode }> = ({
 
   const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuthContext();
 
+  // Derive stable primitives from the auth user to avoid object-reference churn
+  const authUserId = (authUser as any)?.userId ?? (authUser as any)?.id ?? null;
+  const authUserRole = authUser?.role ?? null;
+
+  // Prevent concurrent or duplicate fetches
+  const isFetchingRef = useRef(false);
+
   const fetchBuyer = useCallback(async () => {
-    if (authLoading) return;
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
 
     try {
       setLoading(true);
       setError(null);
 
-      if (!isAuthenticated || !authUser) {
+      if (!isAuthenticated || !authUserId || authUserRole !== "BUYER") {
         setBuyer(null);
-        setLoading(false);
-        return;
-      }
-
-      // Only fetch if user is BUYER
-      if (authUser.role !== 'BUYER') {
-        setBuyer(null);
-        setLoading(false);
         return;
       }
 
       const data = await getBuyerProfile();
       setBuyer(data);
     } catch (err: any) {
-      console.error("❌ Buyer fetch error:", err.response?.data?.message || err.message);
-      setError(err.response?.data?.message || "Failed to load buyer profile");
+      console.error("❌ Buyer fetch error:", err?.message);
+      setError(err?.message || "Failed to load buyer profile");
       setBuyer(null);
     } finally {
       setLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [authUser, isAuthenticated, authLoading]);
+    // Only re-create fetchBuyer when the user's identity or role changes (primitives)
+  }, [authUserId, authUserRole, isAuthenticated]);
+
+  // Run once auth has finished loading
+  useEffect(() => {
+    if (authLoading) return;
+    fetchBuyer();
+  }, [authLoading, fetchBuyer]);
 
   const updateBuyer = useCallback(async (data: UpdateBuyerData) => {
     try {
@@ -84,10 +93,6 @@ export const BuyerProvider: React.FC<{ children: ReactNode }> = ({
       throw err;
     }
   }, []);
-
-  useEffect(() => {
-    fetchBuyer();
-  }, [fetchBuyer]);
 
   return (
     <BuyerContext.Provider

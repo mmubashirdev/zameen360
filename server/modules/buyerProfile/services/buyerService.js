@@ -1,5 +1,6 @@
 const prisma = require("../../../configs/prisma");
 const jwt = require("jsonwebtoken");
+const { generateAccessToken, generateRefreshToken } = require("../../../utils/generateToken");
 
 // ═══════════════════════════════════════════════════════════
 // Helper: Profile completion percentage
@@ -187,22 +188,17 @@ async function convertToSeller(userId, sellerData) {
     },
   });
 
-  // Generate NEW token with updated role
-  const newToken = jwt.sign(
-    {
-      userId: updatedUser.id,
-      role: "SELLER",
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
+  // Generate NEW tokens with updated role
+  const accessToken = generateAccessToken(updatedUser.id, "SELLER");
+  const refreshToken = generateRefreshToken(updatedUser.id, "SELLER");
 
   return {
     success: true,
     message: "Successfully converted to seller account",
     userId,
     newRole: "SELLER",
-    newToken: newToken,
+    accessToken,
+    refreshToken,
     user: {
       userId: updatedUser.id,
       fullName: updatedUser.fullName,

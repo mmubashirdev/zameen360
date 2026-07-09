@@ -47,16 +47,12 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
     "ngrok-skip-browser-warning": "true",
   },
+  withCredentials: true,
 });
 
-// ─── Request Interceptor - attach token if exists ─────────────────────────────
+// ─── Request Interceptor - No need for manual token, handled by cookies ────────
 apiClient.interceptors.request.use(
   (config) => {
-    const token =
-      localStorage.getItem("accessToken") || localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
     return config;
   },
   (error) => Promise.reject(error),
