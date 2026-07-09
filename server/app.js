@@ -27,7 +27,11 @@ const paymentController = require("./modules/payment/controllers/payment.control
 const chatRoutes = require("./modules/chatbot/routes/chat.routes");
 const app = express();
 
-const defaultClientOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+const defaultClientOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://zameen360-client.vercel.app",
+];
 const configuredClientOrigin = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.replace(/\/$/, "")
   : null;
@@ -144,21 +148,24 @@ io.on("connection", (socket) => {
   });
 
   // Automatically mark message as read if the recipient has the chat open
-  socket.on("mark_message_read", async ({ conversationId, messageId, senderId }) => {
-    try {
-      await prisma.message.update({
-        where: { id: Number(messageId) },
-        data: { isRead: true },
-      });
-      // Notify the original sender that their message was read
-      io.to(`user_${senderId}`).emit("message_read", {
-        conversationId: Number(conversationId),
-        messageIds: [Number(messageId)],
-      });
-    } catch (err) {
-      console.error("Error marking message as read via socket:", err);
-    }
-  });
+  socket.on(
+    "mark_message_read",
+    async ({ conversationId, messageId, senderId }) => {
+      try {
+        await prisma.message.update({
+          where: { id: Number(messageId) },
+          data: { isRead: true },
+        });
+        // Notify the original sender that their message was read
+        io.to(`user_${senderId}`).emit("message_read", {
+          conversationId: Number(conversationId),
+          messageIds: [Number(messageId)],
+        });
+      } catch (err) {
+        console.error("Error marking message as read via socket:", err);
+      }
+    },
+  );
 });
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
@@ -175,26 +182,28 @@ app.use(
 );
 
 const VERIFY_TOKEN = "Zameen_zameen_360";
-app.use("/webhook", (req,res)=>{
+app.use("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
-
-  if(mode === "subscribe" && token === VERIFY_TOKEN){
-    console.log("Webhook verified");
-    return res.status(200).send(challenge)
+  if (mode && token) {
+    if (mode === "subscribe" && token === VERIFY_TOKEN) {
+      console.log("Webhook verified");
+      return res.status(200).send(challenge);
+    } else {
+      return res.sendStatus(403);
+    }
   }
-  return res.sendStatus(403);
-})
+});
 
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 app.use(express.json({ limit: "10mb" }));
 
-app.post("/webhook",(req,res)=>{
+app.post("/webhook", (req, res) => {
   console.log("Webhook come", req.body);
   res.sendStatus(200);
-})
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());

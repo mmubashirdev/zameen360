@@ -31,6 +31,7 @@ services:
 
     depends_on:
       - postgres
+        
 
     environment:
       - DATABASE_URL=postgres://postgres:password@postgres:5432/main360
