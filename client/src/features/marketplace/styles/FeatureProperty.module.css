@@ -61,7 +61,8 @@
 
 /* ── Cards ── */
 .card {
-  min-width: calc(25% - 18px);
+  flex: 0 0 calc(25% - 18px);
+  max-width: calc(25% - 18px);
   background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
@@ -110,6 +111,20 @@
 
 .badgeSale { background-color: #2b6aff; }
 .badgeRent { background-color: #10b981; }
+
+.featuredBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  color: #111827;
+  background: linear-gradient(135deg, #fbbf24 0%, #fde68a 100%);
+  z-index: 2;
+  box-shadow: 0 8px 20px rgba(251, 191, 36, 0.25);
+}
 
 .cardContent { padding: 20px; }
 
@@ -212,15 +227,24 @@
 
 /* ── Responsive ── */
 @media (max-width: 1024px) {
-  .card { min-width: calc(33.333% - 16px); }
+  .card {
+    flex-basis: calc(33.333% - 16px);
+    max-width: calc(33.333% - 16px);
+  }
 }
 
 @media (max-width: 768px) {
-  .card { min-width: calc(50% - 12px); }
+  .card {
+    flex-basis: calc(50% - 12px);
+    max-width: calc(50% - 12px);
+  }
   .arrow { display: none; }
 }
 
 @media (max-width: 480px) {
-  .card { min-width: 100%; }
+  .card {
+    flex-basis: 100%;
+    max-width: 100%;
+  }
   .container { padding: 0 20px; }
 }

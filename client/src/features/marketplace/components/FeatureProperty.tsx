@@ -28,6 +28,8 @@ interface Property {
   address: string | null;
   images: string[];
   status: string;
+  isFeatured?: boolean;
+  featuredUntil?: string | null;
   createdAt: string;
 }
 
@@ -68,6 +70,7 @@ function FeaturedProperties() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false); // ⭐ Pause on hover
+  const [now, setNow] = useState(() => new Date().getTime());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const itemsPerPage = 4;
@@ -79,12 +82,9 @@ function FeaturedProperties() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(
-          `${BASE_URL}/properties?status=approved&featured=true`,
-          {
-            headers: NGROK_SKIP_BROWSER_WARNING_HEADER,
-          },
-        );
+        const res = await fetch(`${BASE_URL}/properties?status=approved`, {
+          headers: NGROK_SKIP_BROWSER_WARNING_HEADER,
+        });
         const result = await res.json();
 
         if (!res.ok) throw new Error(result.message || "Failed to fetch");
@@ -120,6 +120,14 @@ function FeaturedProperties() {
       }
     };
   }, [isPaused, loading, properties.length, maxIndex]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNow(new Date().getTime());
+    }, 60000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   const prevSlide = () => {
     setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
@@ -253,6 +261,13 @@ function FeaturedProperties() {
               {properties.map((property) => {
                 const isRent = property.purpose?.toLowerCase() === "rent";
                 const statusLabel = isRent ? "For Rent" : "For Sale";
+                const featuredUntil = property.featuredUntil
+                  ? new Date(property.featuredUntil).getTime()
+                  : null;
+                const isFeatured = Boolean(
+                  (property.isFeatured || featuredUntil) &&
+                    (!featuredUntil || featuredUntil > now),
+                );
                 const location =
                   [property.locality, property.city]
                     .filter(Boolean)
@@ -280,6 +295,9 @@ function FeaturedProperties() {
                       >
                         {statusLabel}
                       </span>
+                      {isFeatured && (
+                        <span className={styles.featuredBadge}>Featured</span>
+                      )}
                     </div>
                     <div className={styles.cardContent}>
                       <h3 className={styles.cardTitle}>
