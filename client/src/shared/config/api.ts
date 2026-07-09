@@ -2,7 +2,9 @@ import axios from "axios";
 
 const configuredApiUrl =
   import.meta.env.VITE_API_URL?.trim() ||
-  import.meta.env.VITE_API_BASE_URL?.trim();
+  import.meta.env.VITE_API_BASE_URL?.trim() ||
+  // Production fallback (Render backend)
+  "https://zameen360.onrender.com";
 
 const normalizeApiBaseUrl = (value?: string) => {
   // Default: same-host relative calls in local/dev

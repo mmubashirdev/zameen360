@@ -9,6 +9,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+
 enum Role {
   BUYER
   SELLER
