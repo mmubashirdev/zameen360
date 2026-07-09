@@ -47,7 +47,7 @@ export default function LoginForm({ toast }: LoginFormProps) {
 
       const destination =
         result.user.role === "SOCIETY_OWNER" || result.user.role === "SELLER"
-          ? "/profile"
+          ? "/marketplace"
           : "/marketplace";
 
       navigate(destination, { replace: true });
