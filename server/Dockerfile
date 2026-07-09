@@ -14,4 +14,6 @@ EXPOSE 5000
 
 # Render will provide DATABASE_URL but not DIRECT_URL.
 # Prisma schema expects DIRECT_URL too, so set it to DATABASE_URL by default.
+# IMPORTANT: ensure the container process stays alive by starting the server.
 CMD ["sh", "-c", "export DIRECT_URL=${DIRECT_URL:-$DATABASE_URL} && npx prisma migrate deploy && npm start"]
+
