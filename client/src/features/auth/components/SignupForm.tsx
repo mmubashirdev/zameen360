@@ -165,26 +165,37 @@ export default function SignupForm({ toast }: SignupFormProps) {
           <div className={styles.formGroup}>
             <div className={styles.inputWrapper}>
               <i
-                className={`fa-solid fa-user ${styles.inputIcon}`}
-                aria-hidden="true"
-              />
-              <input
-                {...register("fullName", {
-                  onChange: () => handleInputChange("fullName"),
-                })}
-                id="fullName"
-                type="text"
-                placeholder="Full Name"
-                className={`${styles.formInput} ${errors.fullName ? styles.inputError : ""
-                  }`}
-                aria-required="true"
-              />
-            </div>
-            {errors.fullName && (
-              <p className={styles.fieldError} role="alert">
-                <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
-                {errors.fullName.message}
-              </p>
+    className={`fa-solid fa-user ${styles.inputIcon}`}
+    aria-hidden="true"
+  />
+  <input
+    {...register("fullName", {
+      onChange: () => handleInputChange("fullName"),
+    })}
+    id="fullName"
+    type="text"
+    placeholder="Full Name"
+    className={`${styles.formInput} ${errors.fullName ? styles.inputError : ""}`}
+    aria-required="true"
+    onKeyDown={(e) => {
+      const blockedKeys = /[0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/;
+      if (blockedKeys.test(e.key)) {
+        e.preventDefault();
+      }
+    }}
+    onPaste={(e) => {
+      e.preventDefault();
+      const pastedText = e.clipboardData.getData("text");
+      const cleaned = pastedText.replace(/[^A-Za-z\s]/g, "");
+      document.execCommand("insertText", false, cleaned);
+    }}
+  />
+</div>
+{errors.fullName && (
+  <p className={styles.fieldError} role="alert">
+    <i className="fa-solid fa-circle-exclamation" aria-hidden="true" />
+    {errors.fullName.message}
+  </p>
             )}
           </div>
 

@@ -2,15 +2,22 @@ import { z } from "zod";
 
 export const signupSchema = z
   .object({
-    fullName: z
+      fullName: z
       .string()
-      .min(1, "Full name is required")
+      .trim()
       .min(2, "Name must be at least 2 characters")
       .max(50, "Name must be less than 50 characters")
-      .regex(
-        /^[a-zA-Z\s'-]+$/,
-        "Name can only contain letters, spaces, hyphens"
+      .regex(/^[A-Za-z\s]+$/, "Name can only contain alphabets")
+      .refine((val) => !/\d/.test(val), "Numbers are not allowed in name")
+      .refine(
+        (val) => !/[^A-Za-z\s]/.test(val),
+        "Special characters are not allowed in name"
+      )
+      .refine(
+        (val) => val.trim().split(/\s+/).every((word) => word.length >= 1),
+        "Each word must have at least one character"
       ),
+  
 
     email: z
       .string()

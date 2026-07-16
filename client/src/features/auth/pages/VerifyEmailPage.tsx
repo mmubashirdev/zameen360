@@ -34,20 +34,30 @@ const parseTimestamp = (value?: string | null) => {
   return Number.isFinite(isoParsed) ? isoParsed : null;
 };
 
+/**
+ * IMPORTANT: sessionStorage is treated as the source of truth once it exists,
+ * because it's the value we actively keep fresh on every resend.
+ * `preferredTimestamp` (from router location.state) is ONLY used to seed
+ * sessionStorage the very first time — because browsers persist
+ * history.state across a plain reload, so on a reload after a resend,
+ * location.state can still hold the OLD (stale) timestamp from the original
+ * signup redirect. If we let it win, it clobbers the fresh value we just
+ * saved on resend. That was the bug.
+ */
 const initializeTimer = (
   storageKey: string,
   preferredTimestamp: string | undefined,
   fallbackMs: number
 ) => {
+  const storedTime = parseTimestamp(sessionStorage.getItem(storageKey));
+  if (storedTime !== null) {
+    return getRemainingSeconds(storedTime);
+  }
+
   const preferredTime = parseTimestamp(preferredTimestamp);
   if (preferredTime !== null) {
     sessionStorage.setItem(storageKey, String(preferredTime));
     return getRemainingSeconds(preferredTime);
-  }
-
-  const storedTime = parseTimestamp(sessionStorage.getItem(storageKey));
-  if (storedTime !== null) {
-    return getRemainingSeconds(storedTime);
   }
 
   const fallbackTime = Date.now() + fallbackMs;
@@ -62,12 +72,21 @@ export default function VerifyEmailPage() {
   const { verifyEmail, resendVerificationOtp, isLoading } = useAuth();
   const state = (location.state as VerifyEmailLocationState | null) ?? null;
 
-  const [email] = useState(
-    () =>
-      state?.email ??
-      sessionStorage.getItem(VERIFY_EMAIL_PENDING_EMAIL_KEY) ??
-      ""
-  );
+  const [email] = useState(() => {
+    const incomingEmail = state?.email;
+    const storedEmail = sessionStorage.getItem(VERIFY_EMAIL_PENDING_EMAIL_KEY);
+
+    // If a *different* email is starting a fresh verify flow, wipe any
+    // leftover timers from a previous, unrelated signup attempt so they
+    // don't leak into this one.
+    if (incomingEmail && storedEmail && storedEmail !== incomingEmail) {
+      sessionStorage.removeItem(VERIFY_EMAIL_RESEND_KEY);
+      sessionStorage.removeItem(VERIFY_EMAIL_CODE_KEY);
+    }
+
+    return incomingEmail ?? storedEmail ?? "";
+  });
+
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [isResending, setIsResending] = useState(false);
   const [resendTimer, setResendTimer] = useState(() =>
@@ -268,6 +287,9 @@ export default function VerifyEmailPage() {
         parseTimestamp(result.data?.otpExpiresAt) ??
         Date.now() + EMAIL_OTP_EXPIRY_MS;
 
+      // These are now the authoritative values. Because initializeTimer
+      // prefers sessionStorage over location.state, a reload right after
+      // this will correctly pick these up instead of stale router state.
       sessionStorage.setItem(
         VERIFY_EMAIL_RESEND_KEY,
         String(resendAvailableAt)
@@ -308,14 +330,6 @@ export default function VerifyEmailPage() {
           />
           <div className={styles.overlay} />
         </div>
-
-        {/* <div className={styles.logoBox}>
-          <div className={styles.logoPlaceholder}>
-            <span className={styles.logoText}>
-              Z<span>360</span>
-            </span>
-          </div>
-        </div> */}
 
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
