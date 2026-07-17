@@ -4,6 +4,7 @@ import VerifyEmailPage from "../pages/VerifyEmailPage";
 import GoogleCallbackPage from "../pages/GoogleCallbackPage";
 import AuthFlow from "../components/AuthFlow";
 import SocietySetupPasswordPage from "../pages/SocietySetupPasswordPage";
+import ProtectedRoute from "../../../app/routes/protectedRoute";
 
 const authRoutes = [
   {
@@ -18,26 +19,46 @@ const authRoutes = [
 
   {
     path: "/verify-email",
-    element: <VerifyEmailPage />,
+    element: (
+      <ProtectedRoute>
+        <VerifyEmailPage />
+      </ProtectedRoute>
+    ),
   },
 
   {
     path: "/auth/google/callback",
-    element: <GoogleCallbackPage />,
+    element: (
+      <ProtectedRoute>
+        <GoogleCallbackPage />
+      </ProtectedRoute>
+    ),
   },
 
   {
     path: "/forgot-password",
-    element: <AuthFlow initialStep={1} />,
+    element: (
+      <ProtectedRoute>
+        <AuthFlow initialStep={1} />
+      </ProtectedRoute>
+    ),
   },
 
   {
     path: "/auth",
-    element: <AuthFlow />,
+    element: (
+      <ProtectedRoute>
+        <AuthFlow />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/society-setup-password",
-    element: <SocietySetupPasswordPage />,
+    element: (
+      <ProtectedRoute>
+        <SocietySetupPasswordPage />
+      </ProtectedRoute>
+    ),
   },
 ];
 

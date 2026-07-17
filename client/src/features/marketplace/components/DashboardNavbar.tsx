@@ -1,4 +1,3 @@
-import Logostyles from "../../marketplace/components/media/styles/Navbar.module.css";
 import styles from "../styles/dashboardNavbar.module.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuthContext } from "../../auth/context/useAuthContext";
@@ -68,6 +67,19 @@ const useUnreadCount = (currentUser: any) => {
 
   return { unreadCount, setUnreadCount };
 };
+
+const BrandLogo = () => (
+  <Link to="/" className={styles.authLogoLink}>
+    <div className={styles.authLogo}>
+      <div className={styles.logoIconWrapper}>
+        <Home size={20} strokeWidth={2.2} />
+      </div>
+      <span className={styles.logoText}>
+        Zameen<span className={styles.logoAccent}>360</span>
+      </span>
+    </div>
+  </Link>
+);
 
 // ─── Authenticated Navbar ─────────────────────────────────────────────────────
 const AuthenticatedNavbar = () => {
@@ -235,16 +247,7 @@ const AuthenticatedNavbar = () => {
       <nav className={`${styles.authenticatedNavbar} navbar-main`}>
         {/* ── Logo ─────────────────────────────────────────────────────────── */}
         <div className={styles.authNavLeft}>
-          <Link to="/" className={styles.authLogoLink}>
-            <div className={styles.authLogo}>
-              <div className={styles.logoIconWrapper}>
-                <Home size={20} strokeWidth={2.2} />
-              </div>
-              <span className={styles.logoText}>
-                Zameen<span className={styles.logoAccent}>360</span>
-              </span>
-            </div>
-          </Link>
+          <BrandLogo />
         </div>
 
         {/* ── Nav Links ────────────────────────────────────────────────────── */}
@@ -537,13 +540,7 @@ const UnauthenticatedNavbar = () => {
   const navigate = useNavigate();
   return (
     <nav className={`${styles.navbar} navbar-main`}>
-      <Link to="/">
-        <div className={Logostyles.logo}>
-          <span>
-            Zameen<span className={Logostyles.logoAccent}>360</span>
-          </span>
-        </div>
-      </Link>
+      <BrandLogo />
       <ul className={styles.navLinks}>
         {[
           { to: "/", label: "Home" },
