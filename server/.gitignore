@@ -1,9 +1,11 @@
 node_modules/
-# Keep environment variables out of version control
+
+node_modules
+
 .env
+!.env.example
 
 /generated/prisma
 
 
-# Ignore uploaded media files
 uploads/

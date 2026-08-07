@@ -8,7 +8,7 @@ const { Server } = require("socket.io");
 const prisma = require("./configs/prisma");
 const passport = require("./configs/passport");
 const cors = require("cors");
-const fs = require("fs");
+const fs = require("fs"); 
 const cookieParser = require("cookie-parser");
 
 const index = require("./modules/auth/routes/index");
@@ -172,6 +172,11 @@ io.on("connection", (socket) => {
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
+
+app.use((req, res, next) => {
+  console.log("Incoming:", req.method, req.originalUrl);
+  next();
+});
 
 app.use(morgan("dev"));
 
