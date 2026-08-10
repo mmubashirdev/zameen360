@@ -133,7 +133,9 @@ stripe listen --forward-to localhost:5000/api/payments/webhook
 - **Database (PostgreSQL)**
 
 ---
-
+Live Demo: zameen360-client.vercel.app
+Repository: github.com/mmubashirdev/zameen360
+---
 ## Goals of This Project
 
 - Learn and implement **PERN-stack architecture**
