@@ -2,6 +2,8 @@
 
 First of all, thank you for your interest in contributing to Zameen360!
 
+Right now user upload 2:1 panoramic images and that is converted into 3D images with user in the center but It could be even better by applying Gaussian Splatting in order to move freely anywhere in the house
+
 I welcome contributions that improve the project, fix bugs, add features, improve documentation.
 ## Getting Started
 
